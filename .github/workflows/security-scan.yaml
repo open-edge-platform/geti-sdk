@@ -35,23 +35,12 @@ jobs:
       - name: Install dependencies
         run: python -m pip install pip-tools
 
-      - name: Freeze dependencies
-        run: |
-          mkdir -p trivy_input/base
-          pip-compile -o trivy_input/base/requirements.txt requirements/requirements.txt
-          mkdir -p trivy_input/docs
-          pip-compile -o trivy_input/docs/requirements.txt requirements/requirements-docs.txt
-          mkdir -p trivy_input/notebooks
-          pip-compile -o trivy_input/notebooks/requirements.txt requirements/requirements-notebooks.txt
-          mkdir -p trivy_input/develop
-          pip-compile -o trivy_input/develop/requirements.txt requirements/requirements-dev.txt
-
       - name: Run Trivy Scan (vuln)
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # v0.30.0
+        uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37 # v0.31.0
         with:
           scan-type: fs
           format: "sarif"
-          scan-ref: trivy_input
+          scan-ref: uv.lock
           scanners: vuln
           output: trivy-results-vuln.sarif
 
@@ -66,7 +55,7 @@ jobs:
         with:
           scan-type: fs
           format: "spdx-json"
-          scan-ref: trivy_input
+          scan-ref: uv.lock
           output: trivy-results-spdx.json
 
       - name: Upload Trivy results
@@ -81,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: python-deps-list
-          path: "${{ github.workspace }}/trivy_input"
+          path: "${{ github.workspace }}/uv.lock"
           retention-days: 7
 
   Trivy-Scan-Misconfig:
