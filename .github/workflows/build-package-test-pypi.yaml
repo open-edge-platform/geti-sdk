@@ -41,19 +41,13 @@ jobs:
             uv sync --frozen --no-dev
           fi
 
-      - name: Install build tools
-        run: uv pip install build twine
-
       # workaround for missing ownership of geti-sdk in test.pypi.org
       - name: Update package name for TestPyPI
         run: |
           sed -i 's/^name = "geti-sdk"$/name = "geti-sdk-test"/' pyproject.toml
 
       - name: Build package
-        run: python -m build
-
-      - name: Check package contents
-        run: twine check dist/*
+        run: uv build
 
       - name: Upload wheel and source files as github artifact
         # Publish the built wheel and source tarball to github
@@ -70,11 +64,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: dist/*
           tag_name: ${{ github.ref }}
+
       - name: Publish package distributions to TestPyPI
-        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          verbose: true
+        run: uv publish --index testpypi
+
       - name: Clean up dist directory if it was created
         if: ${{ always() }}
         run: |
@@ -85,4 +78,4 @@ jobs:
           fi
     permissions:
       contents: write # required by softprops/action-gh-release
-      id-token: write # required by pypa/gh-action-pypi-publish
+      id-token: write # required by trusted publisher
