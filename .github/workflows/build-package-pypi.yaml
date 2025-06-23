@@ -11,8 +11,6 @@ permissions: read-all
 jobs:
   build_sdk:
     runs-on: ubuntu-latest
-    env:
-      ENABLE_DEV_DEPENDENCIES: 0
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
@@ -35,20 +33,10 @@ jobs:
       - name: Prepare venv and install Python dependencies
         run: |
           uv lock --check
-          if [[ $ENABLE_DEV_DEPENDENCIES = 1 ]]; then
-            uv sync --frozen
-          else
-            uv sync --frozen --no-dev
-          fi
-
-      - name: Install build tools
-        run: uv pip install build twine
+          uv sync --frozen --no-dev
 
       - name: Build package
-        run: python -m build
-
-      - name: Check package contents
-        run: twine check dist/*
+        run: uv build
 
       - name: Upload wheel and source files as github artifact
         # Publish the built wheel and source tarball to github
@@ -65,8 +53,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: dist/*
           tag_name: ${{ github.ref }}
+
       - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+        run: uv publish
+
       - name: Clean up dist directory if it was created
         if: ${{ always() }}
         run: |
@@ -77,4 +67,4 @@ jobs:
           fi
     permissions:
       contents: write # required by softprops/action-gh-release
-      id-token: write # required by pypa/gh-action-pypi-publish
+      id-token: write # required by trusted publisher

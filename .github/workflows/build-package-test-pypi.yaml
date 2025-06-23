@@ -11,8 +11,6 @@ permissions: read-all
 jobs:
   build_sdk:
     runs-on: ubuntu-latest
-    env:
-      ENABLE_DEV_DEPENDENCIES: 1
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
@@ -35,11 +33,7 @@ jobs:
       - name: Prepare venv and install Python dependencies
         run: |
           uv lock --check
-          if [[ $ENABLE_DEV_DEPENDENCIES = 1 ]]; then
-            uv sync --frozen
-          else
-            uv sync --frozen --no-dev
-          fi
+          uv sync --frozen
 
       # workaround for missing ownership of geti-sdk in test.pypi.org
       - name: Update package name for TestPyPI
