@@ -860,7 +860,6 @@ dependencies = [
     { name = "datumaro" },
     { name = "defusedxml" },
     { name = "imageio-ffmpeg" },
-    { name = "ipython" },
     { name = "joblib" },
     { name = "numpy" },
     { name = "omegaconf" },
@@ -915,11 +914,10 @@ requires-dist = [
     { name = "datumaro", specifier = "~=1.10" },
     { name = "defusedxml", specifier = "~=0.7" },
     { name = "imageio-ffmpeg", specifier = "~=0.6" },
-    { name = "ipython", specifier = "~=8.18" },
     { name = "ipywidgets", marker = "extra == 'notebooks'", specifier = "~=8.1" },
     { name = "joblib", specifier = "~=1.5" },
-    { name = "jupyter-core", marker = "extra == 'notebooks'", specifier = "~=4.11" },
-    { name = "jupyterlab", marker = "extra == 'notebooks'", specifier = "~=4.0" },
+    { name = "jupyter-core", marker = "extra == 'notebooks'", specifier = ">=5.8.1" },
+    { name = "jupyterlab", marker = "extra == 'notebooks'", specifier = "~=4.4" },
     { name = "mistune", marker = "extra == 'notebooks'", specifier = "~=2.0" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = "~=2.0" },
     { name = "numpy", specifier = "~=1.26.4" },
@@ -1423,15 +1421,16 @@ wheels = [
 
 [[package]]
 name = "jupyter-core"
-version = "4.12.0"
+version = "5.8.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "platformdirs" },
     { name = "pywin32", marker = "platform_python_implementation != 'PyPy' and sys_platform == 'win32'" },
     { name = "traitlets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8b/d9/0d18cbe8d0d2eb165dd0b42266f0e5e31b1f80c3a48031fbef1077c34521/jupyter_core-4.12.0.tar.gz", hash = "sha256:87f39d7642412ae8a52291cc68e71ac01dfa2c735df2701f8108251d51b4f460", size = 74760, upload-time = "2022-11-28T13:35:52.005Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/99/1b/72906d554acfeb588332eaaa6f61577705e9ec752ddb486f302dafa292d9/jupyter_core-5.8.1.tar.gz", hash = "sha256:0a5f9706f70e64786b75acba995988915ebd4601c8a52e534a40b51c95f59941", size = 88923, upload-time = "2025-05-27T07:38:16.655Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/02/8f/0e0ad6804c0a021a27410ec997626a7a955c20916454d0205f16eb83de4b/jupyter_core-4.12.0-py3-none-any.whl", hash = "sha256:a54672c539333258495579f6964144924e0aa7b07f7069947bef76d7ea5cb4c1", size = 89940, upload-time = "2022-11-28T13:35:50.121Z" },
+    { url = "https://files.pythonhosted.org/packages/2f/57/6bffd4b20b88da3800c5d691e0337761576ee688eb01299eae865689d2df/jupyter_core-5.8.1-py3-none-any.whl", hash = "sha256:c28d268fc90fb53f1338ded2eb410704c5449a358406e8a948b75706e24863d0", size = 28880, upload-time = "2025-05-27T07:38:15.137Z" },
 ]
 
 [[package]]

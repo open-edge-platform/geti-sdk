@@ -31,7 +31,6 @@ dependencies = [
     "datumaro~=1.10",
     "defusedxml~=0.7",
     "imageio-ffmpeg~=0.6",
-    "ipython~=8.18",
     "joblib~=1.5",
     "numpy~=1.26.4",
     "omegaconf~=2.3",
@@ -73,8 +72,8 @@ docs = [
 ]
 notebooks = [
     "ipywidgets~=8.1",
-    "jupyterlab~=4.0",
-    "jupyter-core~=4.11",
+    "jupyter-core>=5.8.1",  # min version set by CVE-2025-30167
+    "jupyterlab~=4.4",
     "mistune~=2.0",
     "pandas~=2.3",
 ]
