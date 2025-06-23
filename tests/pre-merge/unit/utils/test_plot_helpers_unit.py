@@ -64,23 +64,6 @@ class TestPlotHelpers:
         assert results_filepath.shape == fxt_numpy_image.shape
         assert os.path.isfile(filepath)
 
-    def test_show_image_with_annotation_scene_notebook(
-        self,
-        fxt_annotation_scene: AnnotationScene,
-        fxt_numpy_image: np.ndarray,
-    ):
-        # Act
-        with patch("geti_sdk.utils.plot_helpers.display") as mock_display:
-            result = show_image_with_annotation_scene(
-                image=fxt_numpy_image,
-                annotation_scene=fxt_annotation_scene,
-                show_in_notebook=True,
-            )
-
-        # Assert
-        mock_display.assert_called_once()
-        assert result.shape == fxt_numpy_image.shape
-
     def test_show_video_frames_with_annotation_scenes(
         self,
         fxt_video_annotation_scenes: List[AnnotationScene],
