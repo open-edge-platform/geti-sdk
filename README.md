@@ -41,15 +41,17 @@ feeling for use cases for the package.
 # Getting started
 
 ## Installation
-Using an environment manager such as
-[miniforge](https://github.com/conda-forge/miniforge) or
-[venv](https://docs.python.org/3/library/venv.html) to create a new
-Python environment before installing the Intel® Geti™ SDK and its requirements is
-highly recommended.
 
-> **NOTE**: If you have installed multiple versions of Python,
-> use `py -3.9 venv -m <env_name>` when creating your virtual environment to specify
-> a supported version (in this case 3.9). Once you activate the
+> [!TIP]
+> Using an environment manager such as [miniforge](https://github.com/conda-forge/miniforge) or
+[venv](https://docs.python.org/3/library/venv.html) to create a new
+> Python environment is highly recommended if you are starting a new project
+> or installing the SDK as standalone. This will help you avoid potential
+> dependency conflicts with other Python packages you may have installed on your system.
+> 
+> If you have installed multiple versions of Python,
+> use `py -3.10 venv -m <env_name>` when creating your virtual environment to specify
+> a supported version (in this case 3.10). Once you activate the
 > virtual environment <venv_path>/Scripts/activate, make sure to upgrade pip
 > to the latest version `python -m pip install --upgrade pip wheel setuptools`.
 
@@ -66,34 +68,43 @@ operating system, as indicated in the table below.
 Once you have created and activated a new environment, follow the steps below to install
 the package.
 
-### Installing from PyPI
-Use `pip install geti-sdk` to install the SDK from the Python Package Index (PyPI). To
-install a specific version (for instance v1.5.0), use the command
-`pip install geti-sdk==1.5.0`
+### Install from PyPI
 
-### Installing from the Git repo
-1. Download or clone the repository and navigate to the root directory of the repo in
-   your terminal.
+The SDK can be installed from [PyPI](https://pypi.org/project/geti-sdk/) like a normal Python package: `pip install geti-sdk`.
+To install a specific version (for instance v2.10.0), use the command
+`pip install geti-sdk==2.10.0`
 
-2. **Base installation** Within this directory, install the SDK using `pip install .` This command will install the
-   package and its base dependencies in your environment.
+### Install from source
 
-3. **Notebooks installation (Optional)** If you want to be able to run the notebooks, make sure to
+It is also possible to install the SDK directly from the source (Git repo),
+for example if you want to try out the latest changes before the official release.
+
+1. Clone the repository and navigate to the root directory of the repo
+   ```bash
+   git clone https://github.com/open-edge-platform/geti-sdk.git
+   ```
+2. (optional) If you want to install a specific branch or tag, you can do so by
+   checking out the branch or tag after cloning the repository:
+   ```bash
+   git checkout <branch_or_tag_name>
+   ```
+3. **Base installation** Within this directory, install the SDK using `pip install .` This command will install the
+   package and its base dependencies in your environment.  
+4. (optional) **Notebooks installation (Optional)** If you want to be able to run the notebooks, make sure to
    install the extra requirements using `pip install .[notebooks]` This will install both the
-   SDK and all other dependencies needed to run the notebooks in your environment
+   SDK and all other dependencies needed to run the notebooks in your environment.
 
-4. **Development installation (Optional)** If you plan on running the tests or want to build the
-   documentation, you can install the package extra requirements by doing for example
-   `pip install -e .[dev]`
+### Install for development
 
-   The valid options for the extra requirements are `[dev, docs, notebooks]`,
-   corresponding to the following functionality:
+If you are a developer who wants to contribute to the SDK,
+the recommended way to install the SDK is through [uv](https://docs.astral.sh/uv/).
 
-   - `dev` Install requirements to run the test suite on your local machine
-   - `notebooks` Install requirements to run the Juypter notebooks in the `notebooks`
-     folder in this repository.
-   - `docs` Install requirements to build the documentation for the SDK from source on
-     your machine
+1. Clone the repo (see above).
+2. Install uv following the official [uv documentation](https://docs.astral.sh/uv/getting-started/installation/).
+3. Run `uv sync` to initialize the virtual environment and install the SDK and its dependencies.
+Optionally, you can pass the `--extra <TARGET>` argument to install extra requirements for specific functionalities:
+`notebooks` to run the Juypter notebooks in the `notebooks/` folder in this repository,
+`docs` to build the documentation for the SDK from source
 
 ## Using the SDK
 The SDK contains example code in various forms to help you get familiar with the package.

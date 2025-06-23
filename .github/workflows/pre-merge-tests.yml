@@ -51,10 +51,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install package with dev and notebook requirements
+      - name: Install uv
+        uses: astral-sh/setup-uv@a02a550bdd3185dba2ebb6aa98d77047ce54ad21 # v6.2.1
+        with:
+          version: "0.7.13"
+
+      - name: Prepare venv and install Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install ".[dev,notebooks]"
+          uv lock --check
+          uv sync --frozen
 
       - name: Create report directory
         # Creates the temporary directory that is used to store the test report
@@ -63,12 +68,12 @@ jobs:
 
       - name: Check formatting with ruff
         run: |
-          ruff check --output-format=github .
-          ruff format --check .
+          uv run ruff check --output-format=github .
+          uv run ruff format --check .
 
       - name: Test with pytest
         run: |
-          pytest tests/pre-merge -c tests/offline.ini --cov=geti_sdk --html=env.REPORT_DIRECTORY/env.PREMERGE_TEST_REPORT --self-contained-html --cov-report html:env.REPORT_DIRECTORY/coverage
+          uv run pytest tests/pre-merge -c tests/offline.ini --cov=geti_sdk --html=env.REPORT_DIRECTORY/env.PREMERGE_TEST_REPORT --self-contained-html --cov-report html:env.REPORT_DIRECTORY/coverage
 
       - name: Upload test report for pre-merge tests
         # Publish the test report to github

@@ -1,4 +1,4 @@
-name: Publish package [PyPI]
+name: Publish package test [PyPI]
 
 on:
   workflow_dispatch:
@@ -11,8 +11,6 @@ permissions: read-all
 jobs:
   build_sdk:
     runs-on: ubuntu-latest
-    env:
-      ENABLE_DEV_DEPENDENCIES: 1
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
@@ -27,29 +25,23 @@ jobs:
         with:
           python-version: 3.12
 
-      - name: Install package with dev and notebook requirements
+      - name: Install uv
+        uses: astral-sh/setup-uv@a02a550bdd3185dba2ebb6aa98d77047ce54ad21 # v6.2.1
+        with:
+          version: "0.7.13"
+
+      - name: Prepare venv and install Python dependencies
         run: |
-          python -m pip install --upgrade pip
-
-          if [[ $ENABLE_DEV_DEPENDENCIES = 1 ]]; then
-          pip install ".[dev,notebooks]" --pre
-          else
-          pip install ".[dev,notebooks]"
-          fi
-
-      - name: Install build tools
-        run: pip install build twine
+          uv lock --check
+          uv sync --frozen
 
       # workaround for missing ownership of geti-sdk in test.pypi.org
       - name: Update package name for TestPyPI
         run: |
-          sed -i 's/name="geti-sdk"/name="geti-sdk-test"/' setup.py
+          sed -i 's/^name = "geti-sdk"$/name = "geti-sdk-test"/' pyproject.toml
 
       - name: Build package
-        run: python -m build
-
-      - name: Check package contents
-        run: twine check dist/*
+        run: uv build
 
       - name: Upload wheel and source files as github artifact
         # Publish the built wheel and source tarball to github
@@ -66,11 +58,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: dist/*
           tag_name: ${{ github.ref }}
+
       - name: Publish package distributions to TestPyPI
-        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          verbose: true
+        run: uv publish --index testpypi
+
       - name: Clean up dist directory if it was created
         if: ${{ always() }}
         run: |
@@ -81,4 +72,4 @@ jobs:
           fi
     permissions:
       contents: write # required by softprops/action-gh-release
-      id-token: write # required by pypa/gh-action-pypi-publish
+      id-token: write # required by trusted publisher
