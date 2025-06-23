@@ -16,7 +16,6 @@ from typing import List, Optional, Union
 
 import cv2
 import numpy as np
-from IPython.display import display
 from PIL import Image as PILImage
 
 from geti_sdk.data_models.annotation_scene import AnnotationScene
@@ -112,6 +111,13 @@ def show_image_with_annotation_scene(
             if not show_in_notebook:
                 image.show(title=window_name)
             else:
+                try:
+                    from IPython.display import display
+                except ImportError as exc:
+                    raise ImportError(
+                        "IPython is required to display images in a notebook. "
+                        "Please install the SDK with the 'notebooks' extra: 'geti-sdk[notebooks]'"
+                    ) from exc
                 display(image)
     else:
         success, buffer = cv2.imencode(".jpg", result_bgr)
