@@ -98,6 +98,16 @@ class VideoFrameInformation(MediaInformation):
 
 
 @attr.define
+class MediaPreprocessing:
+    """
+    Basic information about a media preprocessing in Intel® Geti™.
+    """
+
+    status: str = attr.ib(kw_only=True)
+    message: Optional[str] = attr.ib(kw_only=True, default=None)
+
+
+@attr.define
 class MediaItem:
     """
     Representation of a media entity in Intel® Geti™.
@@ -110,6 +120,7 @@ class MediaItem:
     :var annotation_state_per_task: Annotation state of the media entity
     :var media_information: Container holding basic information such as width and
         height about the media entity
+    :var preprocessing: Container holding basic information about media preprocessing
     :param last_annotator_id: the name or id of the editor.
     """
 
@@ -118,6 +129,7 @@ class MediaItem:
     type: str = attr.field(converter=str_to_media_type)
     upload_time: str = attr.field(converter=str_to_datetime)
     media_information: MediaInformation
+    preprocessing: MediaPreprocessing
     annotation_state_per_task: Optional[List[TaskAnnotationState]] = None
     thumbnail: Optional[str] = None
     uploader_id: Optional[str] = None
