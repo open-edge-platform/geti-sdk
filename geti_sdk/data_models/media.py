@@ -459,6 +459,7 @@ class VideoFrame(MediaItem):
             upload_time=video.upload_time,
             thumbnail=f"{base_url}/display/thumb",
             media_information=frame_information,
+            preprocessing=video.preprocessing,
             annotation_state_per_task=video.annotation_state_per_task,
             id=video.id,
             video_name=video.name,
