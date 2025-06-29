@@ -19,7 +19,6 @@ from typing import List, Optional, Union
 
 import cv2
 import numpy as np
-from IPython.display import display
 from PIL import Image
 
 from geti_sdk.data_models.annotation_scene import AnnotationScene
@@ -179,6 +178,13 @@ class Visualizer:
 
         :param image: Image to be shown in RGB format
         """
+        try:
+            from IPython.display import display
+        except ImportError as exc:
+            raise ImportError(
+                "IPython is required to display images in a notebook. "
+                "Please install the SDK with the 'notebooks' extra: 'geti-sdk[notebooks]'"
+            ) from exc
         display(Image.fromarray(image))
 
     def show_window(self, image: np.ndarray) -> None:
