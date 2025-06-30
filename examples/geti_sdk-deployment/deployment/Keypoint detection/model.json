@@ -1,0 +1,27 @@
+{
+   "id": "685e76c32a6519c2d26283a7",
+   "name": "RTMPose-tiny OpenVINO FP16",
+   "version": 2,
+   "creation_date": "2025-06-27T10:47:31.906000+00:00",
+   "model_format": "OpenVINO",
+   "precision": [
+      "FP16"
+   ],
+   "has_xai_head": false,
+   "target_device": "CPU",
+   "target_device_type": null,
+   "performance": {
+      "score": 0.047619047619047616
+   },
+   "size": 7039818,
+   "latency": 0,
+   "fps_throughput": 0,
+   "optimization_type": "MO",
+   "optimization_objectives": {},
+   "model_status": "SUCCESS",
+   "configurations": [],
+   "lifecycle_stage": "active",
+   "previous_revision_id": "685e76c32a6519c2d26283a4",
+   "previous_trained_revision_id": "685e76c32a6519c2d26283a4",
+   "optimization_methods": []
+}

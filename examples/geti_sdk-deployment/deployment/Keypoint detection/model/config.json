@@ -1,0 +1,8 @@
+{
+    "task_type": "keypoint_detection",
+    "model_type": "keypoint_detection",
+    "model_parameters": {
+        "labels": "ss 2 3",
+        "labels_ids": "5a3aba8de2ec6d474e45f586 5a3aba8de2ec6d474e45f587 5a3aba8de2ec6d474e45f588"
+    }
+}

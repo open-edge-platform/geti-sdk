@@ -1,0 +1,120 @@
+{
+   "id": "5a3aba8de2ec6d474e45f581",
+   "name": "Key",
+   "creation_time": "2025-06-27T08:20:49.607000+00:00",
+   "creator_id": "6ca74069-087a-42ca-854d-90f9bd268056",
+   "pipeline": {
+      "tasks": [
+         {
+            "id": "5a3aba8de2ec6d474e45f582",
+            "title": "Dataset",
+            "task_type": "dataset"
+         },
+         {
+            "id": "5a3aba8de2ec6d474e45f584",
+            "title": "Keypoint detection",
+            "task_type": "keypoint_detection",
+            "labels": [
+               {
+                  "id": "5a3aba8de2ec6d474e45f586",
+                  "name": "ss",
+                  "is_anomalous": false,
+                  "color": "#f7dab3ff",
+                  "hotkey": "",
+                  "is_empty": false,
+                  "group": "keypoint-detection",
+                  "parent_id": null
+               },
+               {
+                  "id": "5a3aba8de2ec6d474e45f587",
+                  "name": "2",
+                  "is_anomalous": false,
+                  "color": "#26518eff",
+                  "hotkey": "",
+                  "is_empty": false,
+                  "group": "keypoint-detection",
+                  "parent_id": null
+               },
+               {
+                  "id": "5a3aba8de2ec6d474e45f588",
+                  "name": "3",
+                  "is_anomalous": false,
+                  "color": "#cc94daff",
+                  "hotkey": "",
+                  "is_empty": false,
+                  "group": "keypoint-detection",
+                  "parent_id": null
+               }
+            ],
+            "label_schema_id": "5a3aba8de2ec6d474e45f58c",
+            "keypoint_structure": {
+               "edges": [
+                  {
+                     "nodes": [
+                        "5a3aba8de2ec6d474e45f588",
+                        "5a3aba8de2ec6d474e45f586"
+                     ]
+                  },
+                  {
+                     "nodes": [
+                        "5a3aba8de2ec6d474e45f586",
+                        "5a3aba8de2ec6d474e45f587"
+                     ]
+                  },
+                  {
+                     "nodes": [
+                        "5a3aba8de2ec6d474e45f587",
+                        "5a3aba8de2ec6d474e45f588"
+                     ]
+                  }
+               ],
+               "positions": [
+                  {
+                     "label": "5a3aba8de2ec6d474e45f586",
+                     "x": 0.3862012227876667,
+                     "y": 0.24942274625399163
+                  },
+                  {
+                     "label": "5a3aba8de2ec6d474e45f587",
+                     "x": 0.4967490247074122,
+                     "y": 0.403954802259887
+                  },
+                  {
+                     "label": "5a3aba8de2ec6d474e45f588",
+                     "x": 0.3914174252275682,
+                     "y": 0.596045197740113
+                  }
+               ]
+            }
+         }
+      ],
+      "connections": [
+         {
+            "from": "5a3aba8de2ec6d474e45f582",
+            "to": "5a3aba8de2ec6d474e45f584"
+         }
+      ]
+   },
+   "thumbnail": "/api/v1/organizations/afaaa8be-1cce-4b24-a8d1-191b57223f4a/workspaces/67fd69cd-5b6d-4c3e-99cd-c8b27005fc54/projects/5a3aba8de2ec6d474e45f581/thumbnail",
+   "performance": {
+      "score": 0.047619047619047616,
+      "task_performances": [
+         {
+            "task_id": "5a3aba8de2ec6d474e45f584",
+            "score": {
+               "value": 0.047619047619047616,
+               "metric_type": "Percentage of Correct Keypoints"
+            }
+         }
+      ]
+   },
+   "storage_info": {},
+   "datasets": [
+      {
+         "id": "5a3aba8de2ec6d474e45f589",
+         "name": "Dataset",
+         "use_for_training": true,
+         "creation_time": "2025-06-27T08:20:49.607000+00:00"
+      }
+   ]
+}
