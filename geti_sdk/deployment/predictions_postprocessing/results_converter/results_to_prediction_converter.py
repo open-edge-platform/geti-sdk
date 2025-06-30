@@ -59,7 +59,7 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
         label_ids = configuration["label_ids"]
         # configuration["labels"] can be a single string or a list of strings
         model_api_labels = (
-            model_api_labels.split() # space separated string
+            model_api_labels.split()  # space separated string
             if isinstance(model_api_labels, str)
             else [str(name) for name in model_api_labels]
         )
@@ -102,9 +102,13 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
                 if label_id_str in self.label_map_ids:
                     # Get the label by its ID in case it has been renamed
                     label = self.label_map_ids[label_id_str]
-                    logging.warning(f"Label '{label_str}' has been renamed to '{label.name}'.")
+                    logging.warning(
+                        f"Label '{label_str}' has been renamed to '{label.name}'."
+                    )
                 else:
-                    logging.warning(f"Label '{label_str}' cannot be found. It may have been removed.")
+                    logging.warning(
+                        f"Label '{label_str}' cannot be found. It may have been removed."
+                    )
             self.idx_to_label[i] = label
             self.str_to_label[label_str] = label
             self.model_api_label_map_counts[label_str] += 1
