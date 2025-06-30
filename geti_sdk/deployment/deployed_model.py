@@ -801,6 +801,10 @@ class DeployedModel(OptimizedModel):
                     if isinstance(item, str) and item.lower() == "none":
                         value_list.append(None)
                         continue
+                    if child.tag == "labels":
+                        # Do not try to parse labels as floats
+                        value_list.append(item)
+                        continue
                     try:
                         value_list.append(float(item))
                     except ValueError:
