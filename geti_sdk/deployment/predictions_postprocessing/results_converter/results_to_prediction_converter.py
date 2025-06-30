@@ -56,7 +56,7 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
     def __init__(self, labels: LabelList, configuration: Dict[str, Any]):
         self.labels = labels.get_non_empty_labels()
         model_api_labels = configuration["labels"]
-        label_ids = configuration["label_ids"]
+        label_ids = configuration.get("label_ids", [])  # default to empty list
         # configuration["labels"] can be a single string or a list of strings
         model_api_labels = (
             model_api_labels.split()  # space separated string
