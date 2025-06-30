@@ -82,13 +82,23 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
         self.idx_to_label = {}
         self.str_to_label = {}
         self.model_api_label_map_counts: dict[str, int] = defaultdict(int)
+
+        # Validate that label_ids and model_api_labels are properly matched
+        if (n_missing_ids := len(model_api_labels) - len(label_ids)) > 0:
+            logging.warning(
+                f"Mismatch between label_ids (len={len(label_ids)}) and model_api_labels (len={len(model_api_labels)})."
+                f" Using placeholder label IDs for the missing {n_missing_ids} labels."
+            )
+            for i in range(n_missing_ids):
+                label_ids.append(f"generated_label_{i}")
+
         # Assumes configuration['label_ids'] and configuration['labels'] have the same ordering
         for i, (label_id_str, label_str) in enumerate(zip(label_ids, model_api_labels)):
             try:
                 label = self.__get_label(
                     label_str, pos_idx=self.model_api_label_map_counts[label_str]
                 )
-            except ValueError as e:
+            except ValueError:
                 if label_id_str in self.label_map_ids:
                     # Get the label by its ID in case it has been renamed
                     label = self.label_map_ids[label_id_str]
