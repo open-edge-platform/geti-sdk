@@ -24,6 +24,7 @@ Module contents
 
 from .algorithm_helpers import get_default_algorithm_info, get_supported_algorithms
 from .credentials_helpers import get_server_details_from_env
+from .deprecation import deprecate
 from .dictionary_helpers import get_dict_key_from_value
 from .label_helpers import (
     generate_classification_labels,
@@ -39,6 +40,7 @@ from .serialization_helpers import deserialize_dictionary
 from .workspace_helpers import get_workspace_id
 
 __all__ = [
+    "deprecate",
     "get_workspace_id",
     "generate_classification_labels",
     "generate_segmentation_labels",
