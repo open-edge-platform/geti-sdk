@@ -32,8 +32,8 @@ from geti_sdk.utils import deprecate, get_dict_key_from_value
 
 
 @deprecate(
-    since="2.12",
-    use="GetiIE",
+    since="2.11",
+    use="geti_sdk.import_export.GetiIE",
     reason="Dataset and annotations can be imported using Geti's native Dataset Import/Export functionality.",
 )
 class DatumaroDataset(object):

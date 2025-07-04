@@ -20,7 +20,7 @@ The utilities help maintain backward compatibility while encouraging users to
 migrate to newer APIs.
 
 Example:
-    >>> from anomalib.utils.deprecation import deprecated
+    >>> from geti_sdk.utils.deprecation import deprecated
 
     >>> # Deprecation without any information
     >>> @deprecate

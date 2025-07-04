@@ -37,8 +37,8 @@ from .datumaro_dataset import DatumaroDataset
 
 
 @deprecate(
-    since="2.12",
-    use="GetiIE",
+    since="2.11",
+    use="geti_sdk.import_export.GetiIE",
     reason="Dataset and annotations can be imported using Geti's native Dataset Import/Export functionality.",
 )
 class DatumAnnotationReader(AnnotationReader):
