@@ -741,10 +741,12 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
 
             return image
 
-    class KeypointDrawer(Helpers, DrawerEntity[Polygon]):
+    class KeypointDrawer(Helpers, DrawerEntity[Keypoint]):
         """
         Class to draw keypoints on an image.
         """
+
+        supported_types = [Keypoint]
 
         def __init__(self, show_labels, show_confidence):
             super().__init__()
@@ -767,7 +769,8 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             :param fill_shapes: Whether to fill the shapes with color.
             :return: Image with the keypoint drawn on it
             """
-            radius = 5
+            smaller_side = min(image.shape[0], image.shape[1])
+            radius = max(round(smaller_side * 0.01), 1)
 
             circle = cv2.circle(
                 image,
@@ -792,11 +795,11 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             # Get top edge of keypoint
             offset = self.label_offset_box_shape
             x_coord = entity.x
-            y_coord = entity.y * image.shape[0] - radius - offset
+            y_coord = entity.y - radius - offset
 
             # Put label at bottom if it is out of bounds at the top of the shape, and shift label to left if needed
             if y_coord < self.top_margin * image.shape[0]:
-                y_coord = entity.y * image.shape[0] + radius + offset
+                y_coord = entity.y + radius + offset
 
             if x_coord + content_width > circle.shape[1]:
                 # The list of labels is too close to the right side of the image.
