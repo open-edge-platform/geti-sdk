@@ -28,9 +28,14 @@ from datumaro.components.dataset_base import DatasetItem
 from datumaro.components.environment import Environment
 
 from geti_sdk.data_models import TaskType
-from geti_sdk.utils import get_dict_key_from_value
+from geti_sdk.utils import deprecate, get_dict_key_from_value
 
 
+@deprecate(
+    since="2.11",
+    use="geti_sdk.import_export.GetiIE",
+    reason="Dataset and annotations can be imported using Geti's native Dataset Import/Export functionality.",
+)
 class DatumaroDataset(object):
     """
     Wrapper for interacting with the datumaro dataset, contains some example
