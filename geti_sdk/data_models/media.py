@@ -129,7 +129,9 @@ class MediaItem:
     type: str = attr.field(converter=str_to_media_type)
     upload_time: str = attr.field(converter=str_to_datetime)
     media_information: MediaInformation
-    preprocessing: Optional[MediaPreprocessing] = None # preprocessing was added in Geti 2.10
+    preprocessing: Optional[MediaPreprocessing] = (
+        None  # preprocessing was added in Geti 2.10
+    )
     annotation_state_per_task: Optional[List[TaskAnnotationState]] = None
     thumbnail: Optional[str] = None
     uploader_id: Optional[str] = None
