@@ -1,3 +1,12 @@
+# v2.10.2 Intel® Geti™ SDK
+## What's Changed
+
+Bugfixes:
+* Keypoints would not be displayed correctly in demo code by @A-Artemis in https://github.com/open-edge-platform/geti-sdk/pull/617
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.1...v2.10.2
+
+
 # v2.10.1 Intel® Geti™ SDK
 ## What's Changed
 
@@ -5,6 +14,7 @@ Bugfixes:
 * Fixed problem that would make keypoint deployment crash after label renaming by @maxxgx in https://github.com/open-edge-platform/geti-sdk/pull/613
 
 **Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.0...v2.10.1
+
 
 # v2.10.0 Intel® Geti™ SDK
 ## What's Changed
