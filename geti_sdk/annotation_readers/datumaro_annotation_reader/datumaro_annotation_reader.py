@@ -27,11 +27,20 @@ from geti_sdk.data_models import TaskType
 from geti_sdk.data_models.enums.task_type import GLOBAL_TASK_TYPES
 from geti_sdk.data_models.media import MediaInformation
 from geti_sdk.rest_converters import AnnotationRESTConverter
-from geti_sdk.utils import generate_segmentation_labels, get_dict_key_from_value
+from geti_sdk.utils import (
+    deprecate,
+    generate_segmentation_labels,
+    get_dict_key_from_value,
+)
 
 from .datumaro_dataset import DatumaroDataset
 
 
+@deprecate(
+    since="2.12",
+    use="GetiIE",
+    reason="Dataset and annotations can be imported using Geti's native Dataset Import/Export functionality.",
+)
 class DatumAnnotationReader(AnnotationReader):
     """
     Class to read annotations using datumaro
