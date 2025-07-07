@@ -21,6 +21,7 @@ from geti_sdk.data_models import Image, MediaType
 from geti_sdk.data_models.containers import MediaList
 from geti_sdk.data_models.media import (
     ImageInformation,
+    MediaPreprocessing,
     Video,
     VideoFrame,
     VideoInformation,
@@ -79,10 +80,16 @@ def fxt_video_information(fxt_video_path_1_light_bulbs: str) -> VideoInformation
 
 
 @pytest.fixture()
+def fxt_preprocessing() -> MediaPreprocessing:
+    yield MediaPreprocessing(status="FINISHED")
+
+
+@pytest.fixture()
 def fxt_geti_image(
     fxt_numpy_image: np.ndarray,
     fxt_image_information: ImageInformation,
     fxt_image_identifier: ImageIdentifier,
+    fxt_preprocessing: MediaPreprocessing,
     fxt_datetime_string: str,
 ) -> Image:
     image = Image(
@@ -90,6 +97,7 @@ def fxt_geti_image(
         id=fxt_image_identifier.image_id,
         type=fxt_image_identifier.type,
         media_information=fxt_image_information,
+        preprocessing=fxt_preprocessing,
         upload_time=fxt_datetime_string,
     )
     image._data = fxt_numpy_image
@@ -101,6 +109,7 @@ def fxt_geti_video(
     fxt_video_path_1_light_bulbs: str,
     fxt_video_identifier: VideoIdentifier,
     fxt_video_information: VideoInformation,
+    fxt_preprocessing: MediaPreprocessing,
     fxt_datetime_string: str,
 ) -> Video:
     video = Video(
@@ -109,6 +118,7 @@ def fxt_geti_video(
         type=fxt_video_identifier.type,
         upload_time=fxt_datetime_string,
         media_information=fxt_video_information,
+        preprocessing=fxt_preprocessing,
     )
     video._data = fxt_video_path_1_light_bulbs
     yield video
