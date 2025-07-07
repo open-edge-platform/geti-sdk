@@ -52,7 +52,7 @@ import inspect
 import warnings
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, TypeVar, overload
+from typing import Any, Optional, TypeVar, overload
 
 _T = TypeVar("_T")
 
@@ -64,10 +64,10 @@ def deprecate(__obj: _T) -> _T: ...
 @overload
 def deprecate(
     *,
-    since: str | None = None,
-    remove: str | None = None,
-    use: str | None = None,
-    reason: str | None = None,
+    since: Optional[str] = None,
+    remove: Optional[str] = None,
+    use: Optional[str] = None,
+    reason: Optional[str] = None,
     warning_category: type[Warning] = FutureWarning,
 ) -> Callable[[_T], _T]: ...
 
@@ -75,10 +75,10 @@ def deprecate(
 def deprecate(
     __obj: Any = None,
     *,
-    since: str | None = None,
-    remove: str | None = None,
-    use: str | None = None,
-    reason: str | None = None,
+    since: Optional[str] = None,
+    remove: Optional[str] = None,
+    use: Optional[str] = None,
+    reason: Optional[str] = None,
     warning_category: type[Warning] = FutureWarning,
 ) -> Any:
     """
