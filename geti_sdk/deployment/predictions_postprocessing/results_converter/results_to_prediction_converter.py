@@ -21,15 +21,15 @@ from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
 
 import cv2
 import numpy as np
-from model_api.models import ImageModel, SegmentationModel
-from model_api.models.utils import (
-    AnomalyResult,
+from model_api.models import (
+    ImageModel,
+    SegmentationModel,
     ClassificationResult,
-    DetectedKeypoints,
-    Detection,
     DetectionResult,
-    ImageResultWithSoftPrediction,
     InstanceSegmentationResult,
+    ImageResultWithSoftPrediction,
+    AnomalyResult,
+    DetectedKeypoints,
 )
 
 from geti_sdk.data_models.annotations import Annotation
@@ -278,7 +278,7 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
         if "confidence_threshold" in configuration:
             self.confidence_threshold = configuration["confidence_threshold"]
 
-    def _detection2array(self, detections: List[Detection]) -> np.ndarray:
+    def _detection2array(self, detections: List[DetectionResult]) -> np.ndarray:
         """
         Convert list of OpenVINO Detection to a numpy array.
 
