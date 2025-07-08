@@ -28,7 +28,6 @@ classifiers = [
 dependencies = [
     "certifi~=2025.6.15",
     "cryptography~=45.0",
-    "datumaro~=1.10",
     "defusedxml~=0.7",
     "imageio-ffmpeg~=0.6",
     "joblib~=1.5",
@@ -91,18 +90,6 @@ only-include = ["geti_sdk", "README.md", "LICENSE", "CODE_OF_CONDUCT.md", "pypro
 
 [tool.hatch.build.targets.wheel]
 packages = ["geti_sdk"]
-
-[tool.uv]
-override-dependencies = [
-    # Exclude unnecessary subdependencies from datumaro
-    "nltk; sys_platform == 'never'",
-    "portalocker; sys_platform == 'never'",
-    "protobuf; sys_platform == 'never'",
-    "pyarrow; sys_platform == 'never'",
-    "scikit-learn; sys_platform == 'never'",
-    "tokenizers; sys_platform == 'never'",
-    "tritonclient; sys_platform == 'never'",
-]
 
 [[tool.uv.index]]
 name = "testpypi"
