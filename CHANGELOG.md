@@ -1,3 +1,51 @@
+# v2.11.0 Intel® Geti™ SDK
+
+## What's Changed
+
+### ✨ Features
+* Added support for asyncronous preprocessing of media uploaded in Geti by @warrkan in https://github.com/open-edge-platform/geti-sdk/pull/612
+
+### 🔒 Security
+* Hardened GHA workflows by @AlexanderBarabanov in https://github.com/open-edge-platform/geti-sdk/pull/603
+
+### 🦖 Deprecation
+* Deprecated Datumaro dataset and annotation reader by @JortBergfeld in https://github.com/open-edge-platform/geti-sdk/pull/616
+  * The classes now raise a deprecation warning, and will be removed in the following release
+
+### ➕ Extra
+* Adopted uv for dependency management by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/609
+* Replaced most linters with ruff by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/607
+* Removed legacy payload from optimization requests by @JortBergfeld in https://github.com/open-edge-platform/geti-sdk/pull/605
+* Removed some unnecessary dependencies by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/610
+  * More deps will be removed in the next releases
+
+## New Contributors
+* @JortBergfeld made their first contribution in https://github.com/open-edge-platform/geti-sdk/pull/605
+* @warrkan made their first contribution in https://github.com/open-edge-platform/geti-sdk/pull/612
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.2...v2.11.0
+
+
+# v2.10.2 Intel® Geti™ SDK
+
+## What's Changed
+
+Bugfixes:
+* Keypoints would not be displayed correctly in demo code by @A-Artemis in https://github.com/open-edge-platform/geti-sdk/pull/617
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.1...v2.10.2
+
+
+# v2.10.1 Intel® Geti™ SDK
+
+## What's Changed
+
+Bugfixes:
+* Fixed problem that would make keypoint deployment crash after label renaming by @maxxgx in https://github.com/open-edge-platform/geti-sdk/pull/613
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.0...v2.10.1
+
+
 # v2.10.0 Intel® Geti™ SDK (30-05-2025)
 ## What's Changed
 
