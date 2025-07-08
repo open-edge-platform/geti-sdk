@@ -16,16 +16,14 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-from model_api.models.utils import (
-    AnomalyResult,
+from model_api.models import (
     ClassificationResult,
-    Contour,
-    DetectedKeypoints,
-    Detection,
     DetectionResult,
-    ImageResultWithSoftPrediction,
     InstanceSegmentationResult,
-    SegmentedObject,
+    ImageResultWithSoftPrediction,
+    Contour,
+    AnomalyResult,
+    DetectedKeypoints,
 )
 
 from geti_sdk.data_models.containers import LabelList
@@ -94,9 +92,9 @@ class TestInferenceResultsToPredictionConverter:
         labels = fxt_label_list_factory(Domain.DETECTION)
         coords = [12.0, 41.0, 12.5, 45.5]
         raw_prediction = DetectionResult(
-            objects=[Detection(*coords, score=0.51, id=0)],
-            saliency_map=None,
-            feature_vector=None,
+            bboxes=np.array([coords]),
+            labels=np.array([0]),
+            scores=np.array([0.51]),
         )
         model_api_labels = [label.name for label in labels]
 
@@ -144,9 +142,11 @@ class TestInferenceResultsToPredictionConverter:
             ]
         )
         raw_prediction = InstanceSegmentationResult(
-            segmentedObjects=[
-                SegmentedObject(*coords, mask=mask, score=score, id=1, str_label="")
-            ],
+            bboxes=np.array([coords]),
+            labels=np.array([0]),
+            masks=np.array([mask]),
+            scores=np.array([score]),
+            label_names=[""],
             saliency_map=None,
             feature_vector=None,
         )
