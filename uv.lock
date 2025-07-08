@@ -557,6 +557,7 @@ wheels = [
 name = "geti-sdk"
 source = { editable = "." }
 dependencies = [
+    { name = "attrs" },
     { name = "certifi" },
     { name = "cryptography" },
     { name = "defusedxml" },
@@ -609,6 +610,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "attrs", specifier = "~=25.3.0" },
     { name = "certifi", specifier = "~=2025.6.15" },
     { name = "cryptography", specifier = "~=45.0" },
     { name = "defusedxml", specifier = "~=0.7" },
