@@ -280,7 +280,7 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
 
     def _detection2array(self, detection: DetectionResult) -> np.ndarray:
         """
-        Convert list of OpenVINO Detection to a numpy array.
+        Convert DetectionResult to a numpy array.
 
         :param detection: list of OpenVINO Detection containing [score, id, xmin, ymin, xmax, ymax]
         :return: numpy array with [label, confidence, x1, y1, x2, y2]

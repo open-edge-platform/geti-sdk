@@ -82,8 +82,7 @@ class DeploymentClient:
         self, model_identifiers: list[DeploymentModelIdentifier]
     ) -> Deployment:
         """
-        Download and return the deployment identified by `deployment_id`. If the
-        deployment is not ready to be downloaded yet, this method will raise an error.
+        Download and return the deployment.
 
         :param model_identifiers: list of models to include in the deployment
         :return: `Deployment` object containing the deployment
