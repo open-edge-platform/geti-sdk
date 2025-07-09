@@ -143,7 +143,7 @@ class TestInferenceResultsToPredictionConverter:
         )
         raw_prediction = InstanceSegmentationResult(
             bboxes=np.array([coords]),
-            labels=np.array([0]),
+            labels=np.array([1]),
             masks=np.array([mask]),
             scores=np.array([score]),
             label_names=[""],

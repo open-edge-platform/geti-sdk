@@ -411,22 +411,25 @@ class RotatedRectToPredictionConverter(DetectionToPredictionConverter):
         """
         annotations = []
         shape: Union[RotatedRectangle, Ellipse]
-        for obj in inference_results.segmentedObjects:
-            label = self.get_label_by_idx(obj.id)
-            if obj.score < self.confidence_threshold or label.is_empty:
+        for bbox, label, mask, score in zip(
+            inference_results.bboxes,
+            inference_results.labels,
+            inference_results.masks,
+            inference_results.scores,
+        ):
+            label = self.get_label_by_idx(label)
+            if score < self.confidence_threshold or label.is_empty:
                 continue
             if self.use_ellipse_shapes:
-                shape = Ellipse(
-                    obj.xmin, obj.ymin, obj.xmax - obj.xmin, obj.ymax - obj.ymin
-                )
+                shape = Ellipse(bbox[0], bbox[1], bbox[2] - bbox[0], bbox[3] - bbox[1])
                 annotations.append(
                     Annotation(
                         shape=shape,
-                        labels=[ScoredLabel.from_label(label, float(obj.score))],
+                        labels=[ScoredLabel.from_label(label, float(score))],
                     )
                 )
             else:
-                mask = obj.mask.astype(np.uint8)
+                mask = mask.astype(np.uint8)
                 contours, hierarchies = cv2.findContours(
                     mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE
                 )
@@ -448,7 +451,7 @@ class RotatedRectToPredictionConverter(DetectionToPredictionConverter):
                     annotations.append(
                         Annotation(
                             shape=RotatedRectangle.from_polygon(shape),
-                            labels=[ScoredLabel.from_label(label, float(obj.score))],
+                            labels=[ScoredLabel.from_label(label, float(score))],
                         )
                     )
         return Prediction(annotations)
