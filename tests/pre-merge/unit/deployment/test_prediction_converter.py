@@ -121,7 +121,7 @@ class TestInferenceResultsToPredictionConverter:
                 *coords_to_xmin_xmax_width_height(coords)
             )
         assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(
-            labels[0], probability=raw_prediction.objects[0].score
+            labels[0], probability=float(raw_prediction.scores[0])
         )
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
