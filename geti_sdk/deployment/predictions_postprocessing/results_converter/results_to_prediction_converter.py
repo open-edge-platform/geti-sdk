@@ -285,22 +285,26 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
         :param detection: list of OpenVINO Detection containing [score, id, xmin, ymin, xmax, ymax]
         :return: numpy array with [label, confidence, x1, y1, x2, y2]
         """
-        scores = np.empty((0, 1), dtype=np.float32)
-        labels = np.empty((0, 1), dtype=np.uint32)
-        boxes = np.empty((0, 4), dtype=np.float32)
-        for score, label, bbox in zip(
-            detection.scores, detection.labels, detection.bboxes
-        ):
-            if (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) < 1.0:
-                continue
-            scores = np.append(scores, [[score]], axis=0)
-            labels = np.append(labels, [[label]], axis=0)
-            boxes = np.append(
-                boxes,
-                [[float(bbox[0]), float(bbox[1]), float(bbox[2]), float(bbox[3])]],
-                axis=0,
+        # Filter valid detections first
+        valid_detections = [
+            (score, label, bbox)
+            for score, label, bbox in zip(
+                detection.scores, detection.labels, detection.bboxes
             )
-        return np.concatenate((labels, scores, boxes), -1)
+            if (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) >= 1.0
+        ]
+
+        if not valid_detections:
+            return np.empty((0, 6), dtype=np.float32)
+
+        # Pre-allocate arrays with known size
+        n_detections = len(valid_detections)
+        result = np.empty((n_detections, 6), dtype=np.float32)
+
+        for i, (score, label, bbox) in enumerate(valid_detections):
+            result[i] = [label, score, bbox[0], bbox[1], bbox[2], bbox[3]]
+
+        return result
 
     def convert_to_prediction(
         self, inference_results: DetectionResult, **kwargs

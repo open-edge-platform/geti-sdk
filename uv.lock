@@ -926,7 +926,7 @@ requires-dist = [
     { name = "omegaconf", specifier = "~=2.3" },
     { name = "opencv-python", specifier = "~=4.11" },
     { name = "openvino", specifier = "~=2025.2.0" },
-    { name = "openvino-model-api", specifier = "==0.3.0.2" },
+    { name = "openvino-model-api", specifier = "~=0.3.0" },
     { name = "orjson", specifier = "~=3.10" },
     { name = "ovmsclient", specifier = "~=2023.1" },
     { name = "pandas", marker = "extra == 'notebooks'", specifier = "~=2.3" },

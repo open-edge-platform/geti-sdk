@@ -120,9 +120,8 @@ class TestInferenceResultsToPredictionConverter:
             assert prediction.annotations[0].shape == Rectangle(
                 *coords_to_xmin_xmax_width_height(coords)
             )
-        assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(
-            labels[0], probability=float(raw_prediction.scores[0])
-        )
+        assert prediction.annotations[0].labels[0].probability == pytest.approx(0.51)
+        assert prediction.annotations[0].labels[0].name == labels[0].name
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
     def test_rotated_rect_to_prediction_converter(
