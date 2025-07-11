@@ -21,15 +21,15 @@ from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
 
 import cv2
 import numpy as np
-from model_api.models import ImageModel, SegmentationModel
-from model_api.models.utils import (
-    AnomalyResult,
+from model_api.models import (
+    ImageModel,
+    SegmentationModel,
     ClassificationResult,
-    DetectedKeypoints,
-    Detection,
     DetectionResult,
-    ImageResultWithSoftPrediction,
     InstanceSegmentationResult,
+    ImageResultWithSoftPrediction,
+    AnomalyResult,
+    DetectedKeypoints,
 )
 
 from geti_sdk.data_models.annotations import Annotation
@@ -278,27 +278,33 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
         if "confidence_threshold" in configuration:
             self.confidence_threshold = configuration["confidence_threshold"]
 
-    def _detection2array(self, detections: List[Detection]) -> np.ndarray:
+    def _detection2array(self, detection: DetectionResult) -> np.ndarray:
         """
-        Convert list of OpenVINO Detection to a numpy array.
+        Convert DetectionResult to a numpy array.
 
-        :param detections: list of OpenVINO Detection containing [score, id, xmin, ymin, xmax, ymax]
+        :param detection: list of OpenVINO Detection containing [score, id, xmin, ymin, xmax, ymax]
         :return: numpy array with [label, confidence, x1, y1, x2, y2]
         """
-        scores = np.empty((0, 1), dtype=np.float32)
-        labels = np.empty((0, 1), dtype=np.uint32)
-        boxes = np.empty((0, 4), dtype=np.float32)
-        for det in detections:
-            if (det.xmax - det.xmin) * (det.ymax - det.ymin) < 1.0:
-                continue
-            scores = np.append(scores, [[det.score]], axis=0)
-            labels = np.append(labels, [[det.id]], axis=0)
-            boxes = np.append(
-                boxes,
-                [[float(det.xmin), float(det.ymin), float(det.xmax), float(det.ymax)]],
-                axis=0,
+        # Filter valid detections first
+        valid_detections = [
+            (score, label, bbox)
+            for score, label, bbox in zip(
+                detection.scores, detection.labels, detection.bboxes
             )
-        return np.concatenate((labels, scores, boxes), -1)
+            if (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) >= 1.0
+        ]
+
+        if not valid_detections:
+            return np.empty((0, 6), dtype=np.float32)
+
+        # Pre-allocate arrays with known size
+        n_detections = len(valid_detections)
+        result = np.empty((n_detections, 6), dtype=np.float32)
+
+        for i, (score, label, bbox) in enumerate(valid_detections):
+            result[i] = [label, score, bbox[0], bbox[1], bbox[2], bbox[3]]
+
+        return result
 
     def convert_to_prediction(
         self, inference_results: DetectionResult, **kwargs
@@ -314,7 +320,7 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
             - `x1`, `x2`, `y1` and `y2` are expected to be in pixel
         :return: Prediction object containing the boxes obtained from the prediction
         """
-        detections = self._detection2array(inference_results.objects)
+        detections = self._detection2array(inference_results)
 
         annotations = []
         if (
@@ -409,22 +415,25 @@ class RotatedRectToPredictionConverter(DetectionToPredictionConverter):
         """
         annotations = []
         shape: Union[RotatedRectangle, Ellipse]
-        for obj in inference_results.segmentedObjects:
-            label = self.get_label_by_idx(obj.id)
-            if obj.score < self.confidence_threshold or label.is_empty:
+        for bbox, label, mask, score in zip(
+            inference_results.bboxes,
+            inference_results.labels,
+            inference_results.masks,
+            inference_results.scores,
+        ):
+            label = self.get_label_by_idx(label)
+            if score < self.confidence_threshold or label.is_empty:
                 continue
             if self.use_ellipse_shapes:
-                shape = Ellipse(
-                    obj.xmin, obj.ymin, obj.xmax - obj.xmin, obj.ymax - obj.ymin
-                )
+                shape = Ellipse(bbox[0], bbox[1], bbox[2] - bbox[0], bbox[3] - bbox[1])
                 annotations.append(
                     Annotation(
                         shape=shape,
-                        labels=[ScoredLabel.from_label(label, float(obj.score))],
+                        labels=[ScoredLabel.from_label(label, float(score))],
                     )
                 )
             else:
-                mask = obj.mask.astype(np.uint8)
+                mask = mask.astype(np.uint8)
                 contours, hierarchies = cv2.findContours(
                     mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE
                 )
@@ -446,7 +455,7 @@ class RotatedRectToPredictionConverter(DetectionToPredictionConverter):
                     annotations.append(
                         Annotation(
                             shape=RotatedRectangle.from_polygon(shape),
-                            labels=[ScoredLabel.from_label(label, float(obj.score))],
+                            labels=[ScoredLabel.from_label(label, float(score))],
                         )
                     )
         return Prediction(annotations)

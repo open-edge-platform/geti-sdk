@@ -16,16 +16,14 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-from model_api.models.utils import (
-    AnomalyResult,
+from model_api.models import (
     ClassificationResult,
-    Contour,
-    DetectedKeypoints,
-    Detection,
     DetectionResult,
-    ImageResultWithSoftPrediction,
     InstanceSegmentationResult,
-    SegmentedObject,
+    ImageResultWithSoftPrediction,
+    Contour,
+    AnomalyResult,
+    DetectedKeypoints,
 )
 
 from geti_sdk.data_models.containers import LabelList
@@ -94,9 +92,9 @@ class TestInferenceResultsToPredictionConverter:
         labels = fxt_label_list_factory(Domain.DETECTION)
         coords = [12.0, 41.0, 12.5, 45.5]
         raw_prediction = DetectionResult(
-            objects=[Detection(*coords, score=0.51, id=0)],
-            saliency_map=None,
-            feature_vector=None,
+            bboxes=np.array([coords]),
+            labels=np.array([0]),
+            scores=np.array([0.51]),
         )
         model_api_labels = [label.name for label in labels]
 
@@ -122,9 +120,8 @@ class TestInferenceResultsToPredictionConverter:
             assert prediction.annotations[0].shape == Rectangle(
                 *coords_to_xmin_xmax_width_height(coords)
             )
-        assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(
-            labels[0], probability=raw_prediction.objects[0].score
-        )
+        assert prediction.annotations[0].labels[0].probability == pytest.approx(0.51)
+        assert prediction.annotations[0].labels[0].name == labels[0].name
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
     def test_rotated_rect_to_prediction_converter(
@@ -144,9 +141,11 @@ class TestInferenceResultsToPredictionConverter:
             ]
         )
         raw_prediction = InstanceSegmentationResult(
-            segmentedObjects=[
-                SegmentedObject(*coords, mask=mask, score=score, id=1, str_label="")
-            ],
+            bboxes=np.array([coords]),
+            labels=np.array([1]),
+            masks=np.array([mask]),
+            scores=np.array([score]),
+            label_names=[""],
             saliency_map=None,
             feature_vector=None,
         )

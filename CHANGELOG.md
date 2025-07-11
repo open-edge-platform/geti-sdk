@@ -15,6 +15,7 @@
 ### ➕ Extra
 * Adopted uv for dependency management by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/609
 * Replaced most linters with ruff by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/607
+* Replaced call to deprecated deployment endpoint by @AlbertvanHouten in https://github.com/open-edge-platform/geti-sdk/pull/621
 * Removed legacy payload from optimization requests by @JortBergfeld in https://github.com/open-edge-platform/geti-sdk/pull/605
 * Removed some unnecessary dependencies by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/610
   * More deps will be removed in the next releases
