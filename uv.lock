@@ -862,7 +862,6 @@ dependencies = [
     { name = "defusedxml" },
     { name = "imageio-ffmpeg" },
     { name = "joblib" },
-    { name = "notebook" },
     { name = "numpy" },
     { name = "omegaconf" },
     { name = "opencv-python" },
@@ -921,12 +920,11 @@ requires-dist = [
     { name = "jupyterlab", marker = "extra == 'notebooks'", specifier = "~=4.4" },
     { name = "mistune", marker = "extra == 'notebooks'", specifier = "~=2.0" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = "~=2.0" },
-    { name = "notebook", specifier = ">=7.4.4" },
     { name = "numpy", specifier = "~=1.26.4" },
     { name = "omegaconf", specifier = "~=2.3" },
     { name = "opencv-python", specifier = "~=4.11" },
-    { name = "openvino", specifier = "~=2025.2.0" },
-    { name = "openvino-model-api", specifier = "~=0.3.0" },
+    { name = "openvino", specifier = "~=2025.2" },
+    { name = "openvino-model-api", specifier = "~=0.3" },
     { name = "orjson", specifier = "~=3.10" },
     { name = "ovmsclient", specifier = "~=2023.1" },
     { name = "pandas", marker = "extra == 'notebooks'", specifier = "~=2.3" },
@@ -2256,22 +2254,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/43/16/fc88b08840de0e0a72a2f9d8c6bae36be573e475a6326ae854bcc549fc45/nodeenv-1.9.1.tar.gz", hash = "sha256:6ec12890a2dab7946721edbfbcd91f3319c6ccc9aec47be7c7e6b7011ee6645f", size = 47437, upload-time = "2024-06-04T18:44:11.171Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d2/1d/1b658dbd2b9fa9c4c9f32accbfc0205d532c8c6194dc0f2a4c0428e7128a/nodeenv-1.9.1-py2.py3-none-any.whl", hash = "sha256:ba11c9782d29c27c70ffbdda2d7415098754709be8a7056d79a737cd901155c9", size = 22314, upload-time = "2024-06-04T18:44:08.352Z" },
-]
-
-[[package]]
-name = "notebook"
-version = "7.4.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "jupyter-server" },
-    { name = "jupyterlab" },
-    { name = "jupyterlab-server" },
-    { name = "notebook-shim" },
-    { name = "tornado" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b1/4e/a40b5a94eb01fc51746db7854296d88b84905ab18ee0fcef853a60d708a3/notebook-7.4.4.tar.gz", hash = "sha256:392fd501e266f2fb3466c6fcd3331163a2184968cb5c5accf90292e01dfe528c", size = 13883628, upload-time = "2025-06-30T13:04:18.099Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b3/c0/e64d2047fd752249b0b69f6aee2a7049eb94e7273e5baabc8b8ad05cc068/notebook-7.4.4-py3-none-any.whl", hash = "sha256:32840f7f777b6bff79bb101159336e9b332bdbfba1495b8739e34d1d65cbc1c0", size = 14288000, upload-time = "2025-06-30T13:04:14.584Z" },
 ]
 
 [[package]]
