@@ -16,8 +16,9 @@ import copy
 from collections import UserList
 from typing import Any, Dict, List, Optional, Sequence
 
-from geti_sdk.data_models.algorithms import Algorithm
+from geti_sdk.data_models.algorithms import Algorithm, LegacyAlgorithm
 from geti_sdk.data_models.enums import TaskType
+from geti_sdk.platform_versions import GetiVersion
 
 DEFAULT_ALGORITHMS = {
     "classification": "Custom_Image_Classification_EfficinetNet-B0",
@@ -43,15 +44,14 @@ class AlgorithmList(UserList):
             super().__init__(list(data))
 
     @staticmethod
-    def from_rest(rest_input: Dict[str, Any]) -> "AlgorithmList":
+    def from_rest(rest_input: Dict[str, Any], geti_version: GetiVersion) -> "AlgorithmList":
         """
         Create an AlgorithmList from the response of the /supported_algorithms REST
         endpoint in Intel® Geti™.
 
-        :param rest_input: Dictionary retrieved from the /supported_algorithms REST
-            endpoint
-        :return: AlgorithmList holding the information related to the supported
-            algorithms in Intel® Geti™
+        :param rest_input: Dictionary retrieved from the /supported_algorithms REST endpoint
+        :param geti_version: Version of Intel® Geti™ platform
+        :return: AlgorithmList holding the information related to the supported algorithms in Intel® Geti™
         """
         algorithm_list = AlgorithmList([])
         if "items" in rest_input:
@@ -64,24 +64,28 @@ class AlgorithmList(UserList):
             )
         algo_rest_list = copy.deepcopy(algo_rest)
         for algorithm_dict in algo_rest_list:
-            algorithm_list.append(Algorithm(**algorithm_dict))
-        algorithm_list.sort(key=lambda x: x.gigaflops)
+            algorithm: Algorithm
+            if geti_version.is_configuration_revamped:
+                algorithm = Algorithm.model_validate(algorithm_dict)
+            else:
+                algorithm = Algorithm.from_legacy_algorithm(LegacyAlgorithm(**algorithm_dict))
+            algorithm_list.append(algorithm)
+        algorithm_list.sort(key=lambda x: x.stats.gigaflops)
         return algorithm_list
 
-    def get_by_model_template(self, model_template_id: str) -> Algorithm:
+    def get_by_model_manifest_id(self, model_manifest_id: str) -> Algorithm:
         """
         Retrieve an algorithm from the list by its model_template_id.
 
-        :param model_template_id: Name of the model template to get the Algorithm
+        :param model_manifest_id: Name of the model template to get the Algorithm
             information for
         :return: Algorithm holding the algorithm details
         """
         for algo in self.data:
-            if algo.model_template_id == model_template_id:
+            if algo.model_manifest_id == model_manifest_id:
                 return algo
         raise ValueError(
-            f"Algorithm for model template {model_template_id} was not found in the "
-            f"list of supported algorithms."
+            f"Algorithm for model manifest {model_manifest_id} was not found in the list of supported algorithms."
         )
 
     def get_by_task_type(self, task_type: TaskType) -> "AlgorithmList":
@@ -92,7 +96,7 @@ class AlgorithmList(UserList):
         :return: List of supported algorithms for the task type
         """
         return AlgorithmList(
-            [algo for algo in self.data if algo.task_type == task_type]
+            [algo for algo in self.data if algo.task == task_type]
         )
 
     @property
@@ -138,10 +142,9 @@ class AlgorithmList(UserList):
         :return: Default algorithm for the task
         """
         task_algos = self.get_by_task_type(task_type=task_type)
-        default = [algo for algo in task_algos if algo.default_algorithm]
+        default = [algo for algo in task_algos if algo.is_default_model]
         if len(default) == 1:
             return default[0]
         else:
-            # The old method used in Geti v1.8 and lower. Keep for backwards
-            # compatibility
-            return self.get_by_model_template(DEFAULT_ALGORITHMS[str(task_type)])
+            # The old method used in Geti v1.8 and lower. Keep for backwards compatibility
+            return self.get_by_model_manifest_id(DEFAULT_ALGORITHMS[str(task_type)])

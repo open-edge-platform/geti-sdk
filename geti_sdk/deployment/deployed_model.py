@@ -28,7 +28,7 @@ import numpy as np
 from model_api.adapters import OpenvinoAdapter, OVMSAdapter
 from model_api.models import Model as model_api_Model
 from model_api.tilers import DetectionTiler, InstanceSegmentationTiler, Tiler
-from openvino.runtime import Core
+from openvino import Core
 from packaging.version import Version
 
 from geti_sdk.data_models import OptimizedModel, Project, TaskConfiguration

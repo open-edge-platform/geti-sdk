@@ -67,8 +67,8 @@ class ModelClient:
         ]
         # Update algorithm details
         for group in model_groups:
-            group.algorithm = self.supported_algos.get_by_model_template(
-                model_template_id=group.model_template_id
+            group.algorithm = self.supported_algos.get_by_model_manifest_id(
+                model_manifest_id=group.model_template_id
             )
             for model in group.models:
                 # set the model storage id, to link models to their parent group
@@ -520,7 +520,7 @@ class ModelClient:
         metadata = job.metadata
         task_data = metadata.task
         version = task_data.model_version
-        algorithm = self.supported_algos.get_by_model_template(
+        algorithm = self.supported_algos.get_by_model_manifest_id(
             task_data.model_template_id
         )
         if hasattr(task_data, "name") and job.type in (
