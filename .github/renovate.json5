@@ -93,12 +93,23 @@
       matchDepTypes: ["dependency-groups"],
     },
 
-    // Group GitHub Actions updates
+    // Group minor/patch/digest GitHub Actions updates
     {
       enabled: true,
       groupName: "GitHub Actions",
       matchManagers: ["github-actions"],
       matchPackagePatterns: ["*"],
+      matchUpdateTypes: ["minor", "patch", "digest", "pinDigest"],
+      // schedule: ["* * 1 * *"], // every month TODO enable
+    },
+
+    // Group major GitHub Actions updates
+    {
+      enabled: true,
+      groupName: "GitHub Actions major",
+      matchManagers: ["github-actions"],
+      matchPackagePatterns: ["*"],
+      matchUpdateTypes: ["major"],
       // schedule: ["* * 1 * *"], // every month TODO enable
     },
 
