@@ -118,7 +118,6 @@
       groupName: "GitHub Actions",
       matchManagers: ["github-actions"],
       matchPackagePatterns: ["*"],
-      matchUpdateTypes: ["major", "minor", "patch", "digest", "pinDigest"],
       // schedule: ["* * 1 * *"], // every month TODO enable
     },
 
