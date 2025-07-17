@@ -40,18 +40,7 @@
   packageRules: [
     {
       enabled: true,
-      groupName: "Python patch dependencies",
       matchManagers: ["pep621"],
-      matchUpdateTypes: ["patch"],
-      matchDepTypes: ["project.dependencies"],
-      // schedule: ["* * * * 0"], // weekly TODO
-    },
-
-    {
-      enabled: true,
-      groupName: "Python minor-major dependencies",
-      matchManagers: ["pep621"],
-      matchUpdateTypes: ["minor", "major"],
       matchDepTypes: ["project.dependencies"],
       // schedule: ["* * * * 0"], // weekly TODO
     },
@@ -78,7 +67,7 @@
       matchDepTypes: ["requires-python"],
     },
 
-    // Disable numpy notifications until
+    // Disable numpy notifications
     // https://github.com/open-edge-platform/geti-sdk/issues/634
     {
       enabled: false,
