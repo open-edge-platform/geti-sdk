@@ -42,7 +42,7 @@
       enabled: true,
       matchManagers: ["pep621"],
       matchDepTypes: ["project.dependencies"],
-      // schedule: ["* * * * 0"], // weekly TODO
+      schedule: ["* * * * 0"], // weekly
     },
 
     {
@@ -50,15 +50,15 @@
       matchManagers: ["pep621"],
       matchUpdateTypes: ["minor", "patch"],
       matchDepTypes: ["dependency-groups"],
-      // schedule: ["* * 1 * *"], // every month TODO enable
+      schedule: ["* * 1 * *"], // every month
     },
 
+    // disable major upgrades for dependency-groups
     {
       enabled: false,
       matchManagers: ["pep621"],
       matchUpdateTypes: ["major"],
       matchDepTypes: ["dependency-groups"],
-      // schedule: ["* * 1 * *"], // every month TODO enable
     },
 
     {
@@ -66,15 +66,15 @@
       matchManagers: ["pep621"],
       matchUpdateTypes: ["minor", "patch"],
       matchDepTypes: ["project.optional-dependencies"],
-      // schedule: ["* * 1 * *"], // every month TODO enable
+      schedule: ["* * 1 * *"], // every month
     },
 
+    // disable major upgrades for optional-dependencies
     {
       enabled: false,
       matchManagers: ["pep621"],
       matchUpdateTypes: ["major"],
       matchDepTypes: ["project.optional-dependencies"],
-      // schedule: ["* * 1 * *"], // every month TODO enable
     },
 
     // Python version is upgraded manually
@@ -118,7 +118,7 @@
       groupName: "GitHub Actions",
       matchManagers: ["github-actions"],
       matchPackagePatterns: ["*"],
-      // schedule: ["* * 1 * *"], // every month TODO enable
+      schedule: ["* * 1 * *"], // every month
     },
 
     // Python version used in GitHub Actions is updated manually
