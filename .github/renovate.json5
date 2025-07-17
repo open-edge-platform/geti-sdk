@@ -44,30 +44,64 @@
       matchManagers: ["pep621"],
       matchUpdateTypes: ["patch"],
       matchDepTypes: ["project.dependencies"],
-      // schedule: ["before 4am on monday"], // weekly TODO
+      // schedule: ["* * * * 0"], // weekly TODO
     },
 
     {
       enabled: true,
-      groupName: "python minor-major dependencies",
+      groupName: "Python minor-major dependencies",
       matchManagers: ["pep621"],
       matchUpdateTypes: ["minor", "major"],
       matchDepTypes: ["project.dependencies"],
-      // schedule: ["before 4am on monday"], // weekly TODO
+      // schedule: ["* * * * 0"], // weekly TODO
     },
 
     {
       enabled: true,
       matchManagers: ["pep621"],
       matchDepTypes: ["dependency-groups"],
-      // schedule: ["* 0-3 1 * *"], // monthly TODO
+      // schedule: ["* * 1 * *"], // every month TODO enable
     },
 
     {
       enabled: true,
       matchManagers: ["pep621"],
       matchDepTypes: ["project.optional-dependencies"],
-      // schedule: ["* 0-3 1 * *"], // monthly TODO
+      // schedule: ["* * 1 * *"], // every month TODO enable
+    },
+
+    // Python version is upgraded manually
+    {
+      enabled: false,
+      matchDatasources: ["python-version"],
+      matchDepNames: ["python"],
+      matchDepTypes: ["requires-python"],
+    },
+
+    // Disable numpy notifications until
+    // https://github.com/open-edge-platform/geti-sdk/issues/634
+    {
+      enabled: false,
+      matchDatasources: ["pypi"],
+      matchDepNames: ["numpy"],
+    },
+
+    // Disable snowballstemmer notifications
+    // pinned because pytest-recording subdeps are loose
+    {
+      enabled: false,
+      matchDatasources: ["pypi"],
+      matchDepNames: ["snowballstemmer"],
+      matchDepTypes: ["dependency-groups"],
+    },
+
+    // Disable pytest-recording notifications
+    // pinned due to https://github.com/kiwicom/pytest-recording/issues/174
+    {
+      enabled: false,
+      matchDatasources: ["pypi"],
+      matchDepNames: ["pytest-recording"],
+      matchDepTypes: ["dependency-groups"],
     },
 
     // Group minor/patch/digest GitHub Actions updates
@@ -77,7 +111,7 @@
       matchManagers: ["github-actions"],
       matchPackagePatterns: ["*"],
       matchUpdateTypes: ["minor", "patch", "digest", "pinDigest"],
-      // schedule: ["every 4 weeks on Sunday"], // TODO enable
+      // schedule: ["* * 1 * *"], // every month TODO enable
     },
 
     // Group major GitHub Actions updates
@@ -87,7 +121,7 @@
       matchManagers: ["github-actions"],
       matchPackagePatterns: ["*"],
       matchUpdateTypes: ["major"],
-      // schedule: ["every 4 weeks on Sunday"], // TODO enable
+      // schedule: ["* * 1 * *"], // every month TODO enable
     },
   ],
 
