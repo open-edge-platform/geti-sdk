@@ -34,8 +34,7 @@
 
   // Set limit to 5
   ignorePresets: [":prHourlyLimit2"],
-  prHourlyLimit: 5,
-  ignorePaths: [], // to include tests folders as well as `config:base` ignores it
+  prHourlyLimit: 10,
 
   packageRules: [
     {
