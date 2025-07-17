@@ -1,0 +1,100 @@
+// Dependency Update Configuration
+//
+// See https://docs.renovatebot.com/configuration-options/
+// See https://json5.org/ for JSON5 syntax
+
+// [!] While updating the Renovate config, test changes on your own fork.
+//  1. Modify the Renovate configuration, which is located in .github/renovate.json5 and push your changes to the default branch of your fork.
+//  2. Enable the Renovate GitHub app in your GitHub account.
+//     Verify that Renovate is activated in the repository settings within the Renovate Dashboard.
+//     To enable the dashboard set `dependencyDashboard` to true
+//  3. Trigger the Renovate app from the dashboard, or push a new commit to your fork’s default branch to re-trigger Renovate.
+//  4. Use the dashboard to initiate Renovate and create a PR on your fork, then check that the proposed PRs are modifying the correct parts.
+//  5. Once you’ve validated that the Renovate configuration works on your fork, submit a PR,
+//     and include links in the description to share details about the testing you've conducted.
+
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+
+  // regenerate lock weekly https://docs.renovatebot.com/configuration-options/#lockfilemaintenance
+  lockFileMaintenance: {
+    enabled: true,
+  },
+
+  extends: ["config:base", ":gitSignOff", "helpers:pinGitHubActionDigests"],
+  // https://docs.renovatebot.com/presets-default/#gitsignoff
+  // https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigests
+
+  // if necessary, add supported releases branches here
+  // it is possible to enable/disable specific upgrades per branch with
+  // `matchBaseBranches` in specific rule
+  baseBranches: ["main"],
+
+  enabledManagers: ["github-actions", "pep621"],
+
+  // Set limit to 5
+  ignorePresets: [":prHourlyLimit2"],
+  prHourlyLimit: 5,
+  ignorePaths: [], // to include tests folders as well as `config:base` ignores it
+
+  packageRules: [
+    {
+      enabled: true,
+      groupName: "Python patch dependencies",
+      matchManagers: ["pep621"],
+      matchUpdateTypes: ["patch"],
+      matchDepTypes: ["project.dependencies"],
+      // schedule: ["before 4am on monday"], // weekly TODO
+    },
+
+    {
+      enabled: true,
+      groupName: "python minor-major dependencies",
+      matchManagers: ["pep621"],
+      matchUpdateTypes: ["minor", "major"],
+      matchDepTypes: ["project.dependencies"],
+      // schedule: ["before 4am on monday"], // weekly TODO
+    },
+
+    {
+      enabled: true,
+      matchManagers: ["pep621"],
+      matchDepTypes: ["dependency-groups"],
+      // schedule: ["* 0-3 1 * *"], // monthly TODO
+    },
+
+    {
+      enabled: true,
+      matchManagers: ["pep621"],
+      matchDepTypes: ["project.optional-dependencies"],
+      // schedule: ["* 0-3 1 * *"], // monthly TODO
+    },
+
+    // Group minor/patch/digest GitHub Actions updates
+    {
+      enabled: true,
+      groupName: "GitHub Actions",
+      matchManagers: ["github-actions"],
+      matchPackagePatterns: ["*"],
+      matchUpdateTypes: ["minor", "patch", "digest", "pinDigest"],
+      // schedule: ["every 4 weeks on Sunday"], // TODO enable
+    },
+
+    // Group major GitHub Actions updates
+    {
+      enabled: true,
+      groupName: "GitHub Actions major",
+      matchManagers: ["github-actions"],
+      matchPackagePatterns: ["*"],
+      matchUpdateTypes: ["major"],
+      // schedule: ["every 4 weeks on Sunday"], // TODO enable
+    },
+  ],
+
+  // Enable security upgrades
+  vulnerabilityAlerts: {
+    enabled: true,
+  },
+  osvVulnerabilityAlerts: true,
+  dependencyDashboard: true,
+}
