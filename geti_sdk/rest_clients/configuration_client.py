@@ -29,9 +29,18 @@ from geti_sdk.data_models import (
 from geti_sdk.data_models.configurable_parameter_group import PARAMETER_TYPES
 from geti_sdk.http_session import GetiRequestException, GetiSession
 from geti_sdk.rest_converters import ConfigurationRESTConverter
-from geti_sdk.utils import get_supported_algorithms
+from geti_sdk.utils import get_supported_algorithms, deprecate
 
 
+@deprecate(
+    since="2.12",
+    use="geti_sdk.rest_clients.configuration_clients",
+    reason=(
+        "This legacy client is deprecated in favor of the new ProjectConfigurationClient and "
+        "TrainingConfigurationClient classes that provide improved functionality with new project and training "
+        "configuration endpoints in Geti server version 2.12 and above"
+    ),
+)
 class ConfigurationClient:
     """
     Class to manage configuration for a certain project.

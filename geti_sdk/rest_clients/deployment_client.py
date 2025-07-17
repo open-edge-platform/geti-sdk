@@ -25,7 +25,7 @@ from geti_sdk.data_models.enums import OptimizationType
 from geti_sdk.data_models.model import Model, OptimizedModel
 from geti_sdk.deployment import Deployment
 from geti_sdk.http_session import GetiSession
-from geti_sdk.rest_clients.configuration_client import ConfigurationClient
+from geti_sdk.rest_clients import ConfigurationClient
 from geti_sdk.rest_clients.model_client import ModelClient
 from geti_sdk.rest_clients.prediction_client import PredictionClient
 from geti_sdk.utils import get_supported_algorithms
