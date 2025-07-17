@@ -19,6 +19,7 @@
   // regenerate lock weekly https://docs.renovatebot.com/configuration-options/#lockfilemaintenance
   lockFileMaintenance: {
     enabled: true,
+    schedule: ["* * * * 0"], // weekly TODO
   },
 
   extends: ["config:base", ":gitSignOff", "helpers:pinGitHubActionDigests"],
