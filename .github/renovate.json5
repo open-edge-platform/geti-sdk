@@ -42,7 +42,6 @@
       enabled: true,
       matchManagers: ["pep621"],
       matchDepTypes: ["project.dependencies"],
-
       // schedule: ["* * * * 0"], // weekly TODO
     },
 
@@ -112,23 +111,13 @@
       matchDepTypes: ["dependency-groups"],
     },
 
-    // Group minor/patch/digest GitHub Actions updates
+    // Group GitHub Actions updates
     {
       enabled: true,
       groupName: "GitHub Actions",
       matchManagers: ["github-actions"],
       matchPackagePatterns: ["*"],
-      matchUpdateTypes: ["minor", "patch", "digest", "pinDigest"],
-      // schedule: ["* * 1 * *"], // every month TODO enable
-    },
-
-    // Group major GitHub Actions updates
-    {
-      enabled: true,
-      groupName: "GitHub Actions major",
-      matchManagers: ["github-actions"],
-      matchPackagePatterns: ["*"],
-      matchUpdateTypes: ["major"],
+      matchUpdateTypes: ["major", "minor", "patch", "digest", "pinDigest"],
       // schedule: ["* * 1 * *"], // every month TODO enable
     },
 
