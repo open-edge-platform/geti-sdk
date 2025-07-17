@@ -19,7 +19,7 @@
   // regenerate lock weekly https://docs.renovatebot.com/configuration-options/#lockfilemaintenance
   lockFileMaintenance: {
     enabled: true,
-    schedule: ["* * * * 0"], // weekly TODO
+    schedule: ["* * * * 0"], // weekly
   },
 
   extends: ["config:base", ":gitSignOff", "helpers:pinGitHubActionDigests"],
@@ -33,7 +33,7 @@
 
   enabledManagers: ["github-actions", "pep621"],
 
-  // Set limit to 5
+  // Set limit to 10
   ignorePresets: [":prHourlyLimit2"],
   prHourlyLimit: 10,
 
