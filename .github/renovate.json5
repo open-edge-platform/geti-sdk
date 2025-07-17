@@ -98,7 +98,6 @@
       groupName: "GitHub Actions",
       matchManagers: ["github-actions"],
       matchPackagePatterns: ["*"],
-      matchUpdateTypes: [*],
       // schedule: ["* * 1 * *"], // every month TODO enable
     },
 
