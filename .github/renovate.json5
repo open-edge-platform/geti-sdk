@@ -42,12 +42,22 @@
       enabled: true,
       matchManagers: ["pep621"],
       matchDepTypes: ["project.dependencies"],
+
       // schedule: ["* * * * 0"], // weekly TODO
     },
 
     {
       enabled: true,
       matchManagers: ["pep621"],
+      matchUpdateTypes: ["minor", "patch"],
+      matchDepTypes: ["dependency-groups"],
+      // schedule: ["* * 1 * *"], // every month TODO enable
+    },
+
+    {
+      enabled: false,
+      matchManagers: ["pep621"],
+      matchUpdateTypes: ["major"],
       matchDepTypes: ["dependency-groups"],
       // schedule: ["* * 1 * *"], // every month TODO enable
     },
@@ -55,6 +65,15 @@
     {
       enabled: true,
       matchManagers: ["pep621"],
+      matchUpdateTypes: ["minor", "patch"],
+      matchDepTypes: ["project.optional-dependencies"],
+      // schedule: ["* * 1 * *"], // every month TODO enable
+    },
+
+    {
+      enabled: false,
+      matchManagers: ["pep621"],
+      matchUpdateTypes: ["major"],
       matchDepTypes: ["project.optional-dependencies"],
       // schedule: ["* * 1 * *"], // every month TODO enable
     },
