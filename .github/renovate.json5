@@ -1,0 +1,139 @@
+// Dependency Update Configuration
+//
+// See https://docs.renovatebot.com/configuration-options/
+// See https://json5.org/ for JSON5 syntax
+
+// [!] While updating the Renovate config, test changes on your own fork.
+//  1. Modify the Renovate configuration, which is located in .github/renovate.json5 and push your changes to the default branch of your fork.
+//  2. Enable the Renovate GitHub app in your GitHub account.
+//     Verify that Renovate is activated in the repository settings within the Renovate Dashboard.
+//     To enable the dashboard set `dependencyDashboard` to true
+//  3. Trigger the Renovate app from the dashboard, or push a new commit to your fork’s default branch to re-trigger Renovate.
+//  4. Use the dashboard to initiate Renovate and create a PR on your fork, then check that the proposed PRs are modifying the correct parts.
+//  5. Once you’ve validated that the Renovate configuration works on your fork, submit a PR,
+//     and include links in the description to share details about the testing you've conducted.
+
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+
+  // regenerate lock weekly https://docs.renovatebot.com/configuration-options/#lockfilemaintenance
+  lockFileMaintenance: {
+    enabled: true,
+    schedule: ["* * * * 0"], // weekly
+  },
+
+  extends: ["config:base", ":gitSignOff", "helpers:pinGitHubActionDigests"],
+  // https://docs.renovatebot.com/presets-default/#gitsignoff
+  // https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigests
+
+  // if necessary, add supported releases branches here
+  // it is possible to enable/disable specific upgrades per branch with
+  // `matchBaseBranches` in specific rule
+  baseBranches: ["main"],
+
+  enabledManagers: ["github-actions", "pep621"],
+
+  // Set limit to 10
+  ignorePresets: [":prHourlyLimit2"],
+  prHourlyLimit: 10,
+
+  packageRules: [
+    {
+      enabled: true,
+      matchManagers: ["pep621"],
+      matchDepTypes: ["project.dependencies"],
+      schedule: ["* * * * 0"], // weekly
+    },
+
+    {
+      enabled: true,
+      matchManagers: ["pep621"],
+      matchUpdateTypes: ["minor", "patch"],
+      matchDepTypes: ["dependency-groups"],
+      schedule: ["* * 1 * *"], // every month
+    },
+
+    // disable major upgrades for dependency-groups
+    {
+      enabled: false,
+      matchManagers: ["pep621"],
+      matchUpdateTypes: ["major"],
+      matchDepTypes: ["dependency-groups"],
+    },
+
+    {
+      enabled: true,
+      matchManagers: ["pep621"],
+      matchUpdateTypes: ["minor", "patch"],
+      matchDepTypes: ["project.optional-dependencies"],
+      schedule: ["* * 1 * *"], // every month
+    },
+
+    // disable major upgrades for optional-dependencies
+    {
+      enabled: false,
+      matchManagers: ["pep621"],
+      matchUpdateTypes: ["major"],
+      matchDepTypes: ["project.optional-dependencies"],
+    },
+
+    // Python version is upgraded manually
+    {
+      enabled: false,
+      matchDatasources: ["python-version"],
+      matchDepNames: ["python"],
+      matchDepTypes: ["requires-python"],
+    },
+
+    // Disable numpy notifications
+    // https://github.com/open-edge-platform/geti-sdk/issues/634
+    {
+      enabled: false,
+      matchDatasources: ["pypi"],
+      matchDepNames: ["numpy"],
+    },
+
+    // Disable snowballstemmer notifications
+    // pinned because pytest-recording subdeps are loose
+    {
+      enabled: false,
+      matchDatasources: ["pypi"],
+      matchDepNames: ["snowballstemmer"],
+      matchDepTypes: ["dependency-groups"],
+    },
+
+    // Disable pytest-recording notifications
+    // pinned due to https://github.com/kiwicom/pytest-recording/issues/174
+    {
+      enabled: false,
+      matchDatasources: ["pypi"],
+      matchDepNames: ["pytest-recording"],
+      matchDepTypes: ["dependency-groups"],
+    },
+
+    // Group GitHub Actions updates
+    {
+      enabled: true,
+      separateMajorMinor: false,
+      groupName: "GitHub Actions",
+      matchManagers: ["github-actions"],
+      matchPackagePatterns: ["*"],
+      schedule: ["* * 1 * *"], // every month
+    },
+
+    // Python version used in GitHub Actions is updated manually
+    {
+      enabled: false,
+      matchDatasources: ["github-releases"],
+      matchDepNames: ["python"],
+      matchDepTypes: ["uses-with"],
+    },
+  ],
+
+  // Enable security upgrades
+  vulnerabilityAlerts: {
+    enabled: true,
+  },
+  osvVulnerabilityAlerts: true,
+  dependencyDashboard: true,
+}
