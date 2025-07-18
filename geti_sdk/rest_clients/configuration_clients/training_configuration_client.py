@@ -27,7 +27,10 @@ from geti_sdk.rest_converters.training_configuration_rest_converter import (
 
 class TrainingConfigurationClient:
     """
-    Class to manage configuration for an algorithm.
+    REST client for managing training configurations for machine learning models within a project.
+
+    This client provides methods to retrieve and update training configurations, including
+    full configurations and hyperparameters-only configurations for specific models.
     """
 
     def __init__(self, workspace_id: str, project: Project, session: GetiSession):
@@ -40,7 +43,16 @@ class TrainingConfigurationClient:
         )
 
     def get_configuration(self, model_manifest_id: str) -> TrainingConfiguration:
-        """Return the training configuration."""
+        """
+        Retrieve the complete training configuration for a specific model manifest (AKA algorithm).
+
+        Fetches the full training configuration including global parameters, hyperparameters,
+        and all configuration sections (dataset preparation, training, evaluation) for the
+        specified model manifest.
+
+        :param model_manifest_id: Unique identifier of the model manifest to get configuration for
+        :return: Complete TrainingConfiguration object containing all configuration parameters
+        """
         url = f"{self.base_url}?model_manifest_id={model_manifest_id}"
         config_rest = self.session.get_rest_response(url=url, method="GET")
         config_rest["model_manifest_id"] = model_manifest_id
@@ -49,6 +61,16 @@ class TrainingConfigurationClient:
         )
 
     def get_hyperparameters_by_model_id(self, model_id: str) -> Hyperparameters:
+        """
+        Retrieve only the hyperparameters for a specific trained model.
+
+        Fetches hyperparameters configuration for a specific model instance. This method
+        returns only the hyperparameters portion of the configuration, excluding global
+        parameters and other configuration metadata.
+
+        :param model_id: Unique identifier of the trained model to get hyperparameters for
+        :return: Hyperparameters object containing training, dataset preparation, and evaluation hyperparameters
+        """
         url = f"{self.base_url}?model_id={model_id}"
         config_rest = self.session.get_rest_response(url=url, method="GET")
         # when querying by model_id, the rest response contains only hyperparameters
@@ -56,11 +78,15 @@ class TrainingConfigurationClient:
 
     def set_configuration(self, configuration: TrainingConfiguration) -> None:
         """
-        Set the training configuration. This method accepts either a
-        FullConfiguration, TaskConfiguration or GlobalConfiguration object
+        Update the training configuration for the project.
 
-        :param configuration: Configuration to set
-        :return:
+        Applies the provided training configuration to the project, updating all configuration
+        parameters including global parameters and hyperparameters. The configuration will
+        affect future training jobs in the project.
+
+        :param configuration: TrainingConfiguration object containing the new configuration
+                            parameters to apply to the project
+        :return: None
         """
         config_rest = TrainingConfigurationRESTConverter.training_configuration_to_rest(
             configuration

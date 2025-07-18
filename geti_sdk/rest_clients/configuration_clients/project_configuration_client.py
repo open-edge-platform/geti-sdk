@@ -24,7 +24,11 @@ from geti_sdk.rest_converters.project_configuration_rest_converter import (
 
 class ProjectConfigurationClient:
     """
-    Class to manage configuration for a certain project.
+    REST client for managing project-level configuration settings.
+
+    This client provides methods to retrieve and update project configuration,
+    including task configurations and auto-training settings for all tasks
+    within a project.
     """
 
     def __init__(self, workspace_id: str, project: Project, session: GetiSession):
@@ -37,7 +41,14 @@ class ProjectConfigurationClient:
         )
 
     def get_configuration(self) -> ProjectConfiguration:
-        """Return the project configuration."""
+        """
+        Retrieve the complete project configuration.
+
+        Fetches the current project configuration including all task configurations,
+        auto-training settings, and other project-level configuration parameters.
+
+        :return: ProjectConfiguration object containing all project-level settings
+        """
         config_rest = self.session.get_rest_response(url=self.base_url, method="GET")
         return ProjectConfigurationRESTConverter.project_configuration_from_rest(
             config_rest
@@ -45,9 +56,14 @@ class ProjectConfigurationClient:
 
     def set_project_auto_train(self, auto_train: bool = False) -> None:
         """
-        Set the `auto_train` parameter for all tasks in the project.
+        Enable or disable auto-training for all tasks in the project.
 
-        :param auto_train: True to enable auto_training, False to disable
+        Updates the auto_training.enable setting for every task configuration
+        in the project to the specified value. This is a convenience method
+        to bulk update auto-training settings across all tasks.
+
+        :param auto_train: True to enable auto-training for all tasks, False to disable
+        :return: None
         """
         project_configuration = self.get_configuration()
         for task_config in project_configuration.task_configs:
@@ -56,11 +72,15 @@ class ProjectConfigurationClient:
 
     def set_configuration(self, configuration: ProjectConfiguration) -> None:
         """
-        Set the configuration for the project. This method accepts either a
-        FullConfiguration, TaskConfiguration or GlobalConfiguration object
+        Update the project configuration with new settings.
 
-        :param configuration: Configuration to set
-        :return:
+        Applies the provided project configuration to the project, updating all
+        configuration parameters including task configurations and auto-training
+        settings. Changes will affect the behavior of all tasks in the project.
+
+        :param configuration: ProjectConfiguration object containing the new configuration
+                            settings to apply to the project
+        :return: None
         """
         config_rest = ProjectConfigurationRESTConverter.project_configuration_to_rest(
             configuration

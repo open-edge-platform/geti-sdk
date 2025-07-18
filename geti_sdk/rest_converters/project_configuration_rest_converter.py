@@ -21,16 +21,23 @@ from geti_sdk.rest_converters.configurable_parameters_rest_converter import (
 
 class ProjectConfigurationRESTConverter(ConfigurableParametersRESTConverter):
     """
-    Converters between ProjectConfiguration models and their corresponding REST views
+    Converter class for transforming ProjectConfiguration objects to/from REST API format.
+
+    This class provides methods to convert between ProjectConfiguration domain objects and their
+    corresponding REST representations, handling task configurations and auto-training settings.
     """
 
     @classmethod
     def task_config_to_rest(cls, task_config: TaskConfig) -> dict:
         """
-        Get the REST view of a task configuration
+        Convert a TaskConfig object to its REST API representation.
 
-        :param task_config: Task configuration object
-        :return: REST view of the task configuration
+        Transforms a TaskConfig domain object into a dictionary structure expected by the
+        REST API, including task_id and configurable parameters for training and auto_training.
+
+        :param task_config: TaskConfig object containing training and auto-training configuration
+        :return: Dictionary containing task_id, training parameters, and auto_training parameters
+                in REST API format
         """
         return {
             "task_id": task_config.task_id,
@@ -45,10 +52,14 @@ class ProjectConfigurationRESTConverter(ConfigurableParametersRESTConverter):
         cls, project_configuration: ProjectConfiguration
     ) -> dict:
         """
-        Get the REST view of a project configuration
+        Convert a ProjectConfiguration object to its REST API representation.
 
-        :param project_configuration: Project configuration object
-        :return: REST view of the project configuration
+        Transforms a ProjectConfiguration domain object into a dictionary structure expected
+        by the REST API, converting all task configurations to their REST format.
+
+        :param project_configuration: ProjectConfiguration object containing all task configurations
+        :return: Dictionary containing task_configs array with each task configuration converted
+                to REST format
         """
         rest_view = {
             "task_configs": [
@@ -61,10 +72,15 @@ class ProjectConfigurationRESTConverter(ConfigurableParametersRESTConverter):
     @classmethod
     def project_configuration_from_rest(cls, rest_input: dict) -> ProjectConfiguration:
         """
-        Convert a REST input to a ProjectConfiguration object.
+        Create a ProjectConfiguration object from REST API input.
 
-        :param rest_input: REST input dictionary
-        :return: ProjectConfiguration object
+        Parses REST API dictionary and converts it into a validated ProjectConfiguration
+        domain object, transforming each task configuration from REST format to domain format.
+
+        :param rest_input: REST API dictionary containing task_configs array and other
+                          project configuration parameters
+        :return: Validated ProjectConfiguration object with all task configurations converted
+                from REST format
         """
         rest_input = deepcopy(rest_input)
         task_configs = []
