@@ -35,7 +35,12 @@ EVALUATION = "evaluation"
 
 class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
     """
-    Converters between objects and their corresponding REST views
+    Converter class for transforming TrainingConfiguration objects to/from REST API format.
+
+    This class handles the conversion between TrainingConfiguration domain objects and their
+    REST API representations, managing the separation and combination of global parameters
+    and hyperparameters across different configuration sections (dataset preparation,
+    training, and evaluation).
     """
 
     @classmethod
@@ -44,6 +49,20 @@ class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
         global_parameters: GlobalParameters | None,
         hyperparameters: Hyperparameters | None,
     ) -> dict[str, Any]:
+        """
+        Convert dataset preparation parameters from both global and hyperparameters to REST format.
+
+        Merges dataset preparation parameters from global parameters and hyperparameters
+        into a single dictionary for REST API consumption. Global parameters take precedence
+        over hyperparameters when both contain the same keys.
+
+        :param global_parameters: Global parameters object containing dataset preparation settings,
+                                 None if not available
+        :param hyperparameters: Hyperparameters object containing dataset preparation settings,
+                               None if not available
+        :return: Dictionary containing merged dataset preparation parameters for REST API
+        :raises ValueError: If the parameter conversion doesn't result in dictionaries
+        """
         # Return a combined view of global and hyperparameters for dataset preparation
         global_parameters_rest = (
             cls.configurable_parameters_to_rest(
@@ -72,10 +91,16 @@ class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
         cls, training_configuration: TrainingConfiguration
     ) -> dict[str, Any]:
         """
-        Get the REST view of a training configuration. Also supports PartialTrainingConfiguration.
+        Convert a TrainingConfiguration object to its REST API representation.
 
-        :param training_configuration: training configuration
-        :return: REST view of the training configuration
+        Transforms the training configuration into a dictionary structure expected by the
+        REST API, including task_id, model_manifest_id, and parameter sections for
+        dataset_preparation, training, and evaluation.
+
+        :param training_configuration: TrainingConfiguration or PartialTrainingConfiguration
+                                     object to convert to REST format
+        :return: Dictionary containing the complete REST representation with task_id,
+                model_manifest_id, and parameter sections (dataset_preparation, training, evaluation)
         """
         training_params_rest = (
             cls.configurable_parameters_to_rest(
@@ -98,14 +123,18 @@ class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
         }
 
     @classmethod
-    def training_configuration_from_rest(
-        cls, rest_input: dict[str, Any]
-    ) -> TrainingConfiguration:
+    def configuration_dict_from_rest(cls, rest_input: dict[str, Any]) -> dict[str, Any]:
         """
-        Convert REST input to a PartialTrainingConfiguration object.
+        Parse REST input and reorganize it into a structure suitable for Pydantic model creation.
 
-        :param rest_input: REST input dictionary
-        :return: TrainingConfiguration object
+        Separates the flat REST parameter structure into global_parameters and hyperparameters
+        sections based on the model field definitions. This method handles the reverse operation
+        of training_configuration_to_rest by organizing parameters by their proper domains.
+
+        :param rest_input: REST API dictionary containing parameters organized by sections
+                          (dataset_preparation, training, evaluation) plus task_id and model_manifest_id
+        :return: Dictionary with 'global_parameters' and 'hyperparameters' keys properly organized
+                for TrainingConfiguration model validation, plus any additional fields from rest_input
         """
         rest_input = deepcopy(rest_input)
         dataset_preparation = cls.configurable_parameters_from_rest(
@@ -149,9 +178,40 @@ class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
         global_parameters.pop("default_factory", None)
         hyperparameters.pop("default_factory", None)
 
-        dict_model = {
+        return {
             "global_parameters": global_parameters,
             "hyperparameters": hyperparameters,
-        }
+        } | rest_input
 
-        return TrainingConfiguration.model_validate(dict_model | rest_input)
+    @classmethod
+    def training_configuration_from_rest(
+        cls, rest_input: dict[str, Any]
+    ) -> TrainingConfiguration:
+        """
+        Create a TrainingConfiguration object from REST API input.
+
+        Combines the parsing and validation steps to convert a REST API dictionary
+        directly into a validated TrainingConfiguration domain object.
+
+        :param rest_input: REST API dictionary containing all configuration data including
+                          task_id, model_manifest_id, and parameter sections
+        :return: Validated TrainingConfiguration object created from the REST input
+        """
+        dict_model = cls.configuration_dict_from_rest(rest_input)
+        return TrainingConfiguration.model_validate(dict_model)
+
+    @classmethod
+    def hyperparameters_from_rest(cls, rest_input: dict[str, Any]) -> Hyperparameters:
+        """
+        Extract and create a Hyperparameters object from REST API input.
+
+        Parses the REST input to extract only the hyperparameters portion, ignoring
+        global parameters and other configuration data. Useful when only hyperparameters
+        are needed from a full configuration.
+
+        :param rest_input: REST API dictionary containing configuration parameters
+        :return: Validated Hyperparameters object containing training, dataset preparation,
+                and evaluation hyperparameters extracted from the REST input
+        """
+        dict_model = cls.configuration_dict_from_rest(rest_input)["hyperparameters"]
+        return Hyperparameters.model_validate(dict_model)

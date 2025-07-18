@@ -13,6 +13,7 @@
 # and limitations under the License.
 
 from geti_sdk.data_models import Project
+from geti_sdk.data_models.configuration_models import Hyperparameters
 
 from geti_sdk.data_models.configuration_models.training_configuration import (
     TrainingConfiguration,
@@ -39,7 +40,7 @@ class TrainingConfigurationClient:
         )
 
     def get_configuration(self, model_manifest_id: str) -> TrainingConfiguration:
-        """Return the project configuration."""
+        """Return the training configuration."""
         url = f"{self.base_url}?model_manifest_id={model_manifest_id}"
         config_rest = self.session.get_rest_response(url=url, method="GET")
         config_rest["model_manifest_id"] = model_manifest_id
@@ -47,9 +48,15 @@ class TrainingConfigurationClient:
             config_rest
         )
 
+    def get_hyperparameters_by_model_id(self, model_id: str) -> Hyperparameters:
+        url = f"{self.base_url}?model_id={model_id}"
+        config_rest = self.session.get_rest_response(url=url, method="GET")
+        # when querying by model_id, the rest response contains only hyperparameters
+        return TrainingConfigurationRESTConverter.hyperparameters_from_rest(config_rest)
+
     def set_configuration(self, configuration: TrainingConfiguration) -> None:
         """
-        Set the configuration for the project. This method accepts either a
+        Set the training configuration. This method accepts either a
         FullConfiguration, TaskConfiguration or GlobalConfiguration object
 
         :param configuration: Configuration to set
