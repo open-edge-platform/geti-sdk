@@ -50,6 +50,7 @@ from .rest_clients import (
     ProjectClient,
     VideoClient,
 )
+from .rest_clients.configuration_clients.project_configuration_client import ProjectConfigurationClient
 from .utils import (
     generate_classification_labels,
     get_task_types_by_project_type,
@@ -332,10 +333,6 @@ class Geti:
             project.json
                 File containing the project parameters, that can be used to re-create
                 the project.
-
-            configuration.json
-                File containing the configurable parameters for the active models in the
-                project
 
         Downloading a project may take a substantial amount of time if the project
         dataset is large.
@@ -667,10 +664,7 @@ class Geti:
             keypoint_structure=keypoint_structure,
         )
         # Disable auto training
-        configuration_client = ConfigurationClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
-        configuration_client.set_project_auto_train(auto_train=False)
+        self._set_auto_train(project, auto_train=False)
 
         # Upload images
         image_client = ImageClient(
@@ -736,7 +730,7 @@ class Geti:
                 videos, max_threads=max_threads
             )
 
-        configuration_client.set_project_auto_train(auto_train=enable_auto_train)
+        self._set_auto_train(project, auto_train=enable_auto_train)
         return project
 
     def create_task_chain_project_from_dataset(
@@ -824,10 +818,7 @@ class Geti:
             project_name=project_name, project_type=project_type, labels=labels_per_task
         )
         # Disable auto training
-        configuration_client = ConfigurationClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
-        configuration_client.set_project_auto_train(auto_train=False)
+        self._set_auto_train(project, auto_train=False)
 
         # Upload images
         image_client = ImageClient(
@@ -878,7 +869,7 @@ class Geti:
                 )
                 append_annotations = True
             previous_task_type = task_type
-        configuration_client.set_project_auto_train(auto_train=enable_auto_train)
+        self._set_auto_train(project, auto_train=enable_auto_train)
         return project
 
     def upload_and_predict_media_folder(
@@ -1256,3 +1247,21 @@ class Geti:
                 return new_labels_per_task
         else:
             return labels_per_task
+
+    def _set_auto_train(self, project: Project, auto_train: bool) -> None:
+        """
+        Set the auto-train flag for a project.
+
+        :param project: Project to set the auto-train flag for
+        :param auto_train: True to enable auto-training, False to disable it
+        """
+        if self.session.version.is_configuration_revamped:
+            configuration_client = ProjectConfigurationClient(
+                workspace_id=self.workspace_id, session=self.session, project=project
+            )
+            configuration_client.set_project_auto_train(auto_train=auto_train)
+        else:
+            configuration_client = ConfigurationClient(
+                workspace_id=self.workspace_id, session=self.session, project=project
+            )
+            configuration_client.set_project_auto_train(auto_train=auto_train)

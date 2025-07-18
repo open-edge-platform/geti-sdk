@@ -18,6 +18,7 @@ from geti_sdk.import_export.tus_uploader import TUSUploader
 from geti_sdk.platform_versions import GETI_25_VERSION
 from geti_sdk.rest_clients.annotation_clients.annotation_client import AnnotationClient
 from geti_sdk.rest_clients import ConfigurationClient
+from geti_sdk.rest_clients.configuration_clients.project_configuration_client import ProjectConfigurationClient
 from geti_sdk.rest_clients.dataset_client import DatasetClient
 from geti_sdk.rest_clients.media_client.image_client import ImageClient
 from geti_sdk.rest_clients.media_client.video_client import VideoClient
@@ -160,10 +161,17 @@ class GetiIE:
         )
 
         # Disable auto-train to prevent the project from training right away
-        configuration_client = ConfigurationClient(
-            workspace_id=self.workspace_id, session=self.session, project=project
-        )
-        configuration_client.set_project_auto_train(auto_train=False)
+        if self.session.version.is_configuration_revamped:
+            # Geti version >= 2.12
+            configuration_client = ProjectConfigurationClient(
+                workspace_id=self.workspace_id, session=self.session, project=project
+            )
+            configuration_client.set_project_auto_train(auto_train=False)
+        else:
+            configuration_client = ConfigurationClient(
+                workspace_id=self.workspace_id, session=self.session, project=project
+            )
+            configuration_client.set_project_auto_train(auto_train=False)
 
         # Upload media
         image_client = ImageClient(
@@ -250,6 +258,7 @@ class GetiIE:
                 videos=videos, max_threads=max_threads
             )
 
+        configuration_client.set_project_auto_train(auto_train=enable_auto_train)
         logging.info(f"Project '{project.name}' was uploaded successfully.")
         return project
 
