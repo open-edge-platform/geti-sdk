@@ -21,4 +21,7 @@ except AttributeError:
     with resources.path("geti_sdk.demos", "data") as data_path:
         DEFAULT_DATA_PATH = str(data_path)
 
-EXAMPLE_IMAGE_PATH = os.path.join(DEFAULT_DATA_PATH, "example", "dogs.png")
+EXAMPLE_DOG_IMAGE_PATH = os.path.join(DEFAULT_DATA_PATH, "example", "dog1.jpg")
+EXAMPLE_CAT_IMAGE_PATH = os.path.join(DEFAULT_DATA_PATH, "example", "cat.jpg")
+
+EXAMPLE_IMAGE_PATH = EXAMPLE_DOG_IMAGE_PATH

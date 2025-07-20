@@ -19,13 +19,13 @@ from typing import List, Optional
 import numpy as np
 import pytest
 
-from geti_sdk.annotation_readers import DatumAnnotationReader
 from geti_sdk.data_models import Image, Prediction, Project
 from geti_sdk.data_models.enums import JobState, PredictionMode, SubsetPurpose
 from geti_sdk.demos import EXAMPLE_IMAGE_PATH
 from geti_sdk.http_session import GetiRequestException
 from geti_sdk.platform_versions import GETI_15_VERSION, GETI_22_VERSION
 from tests.helpers import (
+    DatumAnnotationReader,
     ProjectService,
     SdkTestMode,
     attempt_to_train_task,

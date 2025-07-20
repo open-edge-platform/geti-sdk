@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 from vcr import VCR
 
 from geti_sdk import Geti
-from geti_sdk.annotation_readers import AnnotationReader, DatumAnnotationReader
+from geti_sdk.annotation_readers import AnnotationReader
 from geti_sdk.data_models import Project, TaskType
 from geti_sdk.rest_clients import (
     AnnotationClient,
@@ -34,6 +34,7 @@ from geti_sdk.rest_clients import (
     TrainingConfigurationClient,
     VideoClient,
 )
+from tests.helpers import DatumAnnotationReader
 
 from .constants import CASSETTE_EXTENSION, PROJECT_PREFIX
 from .finalizers import force_delete_project

@@ -15,10 +15,10 @@ import logging
 
 import pytest
 
-from geti_sdk.annotation_readers import DatumAnnotationReader
 from geti_sdk.data_models import Job, Project, ProjectStatus
 from geti_sdk.data_models.enums import JobState
 from tests.helpers import (
+    DatumAnnotationReader,
     ProjectService,
     SdkTestMode,
     attempt_to_train_task,
