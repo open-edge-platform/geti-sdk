@@ -77,6 +77,7 @@ class DatasetClient:
                     f"Dataset with name `{dataset.name}` was not found in the project. "
                     "Please make sure that the dataset you are trying to delete exists."
                 )
+                return
             else:
                 raise error
         if isinstance(response, dict) and response.get("result", None) == "success":

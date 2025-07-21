@@ -155,6 +155,13 @@ class GetiVersion:
             and self._SC11_TIMETAG <= self.time_tag <= self._GETI10_TIMETAG
         )
 
+    @property
+    def is_configuration_revamped(self) -> bool:
+        """
+        Return True if the version corresponds to a platform with the revamped configuration (>=2.12).
+        """
+        return self.version >= Version("2.12.0")
+
 
 SC_MVP_VERSION = GetiVersion("1.0.0-release-20220129184214")
 SC_11_VERSION = GetiVersion("1.1.0-release-20220624125113")

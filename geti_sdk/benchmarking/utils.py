@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Sequence, Union
 
 import cv2
 import numpy as np
-from openvino.runtime import get_version
+from openvino import get_version
 
 import geti_sdk
 from geti_sdk.data_models import Image, Video
@@ -34,8 +34,8 @@ try:
     from openvino.properties import device as ov_device
 except ImportError:
     # The old API
-    from openvino.runtime import Core
-    from openvino.runtime.properties import device as ov_device
+    from openvino import Core
+    from openvino.properties import device as ov_device
 
 
 def get_system_info(device: str = "CPU") -> Dict[str, str]:
