@@ -482,8 +482,17 @@ class GetiIE:
         )
 
         job = monitor_job(session=self.session, job=job, interval=5)
+        if not job.metadata.project.id:
+            # Wait a few seconds for the metadata to become in sync
+            time.sleep(3)
+            job = get_job_with_timeout(
+                job_id=job.id,
+                session=self.session,
+                workspace_id=self.workspace_id,
+                job_type="import_project",
+            )
         imported_project = self.project_client.get_project(
-            project_id=job.metadata.project_id,
+            project_id=job.metadata.project.id,
         )
         if imported_project is None:
             raise RuntimeError(
