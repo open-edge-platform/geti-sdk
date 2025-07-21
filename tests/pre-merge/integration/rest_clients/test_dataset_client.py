@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
+import warnings
 from typing import List
 
 import pytest
@@ -23,7 +24,7 @@ from tests.helpers.constants import PROJECT_PREFIX
 
 class TestDatasetClient:
     @pytest.mark.vcr()
-    def test_create_dataset(
+    def test_create_and_delete_dataset(
         self, fxt_project_service: ProjectService, fxt_default_labels: List[str]
     ) -> None:
         """
@@ -57,29 +58,10 @@ class TestDatasetClient:
         test_dataset_by_name = dataset_client.get_dataset_by_name(test_dataset_name)
         assert test_dataset == test_dataset_by_name
 
-    @pytest.mark.vcr()
-    def test_delete_dataset(self, fxt_project_service: ProjectService) -> None:
-        """
-        Verifies that deleting a dataset in an existing project works
-        """
-        # Arrange
-        project = fxt_project_service._project
-        dataset_client = DatasetClient(
-            session=fxt_project_service.session,
-            workspace_id=fxt_project_service.workspace_id,
-            project=project,
-        )
-        old_datasets = dataset_client.get_all_datasets()
-        test_dataset_name = "test_dataset"
-        test_dataset = dataset_client.get_dataset_by_name(test_dataset_name)
-
-        # Act
         # Delete existing dataset
         dataset_client.delete_dataset(dataset=test_dataset)
         # Delete non-existing dataset
-        with pytest.raises(GetiRequestException):
-            # Currently the server returns 400 for non-existing dataset
-            # When fixed it would return 404 and the test should be fixed to expect a warning
+        with warnings.catch_warnings():
             dataset_client.delete_dataset(dataset=test_dataset)
 
         # Assert
