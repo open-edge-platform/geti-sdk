@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-import os
 import re
 from importlib import resources
-from pathlib import Path
 from typing import Any, Callable, List, Optional, Tuple
 
 import numpy as np
@@ -116,31 +114,6 @@ def rgb_to_hex(rgb: Tuple[int, int, int]) -> str:
         '#ff0000'
     """
     return "#{:02x}{:02x}{:02x}".format(rgb[0], rgb[1], rgb[2])
-
-
-def get_package_version_from_requirements(
-    requirements_path: os.PathLike, package_name: str
-) -> str:
-    """
-    Get the version of a package from a requirements file.
-
-    :param requirements_path: The requirements file path
-    :param package_name: The name of the package to get the version of
-    :return: The version of the package as a string, empty line if the package is not found.
-    :raises: ValueError If the requirements file is not found.
-    """
-    if not package_name:
-        return ""
-
-    requirements_path = Path(requirements_path).resolve()
-    if not requirements_path.exists():
-        raise ValueError(f"Requirements file {requirements_path} not found")
-
-    for line in requirements_path.read_text().split("\n"):
-        # The OTX package may be installed from a GitHub url
-        if line.startswith(package_name) and "==" in line:
-            return line.split("==")[1].strip()
-    return ""
 
 
 def assign_empty_label(
