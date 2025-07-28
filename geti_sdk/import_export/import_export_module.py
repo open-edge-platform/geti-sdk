@@ -528,7 +528,7 @@ class GetiIE:
         """
         Export a project from the Geti Platform.
 
-        :param project: The project to export.
+        :param project_id: The ID of the project to export.
         :param filepath: The path to save the exported project.
         :param include_models: Indicates which models to include, supported are 'all', 'none' or 'latest_active'
         :raises: RuntimeError if the download url is not retrieved.
