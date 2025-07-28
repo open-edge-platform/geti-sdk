@@ -17,7 +17,7 @@ from enum import Enum
 
 class IncludeModelsType(str, Enum):
     """
-    Enum representing the different include models option
+    Enum representing the different include models options
     """
 
     ALL = "all"
