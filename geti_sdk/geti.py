@@ -468,7 +468,7 @@ class Geti:
     def export_project(
         self,
         filepath: os.PathLike,
-        project: Project,
+        project_id: str,
         include_models: Union[str, IncludeModelsType] = IncludeModelsType.ALL,
     ) -> None:
         """
@@ -478,18 +478,13 @@ class Geti:
         and metadata required for project import to another instance of the Intel® Geti™ platform.
 
         :param filepath: Path to the file to save the project to
-        :param project: Project object to export
+        :param project_id: Id of the project to export
         :param include_models: Indicates which models to include in the export: 'all', 'none' or 'latest_active'
         """
-        if project.id is None:
-            raise ValueError(
-                f"Could not retrieve project ID for project '{project.name}'."
-                "Please reinitialize the project object."
-            )
         if isinstance(include_models, str):
             include_models = IncludeModelsType(include_models)
         self.import_export_module.export_project(
-            project_id=project.id,
+            project_id=project_id,
             filepath=filepath,
             include_models=include_models,
         )
