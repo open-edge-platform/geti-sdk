@@ -1,7 +1,7 @@
 import logging
 import os
 import time
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pathvalidate import sanitize_filepath
 from tqdm.auto import tqdm
@@ -11,6 +11,7 @@ from geti_sdk.annotation_readers.geti_annotation_reader import GetiAnnotationRea
 from geti_sdk.data_models import Dataset
 from geti_sdk.data_models.containers.media_list import MediaList
 from geti_sdk.data_models.enums.dataset_format import DatasetFormat
+from geti_sdk.data_models.enums.include_models import IncludeModelsType
 from geti_sdk.data_models.media import Image, Video
 from geti_sdk.data_models.project import Project
 from geti_sdk.http_session.exception import GetiRequestException
@@ -518,15 +519,23 @@ class GetiIE:
             raise RuntimeError("Failed to get file id for project {project_name}.")
         return file_id
 
-    def export_project(self, project_id: str, filepath: os.PathLike):
+    def export_project(
+        self,
+        project_id: str,
+        filepath: os.PathLike,
+        include_models: Union[str, IncludeModelsType] = IncludeModelsType.ALL,
+    ):
         """
         Export a project from the Geti Platform.
 
-        :param project: The project to export.
+        :param project_id: The ID of the project to export.
         :param filepath: The path to save the exported project.
+        :param include_models: Indicates which models to include, supported are 'all', 'none' or 'latest_active'
         :raises: RuntimeError if the download url is not retrieved.
         """
-        url = f"{self.base_url}projects/{project_id}:export"
+        if isinstance(include_models, str):
+            include_models = IncludeModelsType(include_models)
+        url = f"{self.base_url}projects/{project_id}:export?include_models={include_models}"
         self._export_snapshot(url=url, filepath=filepath)
 
     def export_dataset(

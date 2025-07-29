@@ -21,6 +21,7 @@ import numpy as np
 from packaging.version import Version
 
 from geti_sdk.data_models.enums.dataset_format import DatasetFormat
+from geti_sdk.data_models.enums.include_models import IncludeModelsType
 from geti_sdk.import_export.import_export_module import GetiIE
 from geti_sdk.platform_versions import GETI_116_VERSION
 from geti_sdk.rest_clients.credit_system_client import CreditSystemClient
@@ -467,23 +468,40 @@ class Geti:
     def export_project(
         self,
         filepath: os.PathLike,
-        project: Project,
+        project_id: Optional[str] = None,
+        project: Optional[Project] = None,
+        include_models: Union[str, IncludeModelsType] = IncludeModelsType.ALL,
     ) -> None:
         """
         Export a project with name `project_name` to the file specified by `filepath`.
-        The project will be saved in a .zip file format, containing all project data
+        The project will be saved in a .zip file format, containing all project data,
+        with the option to include all, none or only the latest_active model, indicated by `include_models`.
         and metadata required for project import to another instance of the Intel® Geti™ platform.
 
         :param filepath: Path to the file to save the project to
-        :param project: Project object to export
+        :param project_id: Id of the project to export
+        :param project: [DEPRECATED] Project object of the project to export
+        :param include_models: Indicates which models to include in the export: 'all', 'none' or 'latest_active'
         """
-        if project.id is None:
-            raise ValueError(
-                f"Could not retrieve project ID for project '{project.name}'."
-                "Please reinitialize the project object."
+        if project_id is None:
+            if project is None:
+                raise ValueError(
+                    "Either project_id or project [DEPRECATED] should be specified"
+                )
+            warnings.warn(
+                "'project' input parameter has been deprecated, use project_id instead, for example, 'project_id=project.id'",
+                DeprecationWarning,
+                stacklevel=2,
             )
+            project_id = project.id
+
+        if isinstance(include_models, str):
+            include_models = IncludeModelsType(include_models)
+
         self.import_export_module.export_project(
-            project_id=project.id, filepath=filepath
+            project_id=project_id,
+            filepath=filepath,
+            include_models=include_models,
         )
 
     def import_project(
