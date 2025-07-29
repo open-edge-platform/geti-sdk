@@ -468,7 +468,8 @@ class Geti:
     def export_project(
         self,
         filepath: os.PathLike,
-        project_id: str,
+        project_id: Optional[str] = None,
+        project: Optional[Project] = None,
         include_models: Union[str, IncludeModelsType] = IncludeModelsType.ALL,
     ) -> None:
         """
@@ -479,10 +480,24 @@ class Geti:
 
         :param filepath: Path to the file to save the project to
         :param project_id: Id of the project to export
+        :param project: [DEPRECATED] Project object of the project to export
         :param include_models: Indicates which models to include in the export: 'all', 'none' or 'latest_active'
         """
+        if project_id is None:
+            if project is None:
+                raise ValueError(
+                    "Either project_id or project [DEPRECATED] should be specified"
+                )
+            warnings.warn(
+                "'project' input parameter has been deprecated, use project_id instead, for example, 'project_id=project.id'",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            project_id = project.id
+
         if isinstance(include_models, str):
             include_models = IncludeModelsType(include_models)
+
         self.import_export_module.export_project(
             project_id=project_id,
             filepath=filepath,
