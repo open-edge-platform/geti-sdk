@@ -13,6 +13,7 @@
 # and limitations under the License.
 
 from pydantic import BaseModel, Field
+from typing import Union
 
 
 class CenterCrop(BaseModel):
@@ -141,46 +142,46 @@ class Tiling(BaseModel):
 class AugmentationParameters(BaseModel):
     """Configuration parameters for data augmentation during training."""
 
-    center_crop: CenterCrop | None = Field(
+    center_crop: Union[CenterCrop, None] = Field(
         default=None,
         title="Center crop",
         description="Settings for center cropping images",
     )
-    random_resize_crop: RandomResizeCrop | None = Field(
+    random_resize_crop: Union[RandomResizeCrop, None] = Field(
         default=None,
         title="Random resize crop",
         description="Settings for random resize and crop augmentation",
     )
-    random_affine: RandomAffine | None = Field(
+    random_affine: Union[RandomAffine, None] = Field(
         default=None,
         title="Random affine",
         description="Settings for random affine transformations",
     )
-    random_horizontal_flip: RandomHorizontalFlip | None = Field(
+    random_horizontal_flip: Union[RandomHorizontalFlip, None] = Field(
         default=None,
         title="Random horizontal flip",
         description="Randomly flip images horizontally along the vertical axis (swap left and right)",
     )
-    random_vertical_flip: RandomVerticalFlip | None = Field(
+    random_vertical_flip: Union[RandomVerticalFlip, None] = Field(
         default=None,
         title="Random vertical flip",
         description="Randomly flip images vertically along the horizontal axis (swap top and bottom)",
     )
-    random_iou_crop: RandomIOUCrop | None = Field(
+    random_iou_crop: Union[RandomIOUCrop, None] = Field(
         default=None,
         title="Random IoU crop",
         description="Randomly crop images based on Intersection over Union (IoU) criteria",
     )
-    color_jitter: ColorJitter | None = Field(
+    color_jitter: Union[ColorJitter, None] = Field(
         default=None,
         title="Color jitter",
         description="Settings for random color jitter (brightness, contrast, saturation, hue)",
     )
-    gaussian_blur: GaussianBlur | None = Field(
+    gaussian_blur: Union[GaussianBlur, None] = Field(
         default=None,
         title="Gaussian blur",
         description="Settings for Gaussian blur augmentation",
     )
-    tiling: Tiling | None = Field(
+    tiling: Union[Tiling, None] = Field(
         default=None, title="Tiling", description="Settings for image tiling"
     )
