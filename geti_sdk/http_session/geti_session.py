@@ -73,8 +73,6 @@ class GetiSession(requests.Session):
         else:
             self._proxies = server_config.proxies
 
-        self._proxies = {"https": ""}
-
         # Configure certificate verification
         if not server_config.has_valid_certificate:
             warnings.warn(
