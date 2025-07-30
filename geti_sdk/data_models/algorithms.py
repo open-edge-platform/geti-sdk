@@ -172,7 +172,7 @@ class Algorithm(BaseModel):
         return Algorithm(
             model_manifest_id=legacy_algorithm.model_template_id,
             task=legacy_algorithm.task,
-            name=legacy_algorithm.name or "",
+            name=legacy_algorithm.name or "Unnamed Algorithm",
             description=legacy_algorithm.summary or "",
             stats=ModelStats(
                 gigaflops=legacy_algorithm.gigaflops,
