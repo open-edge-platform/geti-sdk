@@ -79,9 +79,9 @@ class AlgorithmList(UserList):
 
     def get_by_model_manifest_id(self, model_manifest_id: str) -> Algorithm:
         """
-        Retrieve an algorithm from the list by its model_template_id.
+        Retrieve an algorithm from the list by its model_manifest_id.
 
-        :param model_manifest_id: Name of the model template to get the Algorithm
+        :param model_manifest_id: Name of the model manifest to get the Algorithm
             information for
         :return: Algorithm holding the algorithm details
         """
