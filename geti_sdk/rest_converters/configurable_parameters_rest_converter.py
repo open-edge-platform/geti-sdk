@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import Any
+from typing import Any, Union
 
 from pydantic import BaseModel
 
@@ -35,7 +35,7 @@ class ConfigurableParametersRESTConverter:
     @classmethod
     def configurable_parameters_to_rest(
         cls, configurable_parameters: BaseModel
-    ) -> dict[str, Any] | list[dict[str, Any]]:
+    ) -> Union[dict[str, Any], list[dict[str, Any]]]:
         """
         Convert a Pydantic model of configurable parameters to its REST representation.
 
@@ -85,7 +85,7 @@ class ConfigurableParametersRESTConverter:
 
     @classmethod
     def configurable_parameters_from_rest(
-        cls, configurable_parameters_rest: dict[str, Any] | list[dict[str, Any]]
+        cls, configurable_parameters_rest: Union[dict[str, Any], list[dict[str, Any]]]
     ) -> dict[str, Any]:
         """
         Convert a REST representation back to a dictionary that can be used to create/update a Pydantic model.
@@ -122,7 +122,9 @@ class ConfigurableParametersRESTConverter:
 
             for key, value in configurable_parameters_rest.items():
                 # If the value is a complex structure, process it recursively
-                if isinstance(value, dict | list):
+                if isinstance(
+                    value, (dict, list)
+                ):  # Replace `dict | list` with `(dict, list)`
                     result[key] = cls.configurable_parameters_from_rest(value)
                 else:
                     # Simple value, keep as is
