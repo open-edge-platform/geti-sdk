@@ -204,11 +204,11 @@ css = [
 
 [[package]]
 name = "certifi"
-version = "2025.6.15"
+version = "2025.7.14"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/73/f7/f14b46d4bcd21092d7d3ccef689615220d8a08fb25e564b65d20738e672e/certifi-2025.6.15.tar.gz", hash = "sha256:d747aa5a8b9bbbb1bb8c22bb13e22bd1f18e9796defa16bab421f7f7a317323b", size = 158753, upload-time = "2025-06-15T02:45:51.329Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b3/76/52c535bcebe74590f296d6c77c86dabf761c41980e1347a2422e4aa2ae41/certifi-2025.7.14.tar.gz", hash = "sha256:8ea99dbdfaaf2ba2f9bac77b9249ef62ec5218e7c2b2e903378ed5fccf765995", size = 163981, upload-time = "2025-07-14T03:29:28.449Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/ae/320161bd181fc06471eed047ecce67b693fd7515b16d495d8932db763426/certifi-2025.6.15-py3-none-any.whl", hash = "sha256:2e0c7ce7cb5d8f8634ca55d2ba7e6ec2689a2fd6537d8dec1296a477a4910057", size = 157650, upload-time = "2025-06-15T02:45:49.977Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/52/34c6cf5bb9285074dc3531c437b3919e825d976fde097a7a73f79e726d03/certifi-2025.7.14-py3-none-any.whl", hash = "sha256:6b31f564a415d79ee77df69d757bb49a5bb53bd9f756cbbe24394ffd6fc1f4b2", size = 162722, upload-time = "2025-07-14T03:29:26.863Z" },
 ]
 
 [[package]]
@@ -922,7 +922,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "certifi", specifier = "~=2025.6.15" },
+    { name = "certifi", specifier = "~=2025.7.14" },
     { name = "cryptography", specifier = "~=45.0" },
     { name = "datumaro", specifier = "~=1.10" },
     { name = "defusedxml", specifier = "~=0.7" },
@@ -941,7 +941,7 @@ requires-dist = [
     { name = "orjson", specifier = "~=3.10" },
     { name = "ovmsclient", specifier = "~=2023.1" },
     { name = "pandas", marker = "extra == 'notebooks'", specifier = "~=2.3" },
-    { name = "pathvalidate", specifier = "~=2.5" },
+    { name = "pathvalidate", specifier = "~=3.3" },
     { name = "pillow", specifier = "~=11.3" },
     { name = "pydantic", specifier = "==2.5.3" },
     { name = "python-dotenv", specifier = "~=1.1" },
@@ -2711,11 +2711,11 @@ wheels = [
 
 [[package]]
 name = "pathvalidate"
-version = "2.5.2"
+version = "3.3.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/60/f7/ff244fdd8ed98e98d4f9acecfe74a890e5e3245ce55253ef88db51e94652/pathvalidate-2.5.2.tar.gz", hash = "sha256:5ff57d0fabe5ecb7a4f1e4957bfeb5ad8ab5ab4c0fa71f79c6bbc24bd9b7d14d", size = 26715, upload-time = "2022-08-20T16:30:17.395Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fa/2a/52a8da6fe965dea6192eb716b357558e103aea0a1e9a8352ad575a8406ca/pathvalidate-3.3.1.tar.gz", hash = "sha256:b18c07212bfead624345bb8e1d6141cdcf15a39736994ea0b94035ad2b1ba177", size = 63262, upload-time = "2025-06-15T09:07:20.736Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9b/62/925646456f0d72356cbef5549ff85e9b538c55ff44eb74046e37541b344a/pathvalidate-2.5.2-py3-none-any.whl", hash = "sha256:e39a4dfacdba70e3a96d3e4c6ff617a39e991cf242e6e1f2017f1f67c3408d33", size = 20296, upload-time = "2022-08-20T16:30:14.316Z" },
+    { url = "https://files.pythonhosted.org/packages/9a/70/875f4a23bfc4731703a5835487d0d2fb999031bd415e7d17c0ae615c18b7/pathvalidate-3.3.1-py3-none-any.whl", hash = "sha256:5263baab691f8e1af96092fa5137ee17df5bdfbd6cff1fcac4d6ef4bc2e1735f", size = 24305, upload-time = "2025-06-15T09:07:19.117Z" },
 ]
 
 [[package]]

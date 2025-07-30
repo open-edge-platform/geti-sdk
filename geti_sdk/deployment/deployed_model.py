@@ -29,7 +29,6 @@ from model_api.adapters import OpenvinoAdapter, OVMSAdapter
 from model_api.models import Model as model_api_Model
 from model_api.tilers import DetectionTiler, InstanceSegmentationTiler, Tiler
 from openvino import Core
-from packaging.version import Version
 
 from geti_sdk.data_models import OptimizedModel, Project
 from geti_sdk.data_models.containers import LabelList
@@ -45,13 +44,11 @@ from geti_sdk.rest_converters import ModelRESTConverter
 from .utils import (
     generate_ovms_model_address,
     generate_ovms_model_name,
-    get_package_version_from_requirements,
     target_device_is_ovms,
 )
 
 MODEL_DIR_NAME = "model"
 PYTHON_DIR_NAME = "python"
-REQUIREMENTS_FILE_NAME = "requirements.txt"
 
 SALIENCY_KEY = "saliency_map"
 ANOMALY_SALIENCY_KEY = "anomaly_map"
@@ -167,23 +164,6 @@ class DeployedModel(OptimizedModel):
                     )
 
                 self._model_python_path = os.path.join(source, PYTHON_DIR_NAME)
-
-            # A model is being loaded from disk, check if it is a legacy model
-            # We support OTX models starting from version 1.5.0
-            otx_version = get_package_version_from_requirements(
-                requirements_path=os.path.join(
-                    self._model_python_path, REQUIREMENTS_FILE_NAME
-                ),
-                package_name="otx",
-            )
-            if otx_version:  # Empty string if package not found
-                if Version(otx_version) < Version("1.5.0"):
-                    raise ValueError(
-                        "\n"
-                        "This deployment model is not compatible with the current SDK. Proposed solutions:\n"
-                        "1. Please deploy a model using Intel Geti Platform version 2.0.0 or higher.\n"
-                        "2. Downgrade to a compatible Geti-SDK version to continue using this model.\n\n"
-                    )
 
         elif isinstance(source, GetiSession):
             if self.base_url is None:
