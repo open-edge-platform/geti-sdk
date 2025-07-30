@@ -60,6 +60,7 @@ class Label:
     id: Optional[str] = None
     parent_id: Optional[str] = None
     is_anomalous: Optional[bool] = None
+    is_background: Optional[bool] = None
 
     def __key(self) -> Tuple[str, str]:
         """

@@ -221,7 +221,7 @@ class ModelClient:
             method returns None
         """
         if task is not None:
-            if algorithm.task_type != task.type:
+            if algorithm.task != task.type:
                 raise ValueError(
                     f"Unable to retrieve model. The algorithm {algorithm} is not "
                     f"available for the task {task}"
@@ -360,7 +360,7 @@ class ModelClient:
         for group in model_groups:
             if not group.has_trained_models:
                 continue
-            if group.algorithm.task_type != task.type:
+            if group.algorithm.task != task.type:
                 continue
             model_summary = group.get_latest_model()
             if model_summary is not None:

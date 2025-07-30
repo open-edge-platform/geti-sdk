@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
+import logging
 
 from geti_sdk.data_models import Project
 from geti_sdk.data_models.configuration_models import Hyperparameters
@@ -18,7 +19,7 @@ from geti_sdk.data_models.configuration_models import Hyperparameters
 from geti_sdk.data_models.configuration_models.training_configuration import (
     TrainingConfiguration,
 )
-from geti_sdk.http_session import GetiSession
+from geti_sdk.http_session import GetiSession, GetiRequestException
 
 from geti_sdk.rest_converters.training_configuration_rest_converter import (
     TrainingConfigurationRESTConverter,
@@ -60,7 +61,9 @@ class TrainingConfigurationClient:
             config_rest
         )
 
-    def get_hyperparameters_by_model_id(self, model_id: str) -> Hyperparameters:
+    def get_hyperparameters_by_model_id(
+        self, model_id: str, task_id: str | None
+    ) -> Hyperparameters:
         """
         Retrieve only the hyperparameters for a specific trained model.
 
@@ -69,10 +72,21 @@ class TrainingConfigurationClient:
         parameters and other configuration metadata.
 
         :param model_id: Unique identifier of the trained model to get hyperparameters for
+        :param task_id: Unique identifier of the task to get hyperparameters for
         :return: Hyperparameters object containing training, dataset preparation, and evaluation hyperparameters
         """
         url = f"{self.base_url}?model_id={model_id}"
-        config_rest = self.session.get_rest_response(url=url, method="GET")
+        if task_id is not None:
+            url += f"&task_id={task_id}"
+        try:
+            config_rest = self.session.get_rest_response(url=url, method="GET")
+        except GetiRequestException as exc:
+            if task_id is None:
+                logging.error(
+                    "Failed to get hyperparameters by model_id. Please note that for task-chain projects, "
+                    "it's required to provide the task_id."
+                )
+            raise exc
         # when querying by model_id, the rest response contains only hyperparameters
         return TrainingConfigurationRESTConverter.hyperparameters_from_rest(config_rest)
 

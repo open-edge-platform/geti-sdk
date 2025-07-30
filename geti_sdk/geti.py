@@ -50,7 +50,9 @@ from .rest_clients import (
     ProjectClient,
     VideoClient,
 )
-from .rest_clients.configuration_clients.project_configuration_client import ProjectConfigurationClient
+from .rest_clients.configuration_clients.project_configuration_client import (
+    ProjectConfigurationClient,
+)
 from .utils import (
     generate_classification_labels,
     get_task_types_by_project_type,

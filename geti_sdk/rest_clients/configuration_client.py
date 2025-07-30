@@ -200,7 +200,7 @@ class ConfigurationClient:
                 f"configuration."
             )
         return self.get_task_configuration(
-            task_id=task.id, algorithm_name=algorithm.model_template_id
+            task_id=task.id, algorithm_name=algorithm.model_manifest_id
         )
 
     def download_configuration(self, path_to_folder: str) -> FullConfiguration:

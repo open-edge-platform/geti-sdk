@@ -73,7 +73,7 @@ class HyperParameterGroupIdentifier(EntityIdentifier):
         :return:
         """
         self.algorithm_name = algorithm.name
-        self.model_template_id = algorithm.model_template_id
+        self.model_template_id = algorithm.model_manifest_id
 
 
 @attr.define

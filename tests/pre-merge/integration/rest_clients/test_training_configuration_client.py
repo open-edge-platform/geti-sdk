@@ -22,7 +22,7 @@ from tests.helpers.project_service import ProjectService
 
 class TestConfigurationClient:
     @pytest.mark.vcr()
-    def test_get_and_set_configuration(
+    def test_get_and_set_training_configuration(
         self, fxt_project_service: ProjectService, fxt_default_labels: List[str]
     ):
         """
@@ -43,9 +43,13 @@ class TestConfigurationClient:
         )
         task = project.get_trainable_tasks()[0]
         model_client = fxt_project_service.model_client
-        model_manifest = model_client.supported_algos.get_default_for_task_type(task_type=task.type)
+        model_manifest = model_client.supported_algos.get_default_for_task_type(
+            task_type=task.type
+        )
 
-        training_configuration_client = fxt_project_service.training_configuration_client
+        training_configuration_client = (
+            fxt_project_service.training_configuration_client
+        )
         config = training_configuration_client.get_configuration(
             model_manifest_id=model_manifest.model_manifest_id
         )

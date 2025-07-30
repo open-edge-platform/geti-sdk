@@ -44,7 +44,9 @@ class AlgorithmList(UserList):
             super().__init__(list(data))
 
     @staticmethod
-    def from_rest(rest_input: Dict[str, Any], geti_version: GetiVersion) -> "AlgorithmList":
+    def from_rest(
+        rest_input: Dict[str, Any], geti_version: GetiVersion
+    ) -> "AlgorithmList":
         """
         Create an AlgorithmList from the response of the /supported_algorithms REST
         endpoint in Intel® Geti™.
@@ -68,7 +70,9 @@ class AlgorithmList(UserList):
             if geti_version.is_configuration_revamped:
                 algorithm = Algorithm.model_validate(algorithm_dict)
             else:
-                algorithm = Algorithm.from_legacy_algorithm(LegacyAlgorithm(**algorithm_dict))
+                algorithm = Algorithm.from_legacy_algorithm(
+                    LegacyAlgorithm(**algorithm_dict)
+                )
             algorithm_list.append(algorithm)
         algorithm_list.sort(key=lambda x: x.stats.gigaflops)
         return algorithm_list
@@ -95,9 +99,7 @@ class AlgorithmList(UserList):
         :param task_type: TaskType to get the supported algorithms for
         :return: List of supported algorithms for the task type
         """
-        return AlgorithmList(
-            [algo for algo in self.data if algo.task == task_type]
-        )
+        return AlgorithmList([algo for algo in self.data if algo.task == task_type])
 
     @property
     def summary(self) -> str:
@@ -110,7 +112,7 @@ class AlgorithmList(UserList):
         for algorithm in self.data:
             summary_str += (
                 f"  Name: {algorithm.name}\n"
-                f"    Task type: {algorithm.task_type}\n"
+                f"    Task type: {algorithm.task}\n"
                 f"    Model size: {algorithm.model_size}\n"
                 f"    Gigaflops: {algorithm.gigaflops}\n"
                 f"    Recommended for: {algorithm.performance_category}\n\n"

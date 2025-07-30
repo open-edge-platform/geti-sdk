@@ -16,7 +16,6 @@ from typing import List
 
 import pytest
 
-from geti_sdk.http_session.exception import GetiRequestException
 from geti_sdk.rest_clients import DatasetClient
 from tests.helpers import ProjectService
 from tests.helpers.constants import PROJECT_PREFIX

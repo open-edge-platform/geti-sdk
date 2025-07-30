@@ -265,7 +265,9 @@ class TestAnnotationClient:
         annotation_client = fxt_project_service.annotation_client
         annotation_client.annotation_reader = annotation_reader
 
-        annotation_client.upload_annotations_for_images(images=[image_1, image_2])
+        annotation_client.upload_annotations_for_images(
+            images=[image_1, image_2], max_threads=1
+        )
 
         # Fetch annotations from annotation client
         annotation_for_image_1 = annotation_client.get_annotation(media_item=image_1)

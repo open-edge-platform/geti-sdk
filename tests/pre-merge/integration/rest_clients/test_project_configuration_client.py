@@ -22,7 +22,7 @@ from tests.helpers.project_service import ProjectService
 
 class TestConfigurationClient:
     @pytest.mark.vcr()
-    def test_get_and_set_configuration(
+    def test_get_and_set_project_configuration(
         self, fxt_project_service: ProjectService, fxt_default_labels: List[str]
     ):
         """
@@ -36,7 +36,7 @@ class TestConfigurationClient:
         4. PATCH the new configuration to the server
         5. GET the project configuration again, and assert that auto-training has changed
         """
-        project = fxt_project_service.create_project(
+        fxt_project_service.create_project(
             project_name=f"{PROJECT_PREFIX}_project_configuration_client",
             project_type="detection",
             labels=[fxt_default_labels],

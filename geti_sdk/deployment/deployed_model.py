@@ -31,7 +31,7 @@ from model_api.tilers import DetectionTiler, InstanceSegmentationTiler, Tiler
 from openvino import Core
 from packaging.version import Version
 
-from geti_sdk.data_models import OptimizedModel, Project, TaskConfiguration
+from geti_sdk.data_models import OptimizedModel, Project
 from geti_sdk.data_models.containers import LabelList
 from geti_sdk.data_models.enums.domain import Domain
 from geti_sdk.data_models.predictions import Prediction, ResultMedium
@@ -40,7 +40,7 @@ from geti_sdk.deployment.predictions_postprocessing.results_converter.results_to
     InferenceResultsToPredictionConverter,
 )
 from geti_sdk.http_session import GetiSession
-from geti_sdk.rest_converters import ConfigurationRESTConverter, ModelRESTConverter
+from geti_sdk.rest_converters import ModelRESTConverter
 
 from .utils import (
     generate_ovms_model_address,

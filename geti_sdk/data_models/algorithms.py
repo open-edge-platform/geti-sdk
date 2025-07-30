@@ -121,7 +121,9 @@ class ModelStats(BaseModel):
     """Information about a machine learning model."""
 
     gigaflops: float = Field(
-        ge=0, title="Gigaflops", description="Billions of floating-point operations per second required by the model"
+        ge=0,
+        title="Gigaflops",
+        description="Billions of floating-point operations per second required by the model",
     )
     trainable_parameters: float = Field(
         ge=0.0,
@@ -129,7 +131,8 @@ class ModelStats(BaseModel):
         description="Number of trainable parameters in the model, expressed in millions",
     )
     performance_ratings: PerformanceRatings = Field(
-        title="Performance ratings", description="Standardized ratings for model performance metrics"
+        title="Performance ratings",
+        description="Standardized ratings for model performance metrics",
     )
 
 
@@ -137,7 +140,8 @@ class Capabilities(BaseModel):
     """Model capabilities configuration."""
 
     xai: bool = Field(
-        title="Explainable AI Support", description="Whether the model supports explainable AI features"
+        title="Explainable AI Support",
+        description="Whether the model supports explainable AI features",
     )
     tiling: bool = Field(
         title="Tiling Support",
@@ -167,7 +171,7 @@ class Algorithm(BaseModel):
         """
         return Algorithm(
             model_manifest_id=legacy_algorithm.model_template_id,
-            task=legacy_algorithm.task_type,
+            task=legacy_algorithm.task,
             name=legacy_algorithm.name or "",
             description=legacy_algorithm.summary or "",
             stats=ModelStats(

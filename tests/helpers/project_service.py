@@ -32,8 +32,12 @@ from geti_sdk.rest_clients import (
     TrainingClient,
     VideoClient,
 )
-from geti_sdk.rest_clients.configuration_clients.project_configuration_client import ProjectConfigurationClient
-from geti_sdk.rest_clients.configuration_clients.training_configuration_client import TrainingConfigurationClient
+from geti_sdk.rest_clients.configuration_clients.project_configuration_client import (
+    ProjectConfigurationClient,
+)
+from geti_sdk.rest_clients.configuration_clients.training_configuration_client import (
+    TrainingConfigurationClient,
+)
 
 from .constants import CASSETTE_EXTENSION, PROJECT_PREFIX
 from .finalizers import force_delete_project
@@ -492,7 +496,9 @@ class ProjectService:
             f"{self.project.name}_set_auto_train.{CASSETTE_EXTENSION}"
         ):
             if self.session.version.is_configuration_revamped:
-                self.project_configuration_client.set_project_auto_train(auto_train=auto_train)
+                self.project_configuration_client.set_project_auto_train(
+                    auto_train=auto_train
+                )
             else:
                 self.configuration_client.set_project_auto_train(auto_train=auto_train)
 

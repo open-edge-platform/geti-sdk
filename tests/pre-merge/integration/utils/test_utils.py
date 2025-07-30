@@ -69,7 +69,7 @@ class TestUtils:
         )
         assert len(classification_algos) > 0
         for algorithm in classification_algos:
-            assert algorithm.task_type == TaskType.CLASSIFICATION
+            assert algorithm.task == TaskType.CLASSIFICATION
 
     def test_get_server_details_from_env(self, fxt_env_filepath: str):
         """

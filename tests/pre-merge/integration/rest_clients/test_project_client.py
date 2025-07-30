@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-
+from time import sleep
 from typing import Dict, List
 
 import pytest
@@ -21,6 +21,7 @@ from vcr import VCR
 from geti_sdk import Geti
 from geti_sdk.data_models import Project, Task, TaskType
 from geti_sdk.rest_clients import ProjectClient
+from tests.helpers import SdkTestMode
 from tests.helpers.constants import CASSETTE_EXTENSION, PROJECT_PREFIX
 from tests.helpers.project_service import ProjectService
 
@@ -28,7 +29,10 @@ from tests.helpers.project_service import ProjectService
 class TestProjectClient:
     @pytest.mark.vcr()
     def test_create_and_delete_project(
-        self, fxt_default_labels: List[str], fxt_project_service: ProjectService
+        self,
+        fxt_test_mode,
+        fxt_default_labels: List[str],
+        fxt_project_service: ProjectService,
     ):
         """
         Verifies that creating and deleting a project through the project client
@@ -61,6 +65,8 @@ class TestProjectClient:
         project_task = project_get_or_create.get_trainable_tasks()[0]
         assert project_task.task_type == TaskType.CLASSIFICATION
 
+        if fxt_test_mode != SdkTestMode.OFFLINE:
+            sleep(5)  # Ensure the project is created before deletion
         project_client.delete_project(project, requires_confirmation=False)
         assert project_client.get_project_by_name(project.name) is None
         fxt_project_service.reset_state()
@@ -69,6 +75,7 @@ class TestProjectClient:
     def test_get_all_projects(
         self,
         request: FixtureRequest,
+        fxt_test_mode,
         fxt_geti: Geti,
         fxt_existing_projects: List[Project],
         fxt_vcr: VCR,
@@ -115,10 +122,13 @@ class TestProjectClient:
 
         assert len(all_projects) == len(fxt_existing_projects) + len(new_projects)
         assert new_projects_names.issubset(all_projects_names)
+        if fxt_test_mode != SdkTestMode.OFFLINE:
+            sleep(3)  # allow time for the projects to be fully created
 
     @pytest.mark.vcr()
     def test_hierarchical_classification_project(
         self,
+        fxt_test_mode,
         fxt_project_service: ProjectService,
         fxt_hierarchical_classification_labels: List[Dict[str, str]],
     ):
@@ -149,8 +159,11 @@ class TestProjectClient:
             if label_rest_data.get("group", None):
                 assert label.group == label_rest_data["group"]
 
+        if fxt_test_mode != SdkTestMode.OFFLINE:
+            sleep(3)  # allow time for the projects to be fully created
+
     @pytest.mark.vcr()
-    def test_list_projects(self, capfd, fxt_geti: Geti):
+    def test_list_projects(self, fxt_test_mode, capfd, fxt_geti: Geti):
         """
         Verifies that the `list_projects` method prints a list of project summaries
         """
@@ -162,9 +175,16 @@ class TestProjectClient:
         for project in projects:
             assert project.summary in output
 
+        if fxt_test_mode != SdkTestMode.OFFLINE:
+            sleep(3)  # allow time for the projects to be fully created
+
     @pytest.mark.vcr()
     def test_add_labels_single_task(
-        self, request: FixtureRequest, fxt_default_labels: List[str], fxt_geti: Geti
+        self,
+        request: FixtureRequest,
+        fxt_test_mode,
+        fxt_default_labels: List[str],
+        fxt_geti: Geti,
     ):
         """
         Verify that adding labels to a single task project works as expected
@@ -191,6 +211,9 @@ class TestProjectClient:
             project_client.add_labels(
                 labels=labels_to_add, project=project, task=invalid_task
             )
+
+        if fxt_test_mode != SdkTestMode.OFFLINE:
+            sleep(5)  # allow time for the projects to be fully created
 
         # add_labels should work correctly when task is None for single task project
         updated_project = project_client.add_labels(
@@ -219,7 +242,11 @@ class TestProjectClient:
 
     @pytest.mark.vcr()
     def test_add_labels_multitask(
-        self, request: FixtureRequest, fxt_default_labels: List[str], fxt_geti: Geti
+        self,
+        request: FixtureRequest,
+        fxt_test_mode,
+        fxt_default_labels: List[str],
+        fxt_geti: Geti,
     ):
         """
         Verify that adding labels to a task chain project works as expected
@@ -238,6 +265,9 @@ class TestProjectClient:
                 project=project, requires_confirmation=False
             )
         )
+
+        if fxt_test_mode != SdkTestMode.OFFLINE:
+            sleep(5)  # allow time for the projects to be fully created
 
         labels_to_add_detection = ["prisma", "pyramid"]
 
