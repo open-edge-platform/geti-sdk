@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import logging
+from typing import Union
 
 from geti_sdk.data_models import Project
 from geti_sdk.data_models.configuration_models import Hyperparameters
@@ -62,7 +63,7 @@ class TrainingConfigurationClient:
         )
 
     def get_hyperparameters_by_model_id(
-        self, model_id: str, task_id: str | None
+        self, model_id: str, task_id: Union[str, None]
     ) -> Hyperparameters:
         """
         Retrieve only the hyperparameters for a specific trained model.

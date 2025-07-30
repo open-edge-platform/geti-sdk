@@ -13,7 +13,7 @@
 # and limitations under the License.
 from collections import defaultdict
 from copy import deepcopy
-from typing import Any
+from typing import Any, Union
 
 from geti_sdk.data_models.configuration_models import (
     DatasetPreparationParameters as HyperparametersDatasetPreparationParameters,
@@ -46,8 +46,8 @@ class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
     @classmethod
     def _dataset_preparation_to_rest(
         cls,
-        global_parameters: GlobalParameters | None,
-        hyperparameters: Hyperparameters | None,
+        global_parameters: Union[GlobalParameters, None],
+        hyperparameters: Union[Hyperparameters, None],
     ) -> dict[str, Any]:
         """
         Convert dataset preparation parameters from both global and hyperparameters to REST format.

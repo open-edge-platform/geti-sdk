@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
+from typing import Union
 from pydantic import BaseModel, ConfigDict, Field
 
 from .hyperparameters.hyperparameters import Hyperparameters
@@ -171,7 +172,7 @@ class TrainingConfiguration(BaseModel):
     model_config = ConfigDict(
         protected_namespaces=()
     )  # avoid conflict with "model_" namespace
-    model_manifest_id: str | None = Field(
+    model_manifest_id: Union[str, None] = Field(
         default=None,
         title="Model manifest ID",
         description="ID for the model manifest that defines the supported parameters and capabilities for training",
