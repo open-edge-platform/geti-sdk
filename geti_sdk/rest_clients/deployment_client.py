@@ -25,9 +25,13 @@ from geti_sdk.data_models.enums import OptimizationType
 from geti_sdk.data_models.model import Model, OptimizedModel
 from geti_sdk.deployment import Deployment
 from geti_sdk.http_session import GetiSession
-from geti_sdk.rest_clients.configuration_client import ConfigurationClient
+from geti_sdk.rest_clients import ConfigurationClient
+from geti_sdk.rest_clients.configuration_clients.training_configuration_client import (
+    TrainingConfigurationClient,
+)
 from geti_sdk.rest_clients.model_client import ModelClient
 from geti_sdk.rest_clients.prediction_client import PredictionClient
+from geti_sdk.rest_converters import ConfigurationRESTConverter
 from geti_sdk.utils import get_supported_algorithms
 
 
@@ -51,6 +55,10 @@ class DeploymentClient:
         self._prediction_client = PredictionClient(
             workspace_id=workspace_id, project=project, session=session
         )
+        self._training_configuration_client = TrainingConfigurationClient(
+            workspace_id=workspace_id, project=project, session=session
+        )
+        # legacy configuration client for backward compatibility
         self._configuration_client = ConfigurationClient(
             workspace_id=workspace_id, project=project, session=session
         )
@@ -282,12 +290,24 @@ class DeploymentClient:
                     break
 
         # Retrieve hyper parameters for the models
-        hyper_parameters = [
-            self._configuration_client.get_for_model(
-                model_id=model.id, task_id=model_id_to_task_id[model.id]
-            )
-            for model in sorted_optimized_models
-        ]
+        hyper_parameters = []
+        for model in sorted_optimized_models:
+            if self.session.version.is_configuration_revamped:
+                hyperparams_dict = (
+                    self._training_configuration_client.get_hyperparameters_by_model_id(
+                        model_id=model.id, task_id=model_id_to_task_id[model.id]
+                    ).model_dump()
+                )
+            else:
+                hyperparams = self._configuration_client.get_for_model(
+                    model_id=model.id, task_id=model_id_to_task_id[model.id]
+                )
+                hyperparams_dict = (
+                    ConfigurationRESTConverter.configuration_to_minimal_dict(
+                        hyperparams
+                    )
+                )
+            hyper_parameters.append(hyperparams_dict)
 
         # Make the request to prepare and fetch the deployment package
         deployment = self._fetch_deployment(model_identifiers=model_identifiers)

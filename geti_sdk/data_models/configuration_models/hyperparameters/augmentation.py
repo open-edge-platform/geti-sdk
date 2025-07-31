@@ -1,0 +1,187 @@
+# Copyright (C) 2025 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions
+# and limitations under the License.
+
+from pydantic import BaseModel, Field
+from typing import Union
+
+
+class CenterCrop(BaseModel):
+    enable: bool = Field(
+        default=False,
+        title="Enable center crop",
+        description="Whether to apply center cropping to the image",
+    )
+    ratio: float = Field(
+        gt=0.0,
+        default=1.0,
+        title="Crop ratio",
+        description="Ratio of original dimensions to keep when cropping",
+    )
+
+
+class RandomResizeCrop(BaseModel):
+    enable: bool = Field(
+        default=False,
+        title="Enable random resize crop",
+        description="Whether to apply random resize and crop to the image",
+    )
+    ratio: float = Field(
+        gt=0.0,
+        default=1.0,
+        title="Crop resize ratio",
+        description="Ratio of original dimensions to apply during resize crop operation",
+    )
+
+
+class RandomAffine(BaseModel):
+    enable: bool = Field(
+        default=False,
+        title="Enable random affine",
+        description="Whether to apply random affine transformations to the image",
+    )
+    degrees: float = Field(
+        ge=0.0,
+        default=0.0,
+        title="Rotation degrees",
+        description="Maximum rotation angle in degrees",
+    )
+    translate_x: float = Field(
+        default=0.0,
+        title="Horizontal translation",
+        description="Maximum horizontal translation as a fraction of image width",
+    )
+    translate_y: float = Field(
+        default=0.0,
+        title="Vertical translation",
+        description="Maximum vertical translation as a fraction of image height",
+    )
+    scale: float = Field(
+        default=1.0,
+        title="Scale factor",
+        description="Scaling factor for the image during affine transformation",
+    )
+
+
+class RandomHorizontalFlip(BaseModel):
+    enable: bool = Field(
+        default=False,
+        title="Enable random horizontal flip",
+        description="Whether to apply random flip images horizontally along the vertical axis (swap left and right)",
+    )
+
+
+class RandomVerticalFlip(BaseModel):
+    enable: bool = Field(
+        default=False,
+        title="Enable random vertical flip",
+        description="Whether to apply random flip images vertically along the horizontal axis (swap top and bottom)",
+    )
+
+
+class RandomIOUCrop(BaseModel):
+    enable: bool = Field(
+        default=False,
+        title="Enable random IoU crop",
+        description="Whether to apply random cropping based on IoU criteria",
+    )
+
+
+class ColorJitter(BaseModel):
+    enable: bool = Field(
+        default=False,
+        title="Enable color jitter",
+        description="Whether to apply random color jitter to the image",
+    )
+
+
+class GaussianBlur(BaseModel):
+    enable: bool = Field(
+        default=False,
+        title="Enable Gaussian blur",
+        description="Whether to apply Gaussian blur to the image",
+    )
+    kernel_size: int = Field(
+        gt=0, default=3, title="Kernel size", description="Size of the Gaussian kernel"
+    )
+
+
+class Tiling(BaseModel):
+    enable: bool = Field(
+        default=False,
+        title="Enable tiling",
+        description="Whether to apply tiling to the image",
+    )
+    adaptive_tiling: bool = Field(
+        default=False,
+        title="Adaptive tiling",
+        description="Whether to use adaptive tiling based on image content",
+    )
+    tile_size: int = Field(
+        gt=0, default=128, title="Tile size", description="Size of each tile in pixels"
+    )
+    tile_overlap: float = Field(
+        ge=0.0,
+        lt=1.0,
+        default=0.5,
+        title="Tile overlap",
+        description="Overlap between adjacent tiles as a fraction of tile size",
+    )
+
+
+class AugmentationParameters(BaseModel):
+    """Configuration parameters for data augmentation during training."""
+
+    center_crop: Union[CenterCrop, None] = Field(
+        default=None,
+        title="Center crop",
+        description="Settings for center cropping images",
+    )
+    random_resize_crop: Union[RandomResizeCrop, None] = Field(
+        default=None,
+        title="Random resize crop",
+        description="Settings for random resize and crop augmentation",
+    )
+    random_affine: Union[RandomAffine, None] = Field(
+        default=None,
+        title="Random affine",
+        description="Settings for random affine transformations",
+    )
+    random_horizontal_flip: Union[RandomHorizontalFlip, None] = Field(
+        default=None,
+        title="Random horizontal flip",
+        description="Randomly flip images horizontally along the vertical axis (swap left and right)",
+    )
+    random_vertical_flip: Union[RandomVerticalFlip, None] = Field(
+        default=None,
+        title="Random vertical flip",
+        description="Randomly flip images vertically along the horizontal axis (swap top and bottom)",
+    )
+    random_iou_crop: Union[RandomIOUCrop, None] = Field(
+        default=None,
+        title="Random IoU crop",
+        description="Randomly crop images based on Intersection over Union (IoU) criteria",
+    )
+    color_jitter: Union[ColorJitter, None] = Field(
+        default=None,
+        title="Color jitter",
+        description="Settings for random color jitter (brightness, contrast, saturation, hue)",
+    )
+    gaussian_blur: Union[GaussianBlur, None] = Field(
+        default=None,
+        title="Gaussian blur",
+        description="Settings for Gaussian blur augmentation",
+    )
+    tiling: Union[Tiling, None] = Field(
+        default=None, title="Tiling", description="Settings for image tiling"
+    )

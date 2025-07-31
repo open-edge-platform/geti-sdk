@@ -14,12 +14,14 @@ from geti_sdk.data_models.enums.dataset_format import DatasetFormat
 from geti_sdk.data_models.enums.include_models import IncludeModelsType
 from geti_sdk.data_models.media import Image, Video
 from geti_sdk.data_models.project import Project
-from geti_sdk.http_session.exception import GetiRequestException
 from geti_sdk.http_session.geti_session import GetiSession
 from geti_sdk.import_export.tus_uploader import TUSUploader
 from geti_sdk.platform_versions import GETI_25_VERSION
 from geti_sdk.rest_clients.annotation_clients.annotation_client import AnnotationClient
-from geti_sdk.rest_clients.configuration_client import ConfigurationClient
+from geti_sdk.rest_clients import ConfigurationClient
+from geti_sdk.rest_clients.configuration_clients.project_configuration_client import (
+    ProjectConfigurationClient,
+)
 from geti_sdk.rest_clients.dataset_client import DatasetClient
 from geti_sdk.rest_clients.media_client.image_client import ImageClient
 from geti_sdk.rest_clients.media_client.video_client import VideoClient
@@ -132,12 +134,6 @@ class GetiIE:
                     inferred_frames_only=False,
                 )
 
-        # Download configuration
-        configuration_client = ConfigurationClient(
-            workspace_id=self.workspace_id, session=self.session, project=project
-        )
-        configuration_client.download_configuration(path_to_folder=target_folder)
-
         # Download active models
         if include_active_models:
             model_client = ModelClient(
@@ -168,10 +164,17 @@ class GetiIE:
         )
 
         # Disable auto-train to prevent the project from training right away
-        configuration_client = ConfigurationClient(
-            workspace_id=self.workspace_id, session=self.session, project=project
-        )
-        configuration_client.set_project_auto_train(auto_train=False)
+        if self.session.version.is_configuration_revamped:
+            # Geti version >= 2.12
+            configuration_client = ProjectConfigurationClient(
+                workspace_id=self.workspace_id, session=self.session, project=project
+            )
+            configuration_client.set_project_auto_train(auto_train=False)
+        else:
+            configuration_client = ConfigurationClient(
+                workspace_id=self.workspace_id, session=self.session, project=project
+            )
+            configuration_client.set_project_auto_train(auto_train=False)
 
         # Upload media
         image_client = ImageClient(
@@ -258,28 +261,6 @@ class GetiIE:
                 videos=videos, max_threads=max_threads
             )
 
-        configuration_file = os.path.join(target_folder, "configuration.json")
-        if os.path.isfile(configuration_file):
-            result = None
-            try:
-                result = configuration_client.apply_from_file(
-                    path_to_folder=target_folder
-                )
-            except GetiRequestException:
-                logging.warning(
-                    f"Attempted to set configuration according to the "
-                    f"'configuration.json' file in the project directory, but setting "
-                    f"the configuration failed. Probably the configuration specified "
-                    f"in '{configuration_file}' does "
-                    f"not apply to the default model for one of the tasks in the "
-                    f"project. Please make sure to reconfigure the models manually."
-                )
-            if result is None:
-                logging.warning(
-                    f"Not all configurable parameters could be set according to the "
-                    f"configuration in {configuration_file}. Please make sure to "
-                    f"verify model configuration manually."
-                )
         configuration_client.set_project_auto_train(auto_train=enable_auto_train)
         logging.info(f"Project '{project.name}' was uploaded successfully.")
         return project

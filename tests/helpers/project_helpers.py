@@ -31,7 +31,6 @@ def get_or_create_annotated_project_for_test_class(
     project_name: str,
     project_type: str = "detection",
     enable_auto_train: bool = False,
-    learning_parameter_settings: str = "minimal",
     annotation_requirements_first_training: Optional[int] = None,
     keypoint_structure: Optional[Dict[str, list]] = None,
 ):
@@ -46,12 +45,6 @@ def get_or_create_annotated_project_for_test_class(
     :param project_name: Name of the project
     :param project_type: Type of the project
     :param enable_auto_train: True to turn auto-training on, False to leave it off
-    :param learning_parameter_settings: Settings to use for the learning parameters
-        during model training. There are three options:
-          'minimal'     - Set hyper parameters such that the training time is minimized
-                          (i.e. single epoch, low batch size, etc.)
-          'default'     - Use default hyper parameter settings
-          'reduced_mem' - Reduce the batch size for memory intensive tasks
     :param annotation_requirements_first_training: The required amount of annotations for first training.
     :param keypoint_structure: The structure of the keypoints to be used for the project,
         represented as a graph of nodes and edges.
@@ -77,15 +70,6 @@ def get_or_create_annotated_project_for_test_class(
     )
     if not project_exists:
         project_service.set_auto_train(False)
-        if learning_parameter_settings == "minimal":
-            project_service.set_minimal_training_hypers()
-        elif learning_parameter_settings == "reduced_mem":
-            project_service.set_reduced_memory_hypers()
-        elif learning_parameter_settings != "default":
-            logging.info(
-                f"Invalid learning parameter settings '{learning_parameter_settings}' "
-                f"specified, continuing with default hyper parameters."
-            )
         if annotation_requirements_first_training is not None:
             project_service.set_auto_training_annotation_requirement(
                 required_images=annotation_requirements_first_training

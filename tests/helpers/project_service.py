@@ -32,6 +32,12 @@ from geti_sdk.rest_clients import (
     TrainingClient,
     VideoClient,
 )
+from geti_sdk.rest_clients.configuration_clients.project_configuration_client import (
+    ProjectConfigurationClient,
+)
+from geti_sdk.rest_clients.configuration_clients.training_configuration_client import (
+    TrainingConfigurationClient,
+)
 
 from .constants import CASSETTE_EXTENSION, PROJECT_PREFIX
 from .finalizers import force_delete_project
@@ -65,6 +71,8 @@ class ProjectService:
         self._project_creation_timestamp: Optional[float] = None
         self._is_offline: bool = is_offline
         self._configuration_client: Optional[ConfigurationClient] = None
+        self._project_configuration_client: Optional[ConfigurationClient] = None
+        self._training_configuration_client: Optional[ConfigurationClient] = None
         self._image_client: Optional[ImageClient] = None
         self._annotation_client: Optional[AnnotationClient] = None
         self._training_client: Optional[TrainingClient] = None
@@ -310,7 +318,7 @@ class ProjectService:
         """Returns the ConfigurationClient instance for the project"""
         if self._configuration_client is None:
             with self.vcr_context(
-                f"{self.project.name}_configuration_client.{CASSETTE_EXTENSION}"
+                f"../LEGACY/{self.project.name}_configuration_client.{CASSETTE_EXTENSION}"
             ):
                 self._configuration_client = ConfigurationClient(
                     session=self.session,
@@ -318,6 +326,34 @@ class ProjectService:
                     project=self.project,
                 )
         return self._configuration_client
+
+    @property
+    def project_configuration_client(self) -> ProjectConfigurationClient:
+        """Returns the ConfigurationClient instance for the project"""
+        if self._project_configuration_client is None:
+            with self.vcr_context(
+                f"{self.project.name}_project_configuration_client.{CASSETTE_EXTENSION}"
+            ):
+                self._project_configuration_client = ProjectConfigurationClient(
+                    session=self.session,
+                    workspace_id=self.workspace_id,
+                    project=self.project,
+                )
+        return self._project_configuration_client
+
+    @property
+    def training_configuration_client(self) -> TrainingConfigurationClient:
+        """Returns the ConfigurationClient instance for the project"""
+        if self._training_configuration_client is None:
+            with self.vcr_context(
+                f"{self.project.name}_training_configuration_client.{CASSETTE_EXTENSION}"
+            ):
+                self._training_configuration_client = TrainingConfigurationClient(
+                    session=self.session,
+                    workspace_id=self.workspace_id,
+                    project=self.project,
+                )
+        return self._training_configuration_client
 
     @property
     def training_client(self) -> TrainingClient:
@@ -459,7 +495,12 @@ class ProjectService:
         with self.vcr_context(
             f"{self.project.name}_set_auto_train.{CASSETTE_EXTENSION}"
         ):
-            self.configuration_client.set_project_auto_train(auto_train=auto_train)
+            if self.session.version.is_configuration_revamped:
+                self.project_configuration_client.set_project_auto_train(
+                    auto_train=auto_train
+                )
+            else:
+                self.configuration_client.set_project_auto_train(auto_train=auto_train)
 
     def set_minimal_training_hypers(self) -> None:
         """

@@ -190,7 +190,7 @@ class TrainingClient:
             "dataset_id": dataset.id,
             "task_id": task.id,
             "train_from_scratch": train_from_scratch,
-            "model_template_id": algorithm.model_template_id,
+            "model_template_id": algorithm.model_manifest_id,
         }
         if hyper_parameters is not None:
             hypers = hyper_parameters.model_configurations

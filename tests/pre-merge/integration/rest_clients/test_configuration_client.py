@@ -22,6 +22,10 @@ from tests.helpers.project_service import ProjectService
 
 class TestConfigurationClient:
     @pytest.mark.vcr()
+    @pytest.mark.skip(
+        reason="ConfigurationClient is deprecated. "
+        "This test is disabled because VCR cassettes conflicts with the new configuration clients."
+    )
     def test_get_and_set_configuration(
         self, fxt_project_service: ProjectService, fxt_default_labels: List[str]
     ):
@@ -32,11 +36,10 @@ class TestConfigurationClient:
         Steps:
         1. Create detection project
         2. Get task configuration
-        3. Assert that 'batch_size' is part of the task configuration
-        4. Update the configuration so that the new batch size is half the old batch
-            size
+        3. Assert that 'learning_rate' is part of the task configuration
+        4. Update the configuration so that the new batch size is half the old learning_rate
         5. POST the new configuration to the server
-        6. GET the task configuration again, and assert that the batch size has changed
+        6. GET the task configuration again, and assert that the learning_rate has changed
         """
         project = fxt_project_service.create_project(
             project_name=f"{PROJECT_PREFIX}_configuration_client",
@@ -47,11 +50,11 @@ class TestConfigurationClient:
 
         configuration_client = fxt_project_service.configuration_client
         task_configuration = configuration_client.get_task_configuration(task.id)
-        assert "batch_size" in task_configuration.get_all_parameter_names()
-        old_batch_size = task_configuration.batch_size.value
-        new_batch_size = int(old_batch_size / 2)
-        task_configuration.set_parameter_value("batch_size", new_batch_size)
+        assert "learning_rate" in task_configuration.get_all_parameter_names()
+        old_learning_rate = task_configuration.learning_rate.value
+        new_learning_rate = old_learning_rate / 2
+        task_configuration.set_parameter_value("learning_rate", new_learning_rate)
         configuration_client.set_configuration(task_configuration)
 
         new_task_configuration = configuration_client.get_task_configuration(task.id)
-        assert new_task_configuration.batch_size.value == new_batch_size
+        assert new_task_configuration.learning_rate.value == new_learning_rate

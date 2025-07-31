@@ -31,8 +31,18 @@ from geti_sdk.data_models.configuration_identifiers import (
 )
 from geti_sdk.data_models.enums.configuration_enums import ConfigurationEntityType
 from geti_sdk.data_models.utils import remove_null_fields
+from geti_sdk.utils import deprecate
 
 
+@deprecate(
+    since="2.12",
+    use="geti_sdk.rest_converters.configurable_parameters_rest_converter",
+    reason=(
+        "This legacy converter is deprecated in favor of ConfigurableParametersRESTConverter "
+        "which provides support for the new project and training configuration REST endpoints, "
+        "introduced in Geti server version 2.12 and above."
+    ),
+)
 class ConfigurationRESTConverter:
     """
     Class that handles conversion of Intel® Geti™ REST output for configurable parameter
@@ -135,7 +145,7 @@ class ConfigurationRESTConverter:
     def task_configuration_from_dict(input_dict: Dict[str, Any]) -> TaskConfiguration:
         """
         Create a TaskConfiguration object holding all configurable parameters for a
-        task in an Intel® Geti™ project, from a dictionary returned by the
+        task in an Intel�� Geti™ project, from a dictionary returned by the
         /configuration REST endpoints.
 
         :param input_dict: Dictionary containing the configurable parameters for the

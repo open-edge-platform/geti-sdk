@@ -55,7 +55,9 @@ def get_supported_algorithms(
             if algo["task_type"].upper() == task_type.name
         ]
         algorithm_rest_response["items"] = filtered_response
-    return AlgorithmList.from_rest(algorithm_rest_response)
+    return AlgorithmList.from_rest(
+        algorithm_rest_response, geti_version=rest_session.version
+    )
 
 
 def get_default_algorithm_info(

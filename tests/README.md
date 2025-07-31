@@ -73,6 +73,9 @@ by running the tests in `RECORD` mode. The easiest way to do this is to create a
 > **WARNING**: Running the test suite in `ONLINE` or `RECORD` mode will increase the
 > time required for test execution considerably.
 
+> **WARNING**: VCR playback in `OFFLINE` mode only supports username/password authentication. 
+> Avoid using token-based authentication in `RECORD` mode.
+
 ## Running the tests in a non-default mode
 Once you created the custom `online.ini` or `record.ini` configurations, you can run
 the tests using `pytest -c online.ini ./pre-merge`. This will execute the tests in

@@ -67,8 +67,8 @@ class ModelClient:
         ]
         # Update algorithm details
         for group in model_groups:
-            group.algorithm = self.supported_algos.get_by_model_template(
-                model_template_id=group.model_template_id
+            group.algorithm = self.supported_algos.get_by_model_manifest_id(
+                model_manifest_id=group.model_template_id
             )
             for model in group.models:
                 # set the model storage id, to link models to their parent group
@@ -221,7 +221,7 @@ class ModelClient:
             method returns None
         """
         if task is not None:
-            if algorithm.task_type != task.type:
+            if algorithm.task != task.type:
                 raise ValueError(
                     f"Unable to retrieve model. The algorithm {algorithm} is not "
                     f"available for the task {task}"
@@ -360,7 +360,7 @@ class ModelClient:
         for group in model_groups:
             if not group.has_trained_models:
                 continue
-            if group.algorithm.task_type != task.type:
+            if group.algorithm.task != task.type:
                 continue
             model_summary = group.get_latest_model()
             if model_summary is not None:
@@ -520,7 +520,7 @@ class ModelClient:
         metadata = job.metadata
         task_data = metadata.task
         version = task_data.model_version
-        algorithm = self.supported_algos.get_by_model_template(
+        algorithm = self.supported_algos.get_by_model_manifest_id(
             task_data.model_template_id
         )
         if hasattr(task_data, "name") and job.type in (

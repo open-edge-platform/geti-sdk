@@ -273,20 +273,22 @@ class GetiSession(requests.Session):
         else:
             requesturl = f"{self.base_url}{url}"
 
-        if method == "POST" or method == "PUT":
+        if method == "POST" or method == "PUT" or method == "PATCH":
             if contenttype == "json":
                 kw_data_arg = {"json": data}
             elif contenttype == "multipart":
                 kw_data_arg = {"files": data}
-            elif contenttype == "jpeg" or contenttype == "zip":
+            elif (
+                contenttype == "jpeg"
+                or contenttype == "zip"
+                or contenttype == "offset+octet-stream"
+            ):
                 kw_data_arg = {"data": data}
             else:
                 raise ValueError(
                     f"Making a POST request with content of type {contenttype} is "
                     f"currently not supported through the Intel Geti SDK."
                 )
-        elif method == "PATCH":
-            kw_data_arg = {"data": data}
         else:
             kw_data_arg = {}
 
@@ -338,7 +340,10 @@ class GetiSession(requests.Session):
                 allow_reauthentication=allow_reauthentication,
                 content_type=contenttype,
             )
-        if response.headers.get("Content-Type", "").startswith("application/json"):
+        if (
+            response.headers.get("Content-Type", "").startswith("application/json")
+            and response.status_code != 204
+        ):
             result = response.json()
         else:
             result = response
