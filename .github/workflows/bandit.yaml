@@ -12,7 +12,7 @@ jobs:
         with:
           persist-credentials: false
       - id: files
-        uses: tj-actions/changed-files@666c9d29007687c52e3c7aa2aac6c0ffcadeadc3 # v45.0.7
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
         with:
           files: |
             **/*.py
