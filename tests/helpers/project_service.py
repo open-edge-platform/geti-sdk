@@ -29,14 +29,10 @@ from geti_sdk.rest_clients import (
     ModelClient,
     PredictionClient,
     ProjectClient,
-    TrainingClient,
-    VideoClient,
-)
-from geti_sdk.rest_clients.configuration_clients.project_configuration_client import (
     ProjectConfigurationClient,
-)
-from geti_sdk.rest_clients.configuration_clients.training_configuration_client import (
+    TrainingClient,
     TrainingConfigurationClient,
+    VideoClient,
 )
 
 from .constants import CASSETTE_EXTENSION, PROJECT_PREFIX

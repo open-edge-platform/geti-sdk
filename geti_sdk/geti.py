@@ -49,10 +49,8 @@ from .rest_clients import (
     ImageClient,
     PredictionClient,
     ProjectClient,
-    VideoClient,
-)
-from .rest_clients.configuration_clients.project_configuration_client import (
     ProjectConfigurationClient,
+    VideoClient,
 )
 from .utils import (
     generate_classification_labels,
