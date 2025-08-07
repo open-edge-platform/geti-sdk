@@ -113,8 +113,8 @@ class AlgorithmList(UserList):
             summary_str += (
                 f"  Name: {algorithm.name}\n"
                 f"    Task type: {algorithm.task}\n"
-                f"    Model size: {algorithm.model_size}\n"
-                f"    Gigaflops: {algorithm.gigaflops}\n"
+                f"    Model size: {algorithm.stats.trainable_parameters} parameters\n"
+                f"    Gigaflops: {algorithm.stats.gigaflops}\n"
                 f"    Recommended for: {algorithm.performance_category}\n\n"
             )
         return summary_str
