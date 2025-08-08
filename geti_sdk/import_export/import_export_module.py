@@ -18,10 +18,7 @@ from geti_sdk.http_session.geti_session import GetiSession
 from geti_sdk.import_export.tus_uploader import TUSUploader
 from geti_sdk.platform_versions import GETI_25_VERSION
 from geti_sdk.rest_clients.annotation_clients.annotation_client import AnnotationClient
-from geti_sdk.rest_clients import ConfigurationClient
-from geti_sdk.rest_clients.configuration_clients.project_configuration_client import (
-    ProjectConfigurationClient,
-)
+from geti_sdk.rest_clients import ConfigurationClient, ProjectConfigurationClient
 from geti_sdk.rest_clients.dataset_client import DatasetClient
 from geti_sdk.rest_clients.media_client.image_client import ImageClient
 from geti_sdk.rest_clients.media_client.video_client import VideoClient
