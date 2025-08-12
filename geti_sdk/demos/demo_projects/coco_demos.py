@@ -21,6 +21,7 @@ from geti_sdk.data_models import Project
 from geti_sdk.demos.data_helpers.coco_helpers import get_coco_dataset
 from geti_sdk.rest_clients import ProjectClient
 from geti_sdk.utils import get_task_types_by_project_type
+from tests.helpers import DatumAnnotationReader
 
 from .utils import ensure_project_is_trained
 
