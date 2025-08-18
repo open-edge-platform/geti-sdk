@@ -26,9 +26,9 @@ classifiers = [
 ]
 
 dependencies = [
+    "attrs~=25.3",
     "certifi~=2025.7.14",
     "cryptography~=45.0",
-    "datumaro~=1.10",
     "defusedxml~=0.7",
     "imageio-ffmpeg~=0.6",
     "joblib~=1.5",
@@ -62,6 +62,7 @@ dev = [
     "ruff~=0.12",
     "snowballstemmer~=2.2",  # pinned because pytest-recording subdeps are loose
     "vcrpy~=7.0",
+    "datumaro~=1.11",
 ]
 
 [project.optional-dependencies]

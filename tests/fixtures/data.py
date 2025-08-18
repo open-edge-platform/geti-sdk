@@ -18,7 +18,8 @@ from typing import Callable, List
 
 import pytest
 
-from geti_sdk.annotation_readers import DatumAnnotationReader, GetiAnnotationReader
+from geti_sdk.annotation_readers import GetiAnnotationReader
+from tests.helpers import DatumAnnotationReader
 
 
 @pytest.fixture(scope="session")

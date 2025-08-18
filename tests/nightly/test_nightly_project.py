@@ -20,11 +20,11 @@ import cv2
 import numpy as np
 
 from geti_sdk import Geti
-from geti_sdk.annotation_readers import DatumAnnotationReader
 from geti_sdk.data_models import Job, Prediction
 from geti_sdk.data_models.enums import JobState
 from geti_sdk.http_session import GetiRequestException
 from tests.helpers import (
+    DatumAnnotationReader,
     ProjectService,
     get_or_create_annotated_project_for_test_class,
     plot_predictions_side_by_side,

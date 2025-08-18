@@ -27,7 +27,7 @@ from geti_sdk.platform_versions import GETI_116_VERSION
 from geti_sdk.rest_clients.credit_system_client import CreditSystemClient
 
 from ._version import __version__ as sdk_version_string
-from .annotation_readers import AnnotationReader, DatumAnnotationReader
+from .annotation_readers import AnnotationReader
 from .data_models import (
     Dataset,
     Image,
@@ -688,28 +688,11 @@ class Geti:
         image_client = ImageClient(
             session=self.session, workspace_id=self.workspace_id, project=project
         )
-        if isinstance(annotation_reader, DatumAnnotationReader):
-            if hasattr(annotation_reader, "get_all_image_filepaths"):
-                images = image_client.upload_from_list(
-                    path_to_folder=path_to_images,
-                    image_names=annotation_reader.get_all_image_filepaths(),
-                    n_images=number_of_images_to_upload,
-                    image_names_as_full_paths=True,
-                    max_threads=max_threads,
-                )
-            else:
-                images = image_client.upload_from_list(
-                    path_to_folder=path_to_images,
-                    image_names=annotation_reader.get_all_image_names(),
-                    n_images=number_of_images_to_upload,
-                    max_threads=max_threads,
-                )
-        else:
-            images = image_client.upload_folder(
-                path_to_images,
-                n_images=number_of_images_to_upload,
-                max_threads=max_threads,
-            )
+        images = image_client.upload_folder(
+            path_to_images,
+            n_images=number_of_images_to_upload,
+            max_threads=max_threads,
+        )
 
         if (
             number_of_images_to_annotate < len(images)
@@ -842,21 +825,11 @@ class Geti:
         image_client = ImageClient(
             session=self.session, workspace_id=self.workspace_id, project=project
         )
-        # Assume that the first task determines the media that will be uploaded
-        first_task_reader = annotation_readers_per_task[0]
-        if isinstance(first_task_reader, DatumAnnotationReader):
-            images = image_client.upload_from_list(
-                path_to_folder=path_to_images,
-                image_names=first_task_reader.get_all_image_names(),
-                n_images=number_of_images_to_upload,
-                max_threads=max_threads,
-            )
-        else:
-            images = image_client.upload_folder(
-                path_to_images,
-                n_images=number_of_images_to_upload,
-                max_threads=max_threads,
-            )
+        images = image_client.upload_folder(
+            path_to_images,
+            n_images=number_of_images_to_upload,
+            max_threads=max_threads,
+        )
 
         if (
             number_of_images_to_annotate < len(images)
@@ -1252,9 +1225,6 @@ class Geti:
             new_labels_per_task = []
             for index, task_type in enumerate(task_types):
                 reader = annotation_readers_per_task[index]
-                if task_type == TaskType.SEGMENTATION:
-                    if isinstance(reader, DatumAnnotationReader):
-                        reader.convert_labels_to_segmentation_names()
                 new_labels.extend(reader.get_all_label_names())
                 new_labels_per_task.append(reader.get_all_label_names())
             if len(set(new_labels)) != len(new_labels):

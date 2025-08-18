@@ -13,6 +13,7 @@
 # and limitations under the License.
 
 from .constants import BASE_TEST_PATH
+from .datumaro_annotation_reader import DatumAnnotationReader
 from .enums import SdkTestMode
 from .finalizers import force_delete_project
 from .fixtures import get_sdk_fixtures
@@ -24,6 +25,7 @@ from .vcr_helpers import are_cassettes_available, replace_unique_entries_in_cass
 
 __all__ = [
     "BASE_TEST_PATH",
+    "DatumAnnotationReader",
     "SdkTestMode",
     "get_sdk_fixtures",
     "ProjectService",
