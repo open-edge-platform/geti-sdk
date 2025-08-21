@@ -15,9 +15,9 @@ import logging
 import os
 import platform
 import sys
+from collections.abc import Sequence
 from contextlib import contextmanager
 from logging.handlers import MemoryHandler
-from typing import Dict, List, Optional, Sequence, Union
 
 import cv2
 import numpy as np
@@ -38,7 +38,7 @@ except ImportError:
     from openvino.properties import device as ov_device
 
 
-def get_system_info(device: str = "CPU") -> Dict[str, str]:
+def get_system_info(device: str = "CPU") -> dict[str, str]:
     """
     Retrieve relevant information about the system
 
@@ -53,16 +53,11 @@ def get_system_info(device: str = "CPU") -> Dict[str, str]:
     """
     ov_core = Core()
     try:
-        device_info = ov_core.get_property(
-            device_name=device, property=ov_device.full_name()
-        )
+        device_info = ov_core.get_property(device_name=device, property=ov_device.full_name())
     except RuntimeError as e:
-        logging.warning(
-            f"Unable to retrieve device info for device `{device}`. Failed with "
-            f"error: `{e}`"
-        )
+        logging.warning(f"Unable to retrieve device info for device `{device}`. Failed with error: `{e}`")
         device_info = device
-    info: Dict[str, str] = {}
+    info: dict[str, str] = {}
     info["operating_system"] = platform.system()
     info["device_info"] = device_info
     info["python"] = platform.python_version()
@@ -73,10 +68,10 @@ def get_system_info(device: str = "CPU") -> Dict[str, str]:
 
 def load_benchmark_media(
     session: GetiSession,
-    images: Optional[Sequence[Union[Image, np.ndarray, os.PathLike]]] = None,
-    video: Optional[Union[Video, os.PathLike]] = None,
+    images: Sequence[Image | np.ndarray | os.PathLike] | None = None,
+    video: Video | os.PathLike | None = None,
     frames: int = 200,
-) -> List[np.ndarray]:
+) -> list[np.ndarray]:
     """
     Load and standardize a list of media. This method will return a list of numpy 2D
     arrays containing the frame data. The list will contain exactly `frames` elements.
@@ -109,7 +104,7 @@ def load_benchmark_media(
             f"out of memory problems on systems with constrained resources. Please "
             f"consider reducing the number of frames to load"
         )
-    loaded_frames: List[np.ndarray] = []
+    loaded_frames: list[np.ndarray] = []
     if images is not None:
         if len(images) < frames:
             # Fill the list of images up to `frames` using the first image
@@ -123,7 +118,7 @@ def load_benchmark_media(
                 loaded_frames.append(image_np)
             elif isinstance(image_object, np.ndarray):
                 loaded_frames.append(image_object)
-            elif isinstance(image_object, (os.PathLike, str)):
+            elif isinstance(image_object, os.PathLike | str):
                 image_cv = cv2.imread(image_object)
                 image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB)
                 loaded_frames.append(image_cv)
@@ -166,8 +161,8 @@ def load_benchmark_media(
 
 @contextmanager
 def suppress_log_output(
-    target_logger: Optional[logging.Logger] = None,
-    target_handler: Optional[logging.Handler] = None,
+    target_logger: logging.Logger | None = None,
+    target_handler: logging.Handler | None = None,
 ):
     """
     Context manager to temporarily capture and suppress log output.
@@ -187,9 +182,7 @@ def suppress_log_output(
     formatter = logging.Formatter(DEFAULT_LOG_FORMAT)
     target_handler.setFormatter(formatter)
 
-    memory_handler = MemoryHandler(
-        capacity=1000, flushLevel=logging.ERROR, target=target_handler
-    )
+    memory_handler = MemoryHandler(capacity=1000, flushLevel=logging.ERROR, target=target_handler)
 
     original_handlers = target_logger.handlers
     for handler in original_handlers:

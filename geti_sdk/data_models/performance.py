@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import List, Optional
 
 import attr
 
@@ -26,8 +25,8 @@ class Score:
     :var metric_type: The type of matrix the score represents
     """
 
-    value: Optional[float] = None
-    metric_type: Optional[str] = None
+    value: float | None = None
+    metric_type: str | None = None
 
 
 @attr.define()
@@ -44,10 +43,10 @@ class TaskPerformance:
         classification of the full image for each task
     """
 
-    task_id: Optional[str] = None
-    score: Optional[Score] = None
-    local_score: Optional[Score] = None
-    global_score: Optional[Score] = None
+    task_id: str | None = None
+    score: Score | None = None
+    local_score: Score | None = None
+    global_score: Score | None = None
 
 
 @attr.define()
@@ -62,7 +61,7 @@ class Performance:
         classification of the full image
     """
 
-    score: Optional[float] = None
-    local_score: Optional[float] = None
-    global_score: Optional[float] = None
-    task_performances: Optional[List[TaskPerformance]] = None
+    score: float | None = None
+    local_score: float | None = None
+    global_score: float | None = None
+    task_performances: list[TaskPerformance] | None = None

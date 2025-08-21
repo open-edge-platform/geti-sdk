@@ -13,7 +13,7 @@
 # and limitations under the License.
 
 import copy
-from typing import Any, Dict, List
+from typing import Any
 
 from geti_sdk.data_models import Annotation, Prediction
 from geti_sdk.data_models.predictions import ResultMedium
@@ -34,9 +34,7 @@ class NormalizedPredictionRESTConverter(PredictionRESTConverter):
     """
 
     @staticmethod
-    def normalized_prediction_from_dict(
-        prediction: Dict[str, Any], image_width: int, image_height: int
-    ) -> Prediction:
+    def normalized_prediction_from_dict(prediction: dict[str, Any], image_width: int, image_height: int) -> Prediction:
         """
         Legacy method that creates an AnnotationScene object from a dictionary
         returned by the /annotations REST endpoint in Intel® Geti™ versions 1.1 or
@@ -49,12 +47,8 @@ class NormalizedPredictionRESTConverter(PredictionRESTConverter):
         :return: Prediction object
         """
         input_copy = copy.deepcopy(prediction)
-        media_identifier = (
-            NormalizedAnnotationRESTConverter._media_identifier_from_dict(
-                prediction["media_identifier"]
-            )
-        )
-        annotations: List[Annotation] = []
+        media_identifier = NormalizedAnnotationRESTConverter._media_identifier_from_dict(prediction["media_identifier"])
+        annotations: list[Annotation] = []
         for annotation in prediction["annotations"]:
             annotations.append(
                 NormalizedAnnotationRESTConverter.normalized_annotation_from_dict(
@@ -63,7 +57,7 @@ class NormalizedPredictionRESTConverter(PredictionRESTConverter):
                     image_height=image_height,
                 )
             )
-        result_media: List[ResultMedium] = []
+        result_media: list[ResultMedium] = []
         for result_medium in prediction.get("maps", []):
             if not isinstance(result_medium, ResultMedium):
                 result_media.append(ResultMedium(**result_medium))
@@ -84,7 +78,7 @@ class NormalizedPredictionRESTConverter(PredictionRESTConverter):
         image_width: int,
         image_height: int,
         deidentify: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Convert a Prediction to a dictionary. By default, removes any ID
         fields in the output dictionary

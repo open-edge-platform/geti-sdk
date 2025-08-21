@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import logging
-from typing import BinaryIO, Dict, Optional, Union
+from typing import BinaryIO
 
 
 class GetiRequestException(Exception):
@@ -25,8 +25,8 @@ class GetiRequestException(Exception):
         method: str,
         url: str,
         status_code: int,
-        request_data: Dict[str, Union[dict, str, list, BinaryIO]],
-        response_data: Optional[Union[dict, str, list]] = None,
+        request_data: dict[str, dict | str | list | BinaryIO],
+        response_data: dict | str | list | None = None,
     ):
         """
         Raise this exception upon unsuccessful requests to the Intel® Geti™ server.
@@ -43,8 +43,8 @@ class GetiRequestException(Exception):
         self.status_code = status_code
         self.request_data = request_data
 
-        self.response_message: Optional[str] = None
-        self.response_error_code: Optional[str] = None
+        self.response_message: str | None = None
+        self.response_error_code: str | None = None
 
         if response_data:
             if isinstance(response_data, dict):
@@ -55,8 +55,7 @@ class GetiRequestException(Exception):
                 self.response_error_code = self.status_code
             else:
                 logging.warning(
-                    f"Received unexpected response type `{type(response_data)}` from "
-                    f"server. Response: {response_data}"
+                    f"Received unexpected response type `{type(response_data)}` from server. Response: {response_data}"
                 )
 
     def __str__(self) -> str:
@@ -64,13 +63,9 @@ class GetiRequestException(Exception):
         Return string representation of the unsuccessful http request to the
         Intel® Geti™ server.
         """
-        error_str = (
-            f"{self.method} request to '{self.url}' failed with status code "
-            f"{self.status_code}."
-        )
+        error_str = f"{self.method} request to '{self.url}' failed with status code {self.status_code}."
         if self.response_error_code and self.response_message:
             error_str += (
-                f" Server returned error code '{self.response_error_code}' "
-                f"with message '{self.response_message}'"
+                f" Server returned error code '{self.response_error_code}' with message '{self.response_message}'"
             )
         return error_str

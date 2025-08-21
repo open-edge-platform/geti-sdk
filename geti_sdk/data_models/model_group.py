@@ -13,7 +13,7 @@
 # and limitations under the License.
 
 from datetime import datetime
-from typing import ClassVar, List, Optional, Union
+from typing import ClassVar
 
 import attr
 
@@ -42,21 +42,21 @@ class ModelSummary:
         matching with the latest project labels
     """
 
-    _identifier_fields: ClassVar[List[str]] = ["id", "model_storage_id"]
+    _identifier_fields: ClassVar[list[str]] = ["id", "model_storage_id"]
 
     name: str
     creation_date: str = attr.field(converter=str_to_datetime)
-    score_up_to_date: Optional[bool] = None  # Deprecated in Geti 2.6
-    purge_info: Optional[ModelPurgeInfo] = None
-    size: Optional[int] = None
-    version: Optional[int] = None  # 'version' is removed in v1.1
-    score: Optional[float] = attr.field(default=None)  # 'score' is removed in v1.1
-    performance: Optional[Performance] = None
+    score_up_to_date: bool | None = None  # Deprecated in Geti 2.6
+    purge_info: ModelPurgeInfo | None = None
+    size: int | None = None
+    version: int | None = None  # 'version' is removed in v1.1
+    score: float | None = attr.field(default=None)  # 'score' is removed in v1.1
+    performance: Performance | None = None
     active_model: bool = attr.field(default=False)
-    id: Optional[str] = attr.field(default=None, repr=False)
-    model_storage_id: Optional[str] = attr.field(default=None, repr=False)
-    label_schema_in_sync: Optional[bool] = attr.field(default=None)  # Added in Geti 1.1
-    lifecycle_stage: Optional[str] = attr.field(default=None)  # Added in Geti v2.8
+    id: str | None = attr.field(default=None, repr=False)
+    model_storage_id: str | None = attr.field(default=None, repr=False)
+    label_schema_in_sync: bool | None = attr.field(default=None)  # Added in Geti 1.1
+    lifecycle_stage: str | None = attr.field(default=None)  # Added in Geti v2.8
 
 
 @attr.define(slots=False)
@@ -67,21 +67,21 @@ class ModelGroup:
     have been trained with different training datasets or hyper parameters.
     """
 
-    _identifier_fields: ClassVar[List[str]] = ["id", "task_id"]
+    _identifier_fields: ClassVar[list[str]] = ["id", "task_id"]
 
     name: str
     model_template_id: str
-    models: List[ModelSummary] = attr.field(repr=False)
-    task_id: Optional[str] = attr.field(default=None)
-    id: Optional[str] = attr.field(default=None)
-    learning_approach: Optional[str] = attr.field(default=None)  # Added in Geti v2.5
-    lifecycle_stage: Optional[str] = attr.field(default=None)  # Added in Geti v2.6
+    models: list[ModelSummary] = attr.field(repr=False)
+    task_id: str | None = attr.field(default=None)
+    id: str | None = attr.field(default=None)
+    learning_approach: str | None = attr.field(default=None)  # Added in Geti v2.5
+    lifecycle_stage: str | None = attr.field(default=None)  # Added in Geti v2.6
 
     def __attrs_post_init__(self) -> None:
         """
         Initialize private attributes.
         """
-        self._algorithm: Optional[Algorithm] = None
+        self._algorithm: Algorithm | None = None
 
     @property
     def has_trained_models(self) -> bool:
@@ -91,14 +91,10 @@ class ModelGroup:
         :return: True if the model group holds at least one trained model, False
             otherwise
         """
-        trained_models = [
-            model
-            for model in self.models
-            if (model.performance is not None or model.score is not None)
-        ]
+        trained_models = [model for model in self.models if (model.performance is not None or model.score is not None)]
         return len(trained_models) > 0
 
-    def get_latest_model(self) -> Optional[ModelSummary]:
+    def get_latest_model(self) -> ModelSummary | None:
         """
         Return the latest model in the model group.
 
@@ -120,11 +116,9 @@ class ModelGroup:
         if not self.has_trained_models:
             return None
         try:
-            model = next((model for model in self.models if model.version == version))
+            model = next(model for model in self.models if model.version == version)
         except StopIteration:
-            raise ValueError(
-                f"Model with version {version} does not exist in model group {self}"
-            )
+            raise ValueError(f"Model with version {version} does not exist in model group {self}")
         return model
 
     def get_model_by_creation_date(self, creation_date: datetime) -> ModelSummary:
@@ -138,18 +132,13 @@ class ModelGroup:
         if not self.has_trained_models:
             return None
         try:
-            model = next(
-                (model for model in self.models if model.creation_date == creation_date)
-            )
+            model = next(model for model in self.models if model.creation_date == creation_date)
         except StopIteration:
-            raise ValueError(
-                f"Model with creation date {creation_date} does not exist in model "
-                f"group {self}"
-            )
+            raise ValueError(f"Model with creation date {creation_date} does not exist in model group {self}")
         return model
 
     @property
-    def algorithm(self) -> Optional[Algorithm]:
+    def algorithm(self) -> Algorithm | None:
         """
         Return the details for the algorithm corresponding to the ModelGroup
         This property will return None unless the `get_algorithm_details` method is
@@ -168,7 +157,7 @@ class ModelGroup:
         """
         self._algorithm = algorithm
 
-    def contains_model(self, model: Union[ModelSummary, Model]) -> bool:
+    def contains_model(self, model: ModelSummary | Model) -> bool:
         """
         Return True if the model group contains the `model`.
 

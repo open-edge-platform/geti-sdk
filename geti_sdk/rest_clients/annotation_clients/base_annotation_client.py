@@ -16,8 +16,9 @@ import json
 import logging
 import os
 import time
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, List, Optional, Sequence, Type, TypeVar, Union
+from typing import Any, TypeVar
 
 from requests import Response
 from tqdm.auto import tqdm
@@ -54,24 +55,17 @@ class BaseAnnotationClient:
         session: GetiSession,
         workspace_id: str,
         project: Project,
-        annotation_reader: Optional[AnnotationReaderType] = None,
+        annotation_reader: AnnotationReaderType | None = None,
     ):
         self.session = session
         self.workspace_id = workspace_id
         self.annotation_reader = annotation_reader
         self._project = project
-        if annotation_reader is None:
-            label_mapping = None
-        else:
-            label_mapping = self.__get_label_mapping(project)
+        label_mapping = None if annotation_reader is None else self.__get_label_mapping(project)
         self._label_mapping = label_mapping
-        self._dataset_client = DatasetClient(
-            session=session, project=project, workspace_id=workspace_id
-        )
+        self._dataset_client = DatasetClient(session=session, project=project, workspace_id=workspace_id)
 
-    def _get_all_media_by_type(
-        self, media_type: Type[MediaType]
-    ) -> MediaList[MediaType]:
+    def _get_all_media_by_type(self, media_type: type[MediaType]) -> MediaList[MediaType]:
         """
         Get a list holding all media entities of type `media_type` in the project.
 
@@ -81,16 +75,10 @@ class BaseAnnotationClient:
         datasets = self._dataset_client.get_all_datasets()
         media_list = MediaList[media_type]([])
         for dataset in datasets:
-            media_list.extend(
-                self._get_all_media_in_dataset_by_type(
-                    media_type=media_type, dataset=dataset
-                )
-            )
+            media_list.extend(self._get_all_media_in_dataset_by_type(media_type=media_type, dataset=dataset))
         return media_list
 
-    def _get_all_media_in_dataset_by_type(
-        self, media_type: Type[MediaType], dataset: Dataset
-    ) -> MediaList[MediaType]:
+    def _get_all_media_in_dataset_by_type(self, media_type: type[MediaType], dataset: Dataset) -> MediaList[MediaType]:
         """
         Return a list of all media items of type `media_type` in the dataset `dataset`
 
@@ -107,10 +95,7 @@ class BaseAnnotationClient:
         else:
             raise ValueError(f"Invalid media type specified: {media_type}.")
 
-        url = (
-            f"workspaces/{self.workspace_id}/projects/{self._project.id}"
-            f"/datasets/{dataset.id}/media:query?limit=100"
-        )
+        url = f"workspaces/{self.workspace_id}/projects/{self._project.id}/datasets/{dataset.id}/media:query?limit=100"
         data = {
             "condition": "and",
             "rules": [
@@ -124,22 +109,20 @@ class BaseAnnotationClient:
         response = self.session.get_rest_response(url=url, method="POST", data=data)
         total_number_of_media: int = response[f"total_matched_{media_name}"]
 
-        raw_media_list: List[Dict[str, Any]] = []
+        raw_media_list: list[dict[str, Any]] = []
         while len(raw_media_list) < total_number_of_media:
             for media_item_dict in response["media"]:
                 raw_media_list.append(media_item_dict)
-            if "next_page" in response.keys():
+            if "next_page" in response:
                 response = self.session.get_rest_response(
                     url=response["next_page"],
                     method="POST",
                     data=data,
                     include_organization_id=False,
                 )
-        return MediaList.from_rest_list(
-            rest_input=raw_media_list, media_type=media_type
-        )
+        return MediaList.from_rest_list(rest_input=raw_media_list, media_type=media_type)
 
-    def __get_label_mapping(self, project: Project) -> Dict[str, str]:
+    def __get_label_mapping(self, project: Project) -> dict[str, str]:
         """
         Get the mapping of the label names to the label ids for the project
 
@@ -147,7 +130,7 @@ class BaseAnnotationClient:
         :return: Dictionary containing the label names as keys and the label ids as
             values
         """
-        project_label_name_to_label: Dict[str, Label] = {}
+        project_label_name_to_label: dict[str, Label] = {}
         for label in project.pipeline.get_all_labels():
             if label.is_empty:
                 # We perform a casefold on the label name to ensure that we can match
@@ -159,12 +142,10 @@ class BaseAnnotationClient:
             project_label_name_to_label[label_name] = label
 
         source_label_names = set(self.annotation_reader.get_all_label_names())
-        source_label_name_to_project_label_id: Dict[str, str] = {}
+        source_label_name_to_project_label_id: dict[str, str] = {}
         # We include the project label names in the mapping, as we want to ensure that
         # we can match the labels from the source to the project labels.
-        for source_label_name in source_label_names.union(
-            project_label_name_to_label.keys()
-        ):
+        for source_label_name in source_label_names.union(project_label_name_to_label.keys()):
             if source_label_name in project_label_name_to_label:
                 label_id = project_label_name_to_label[source_label_name].id
             elif (
@@ -174,18 +155,15 @@ class BaseAnnotationClient:
                 label_id = project_label_name_to_label[source_label_name.casefold()].id
             else:
                 raise ValueError(
-                    f"Found label {source_label_name} in source labels, but this "
-                    f"label is not in the project labels."
+                    f"Found label {source_label_name} in source labels, but this label is not in the project labels."
                 )
             if label_id is None:
-                raise ValueError(
-                    f"Unable to find label id for label {source_label_name}."
-                )
+                raise ValueError(f"Unable to find label id for label {source_label_name}.")
             source_label_name_to_project_label_id[source_label_name] = label_id
         return source_label_name_to_project_label_id
 
     @property
-    def label_mapping(self) -> Dict[str, str]:
+    def label_mapping(self) -> dict[str, str]:
         """
         Return a dictionary with label names as keys and label ids as values.
 
@@ -195,16 +173,14 @@ class BaseAnnotationClient:
             if self._label_mapping is None:
                 self._label_mapping = self.__get_label_mapping(self._project)
             return self._label_mapping
-        else:
-            raise ValueError(
-                "Unable to get label mapping for this annotation client, no "
-                "annotation reader has been defined."
-            )
+        raise ValueError(
+            "Unable to get label mapping for this annotation client, no annotation reader has been defined."
+        )
 
     def _upload_annotation_for_2d_media_item(
         self,
-        media_item: Union[Image, VideoFrame],
-        annotation_scene: Optional[AnnotationScene] = None,
+        media_item: Image | VideoFrame,
+        annotation_scene: AnnotationScene | None = None,
     ) -> AnnotationScene:
         """
         Upload a new annotation for an image or video frame to the cluster. This will
@@ -227,14 +203,10 @@ class BaseAnnotationClient:
         :return: AnnotationScene that was uploaded
         """
         if annotation_scene is not None:
-            scene_to_upload = annotation_scene.apply_identifier(
-                media_identifier=media_item.identifier
-            )
+            scene_to_upload = annotation_scene.apply_identifier(media_identifier=media_item.identifier)
         else:
             if self.annotation_reader is not None:
-                scene_to_upload = self._read_2d_media_annotation_from_source(
-                    media_item=media_item
-                )
+                scene_to_upload = self._read_2d_media_annotation_from_source(media_item=media_item)
             else:
                 raise ValueError(
                     "You attempted to upload an annotation for a media item, but no "
@@ -244,9 +216,7 @@ class BaseAnnotationClient:
                 )
         if scene_to_upload.has_data:
             scene_to_upload.prepare_for_post()
-            rest_data = AnnotationRESTConverter.to_dict(
-                scene_to_upload, deidentify=False
-            )
+            rest_data = AnnotationRESTConverter.to_dict(scene_to_upload, deidentify=False)
             rest_data.pop("kind")
             self.session.get_rest_response(
                 url=f"{media_item.base_url}/annotations",
@@ -256,9 +226,7 @@ class BaseAnnotationClient:
             )
         return scene_to_upload
 
-    def _append_annotation_for_2d_media_item(
-        self, media_item: Union[Image, VideoFrame]
-    ) -> AnnotationScene:
+    def _append_annotation_for_2d_media_item(self, media_item: Image | VideoFrame) -> AnnotationScene:
         """
         Add an annotation to the existing annotations for the `media_item`.
 
@@ -271,10 +239,7 @@ class BaseAnnotationClient:
         )
         annotation_scene = self._get_latest_annotation_for_2d_media_item(media_item)
         if annotation_scene is None:
-            logging.info(
-                f"No existing annotation found for {str(media_item.type)} named "
-                f"{media_item.name}"
-            )
+            logging.info(f"No existing annotation found for {str(media_item.type)} named {media_item.name}")
             annotation_scene = AnnotationScene(
                 media_identifier=media_item.identifier,
                 annotations=[],
@@ -283,9 +248,7 @@ class BaseAnnotationClient:
         annotation_scene.extend(new_annotation_scene.annotations)
 
         if annotation_scene.has_data:
-            rest_data = AnnotationRESTConverter.to_dict(
-                annotation_scene, deidentify=False
-            )
+            rest_data = AnnotationRESTConverter.to_dict(annotation_scene, deidentify=False)
             rest_data.pop("kind", None)
             rest_data.pop("annotation_state_per_task", None)
             rest_data.pop("id", None)
@@ -296,8 +259,7 @@ class BaseAnnotationClient:
                 include_organization_id=False,
             )
             return AnnotationRESTConverter.from_dict(response)
-        else:
-            return annotation_scene
+        return annotation_scene
 
     def _upload_annotations_for_2d_media_list(
         self,
@@ -329,49 +291,37 @@ class BaseAnnotationClient:
             nonlocal upload_count, skip_count
             try:
                 if not append_annotations:
-                    response = self._upload_annotation_for_2d_media_item(
-                        media_item=media_item
-                    )
+                    response = self._upload_annotation_for_2d_media_item(media_item=media_item)
                 else:
-                    response = self._append_annotation_for_2d_media_item(
-                        media_item=media_item
-                    )
+                    response = self._append_annotation_for_2d_media_item(media_item=media_item)
             except GetiRequestException as error:
                 skip_count += 1
                 if error.status_code == 500:
-                    logging.error(
-                        f"Failed to upload annotation for {media_item.name}. "
-                    )
+                    logging.error(f"Failed to upload annotation for {media_item.name}. ")
                     return
-                else:
-                    raise error
+                raise error
             if response is not None:
                 upload_count += 1
 
         t_start = time.time()
-        with ThreadPoolExecutor(max_workers=max_threads) as executor:
-            with logging_redirect_tqdm(tqdm_class=tqdm):
-                list(
-                    tqdm(
-                        executor.map(upload_annotation, media_list),
-                        total=len(media_list),
-                        desc=tqdm_prefix,
-                    )
+        with ThreadPoolExecutor(max_workers=max_threads) as executor, logging_redirect_tqdm(tqdm_class=tqdm):
+            list(
+                tqdm(
+                    executor.map(upload_annotation, media_list),
+                    total=len(media_list),
+                    desc=tqdm_prefix,
                 )
+            )
 
         t_elapsed = time.time() - t_start
         if upload_count > 0:
-            logging.info(
-                f"Uploaded {upload_count} annotations in {t_elapsed:.1f} seconds."
-            )
+            logging.info(f"Uploaded {upload_count} annotations in {t_elapsed:.1f} seconds.")
         if skip_count > 0:
-            logging.info(
-                f"Skipped {skip_count} media items, unable to upload annotations."
-            )
+            logging.info(f"Skipped {skip_count} media items, unable to upload annotations.")
         return upload_count
 
     def annotation_scene_from_rest_response(
-        self, response_dict: Dict[str, Any], media_information: MediaInformation
+        self, response_dict: dict[str, Any], media_information: MediaInformation
     ) -> AnnotationScene:
         """
         Convert a dictionary with annotation data obtained from the Intel® Geti™
@@ -382,12 +332,9 @@ class BaseAnnotationClient:
             annotation applies
         :return: AnnotationScene object corresponding to the data in the response_dict
         """
-        annotation_scene = AnnotationRESTConverter.from_dict(response_dict)
-        return annotation_scene
+        return AnnotationRESTConverter.from_dict(response_dict)
 
-    def _get_latest_annotation_for_2d_media_item(
-        self, media_item: Union[Image, VideoFrame]
-    ) -> Optional[AnnotationScene]:
+    def _get_latest_annotation_for_2d_media_item(self, media_item: Image | VideoFrame) -> AnnotationScene | None:
         """
         Retrieve the latest annotation for an image or video frame from the cluster.
         If no annotation is available, this method returns None
@@ -402,17 +349,13 @@ class BaseAnnotationClient:
         )
         if type(response) is Response and response.status_code == 204:
             return None
-        annotation_scene = self.annotation_scene_from_rest_response(
-            response, media_item.media_information
-        )
-        annotation_scene.resolve_label_names_and_colors(
-            labels=self._project.get_all_labels()
-        )
+        annotation_scene = self.annotation_scene_from_rest_response(response, media_item.media_information)
+        annotation_scene.resolve_label_names_and_colors(labels=self._project.get_all_labels())
         return annotation_scene
 
     def _read_2d_media_annotation_from_source(
         self,
-        media_item: Union[Image, VideoFrame],
+        media_item: Image | VideoFrame,
         preserve_shape_for_global_labels: bool = False,
     ) -> AnnotationScene:
         """
@@ -439,7 +382,7 @@ class BaseAnnotationClient:
 
     def _download_annotations_for_2d_media_list(
         self,
-        media_list: Union[MediaList[Image], MediaList[VideoFrame]],
+        media_list: MediaList[Image] | MediaList[VideoFrame],
         path_to_folder: str,
         append_media_uid: bool = False,
         verbose: bool = True,
@@ -471,10 +414,7 @@ class BaseAnnotationClient:
             media_name = "video frame"
             media_name_plural = "video frames"
         else:
-            raise ValueError(
-                "Invalid media type found in media_list, unable to download "
-                "annotations."
-            )
+            raise ValueError("Invalid media type found in media_list, unable to download annotations.")
         if verbose:
             logging.info(
                 f"Starting annotation download... saving annotations for "
@@ -486,7 +426,7 @@ class BaseAnnotationClient:
         skip_count = 0
         tqdm_prefix = f"Downloading {media_name} annotations"
 
-        def download_annotation(media_item: Union[Image, VideoFrame]) -> None:
+        def download_annotation(media_item: Image | VideoFrame) -> None:
             nonlocal skip_count, download_count
             annotation_scene = self._get_latest_annotation_for_2d_media_item(media_item)
             if annotation_scene is None:
@@ -502,10 +442,7 @@ class BaseAnnotationClient:
                 return
             kind = annotation_scene.kind
             if kind != AnnotationKind.ANNOTATION:
-                log_msg = (
-                    f"Received invalid annotation of kind {kind} for "
-                    f"{media_name} with name{media_item.name}"
-                )
+                log_msg = f"Received invalid annotation of kind {kind} for {media_name} with name{media_item.name}"
                 if verbose:
                     logging.info(log_msg)
                 else:
@@ -535,9 +472,7 @@ class BaseAnnotationClient:
                             f"{media_item.media_information.frame_index}.json"
                         )
                 else:
-                    raise TypeError(
-                        f"Received invalid media item of type {type(media_item)}."
-                    )
+                    raise TypeError(f"Received invalid media item of type {type(media_item)}.")
 
             annotation_path = os.path.join(path_to_annotations_folder, filename)
 
@@ -545,15 +480,14 @@ class BaseAnnotationClient:
                 json.dump(export_data, f, indent=4)
             download_count += 1
 
-        with ThreadPoolExecutor(max_workers=max_threads) as executor:
-            with logging_redirect_tqdm(tqdm_class=tqdm):
-                list(
-                    tqdm(  # List unwraps the generator
-                        executor.map(download_annotation, media_list),
-                        total=len(media_list),
-                        desc=tqdm_prefix,
-                    )
+        with ThreadPoolExecutor(max_workers=max_threads) as executor, logging_redirect_tqdm(tqdm_class=tqdm):
+            list(
+                tqdm(  # List unwraps the generator
+                    executor.map(download_annotation, media_list),
+                    total=len(media_list),
+                    desc=tqdm_prefix,
                 )
+            )
 
         t_elapsed = time.time() - t_start
         if download_count > 0:

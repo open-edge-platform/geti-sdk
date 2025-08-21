@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 from time import sleep
-from typing import Dict, List
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -31,7 +30,7 @@ class TestProjectClient:
     def test_create_and_delete_project(
         self,
         fxt_test_mode,
-        fxt_default_labels: List[str],
+        fxt_default_labels: list[str],
         fxt_project_service: ProjectService,
     ):
         """
@@ -77,7 +76,7 @@ class TestProjectClient:
         request: FixtureRequest,
         fxt_test_mode,
         fxt_geti: Geti,
-        fxt_existing_projects: List[Project],
+        fxt_existing_projects: list[Project],
         fxt_vcr: VCR,
     ):
         """
@@ -92,9 +91,7 @@ class TestProjectClient:
         5. Fetch all the projects using a small page size
         6. Verify that all and only the expected projects are loaded
         """
-        project_client = ProjectClient(
-            session=fxt_geti.session, workspace_id=fxt_geti.workspace_id
-        )
+        project_client = ProjectClient(session=fxt_geti.session, workspace_id=fxt_geti.workspace_id)
 
         for project in fxt_existing_projects:
             assert isinstance(project, Project)
@@ -112,9 +109,7 @@ class TestProjectClient:
                 )
                 new_projects.append(project)
                 request.addfinalizer(
-                    lambda proj=project: project_client.delete_project(
-                        project=proj, requires_confirmation=False
-                    )
+                    lambda proj=project: project_client.delete_project(project=proj, requires_confirmation=False)
                 )
 
         all_projects = project_client.get_all_projects(request_page_size=2)
@@ -130,7 +125,7 @@ class TestProjectClient:
         self,
         fxt_test_mode,
         fxt_project_service: ProjectService,
-        fxt_hierarchical_classification_labels: List[Dict[str, str]],
+        fxt_hierarchical_classification_labels: list[dict[str, str]],
     ):
         """
         Verifies that creating a classification project with hierarchical labels works
@@ -146,15 +141,9 @@ class TestProjectClient:
         label_names = [label.name for label in project.get_all_labels()]
         for label_rest_data in fxt_hierarchical_classification_labels:
             assert label_rest_data["name"] in label_names
-            label = next(
-                lab
-                for lab in project.get_all_labels()
-                if lab.name == label_rest_data["name"]
-            )
+            label = next(lab for lab in project.get_all_labels() if lab.name == label_rest_data["name"])
             if label_rest_data.get("parent_id", None):
-                parent_label = next(
-                    lab for lab in project.get_all_labels() if lab.id == label.parent_id
-                )
+                parent_label = next(lab for lab in project.get_all_labels() if lab.id == label.parent_id)
                 assert parent_label.name == label_rest_data["parent_id"]
             if label_rest_data.get("group", None):
                 assert label.group == label_rest_data["group"]
@@ -167,9 +156,7 @@ class TestProjectClient:
         """
         Verifies that the `list_projects` method prints a list of project summaries
         """
-        project_client = ProjectClient(
-            session=fxt_geti.session, workspace_id=fxt_geti.workspace_id
-        )
+        project_client = ProjectClient(session=fxt_geti.session, workspace_id=fxt_geti.workspace_id)
         projects = project_client.list_projects()
         output, error = capfd.readouterr()
         for project in projects:
@@ -183,34 +170,26 @@ class TestProjectClient:
         self,
         request: FixtureRequest,
         fxt_test_mode,
-        fxt_default_labels: List[str],
+        fxt_default_labels: list[str],
         fxt_geti: Geti,
     ):
         """
         Verify that adding labels to a single task project works as expected
         """
-        project_client = ProjectClient(
-            session=fxt_geti.session, workspace_id=fxt_geti.workspace_id
-        )
+        project_client = ProjectClient(session=fxt_geti.session, workspace_id=fxt_geti.workspace_id)
         project = project_client.create_project(
             project_name=f"{PROJECT_PREFIX}_add_labels_single_task",
             project_type="classification",
             labels=[fxt_default_labels],
         )
-        request.addfinalizer(
-            lambda: project_client.delete_project(
-                project=project, requires_confirmation=False
-            )
-        )
+        request.addfinalizer(lambda: project_client.delete_project(project=project, requires_confirmation=False))
 
         labels_to_add = ["prisma", "pyramid"]
 
         invalid_task = Task(title="invalid_task", task_type="classification")
         # Verify that adding labels to a task not in the project raises ValueError
         with pytest.raises(ValueError):
-            project_client.add_labels(
-                labels=labels_to_add, project=project, task=invalid_task
-            )
+            project_client.add_labels(labels=labels_to_add, project=project, task=invalid_task)
 
         if fxt_test_mode != SdkTestMode.OFFLINE:
             sleep(5)  # allow time for the projects to be fully created
@@ -227,16 +206,12 @@ class TestProjectClient:
             assert label in updated_label_names
 
         # Test adding labels with dictionary input
-        label_dict_to_add = [
-            {"name": "hexagon", "group": "default_classification_group"}
-        ]
+        label_dict_to_add = [{"name": "hexagon", "group": "default_classification_group"}]
         updated_project_2 = project_client.add_labels(
             labels=label_dict_to_add,
             project=updated_project,
         )
-        updated_label_names = [
-            label.name for label in updated_project_2.get_all_labels()
-        ]
+        updated_label_names = [label.name for label in updated_project_2.get_all_labels()]
         for label in expected_labels + ["hexagon"]:
             assert label in updated_label_names
 
@@ -245,26 +220,20 @@ class TestProjectClient:
         self,
         request: FixtureRequest,
         fxt_test_mode,
-        fxt_default_labels: List[str],
+        fxt_default_labels: list[str],
         fxt_geti: Geti,
     ):
         """
         Verify that adding labels to a task chain project works as expected
         """
-        project_client = ProjectClient(
-            session=fxt_geti.session, workspace_id=fxt_geti.workspace_id
-        )
+        project_client = ProjectClient(session=fxt_geti.session, workspace_id=fxt_geti.workspace_id)
         project_label_names = ["block"] + fxt_default_labels
         project = project_client.create_project(
             project_name=f"{PROJECT_PREFIX}_add_labels_multitask",
             project_type="detection_to_classification",
             labels=[[project_label_names[0]], fxt_default_labels],
         )
-        request.addfinalizer(
-            lambda: project_client.delete_project(
-                project=project, requires_confirmation=False
-            )
-        )
+        request.addfinalizer(lambda: project_client.delete_project(project=project, requires_confirmation=False))
 
         if fxt_test_mode != SdkTestMode.OFFLINE:
             sleep(5)  # allow time for the projects to be fully created

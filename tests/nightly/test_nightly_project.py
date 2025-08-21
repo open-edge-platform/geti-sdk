@@ -14,7 +14,7 @@
 import logging
 import os
 import time
-from typing import ClassVar, List, Optional
+from typing import ClassVar
 
 import cv2
 import numpy as np
@@ -51,9 +51,7 @@ class TestNightlyProject:
         duration of this test class.
         """
         if self.PROJECT_TYPE == "classification":
-            fxt_annotation_reader.filter_dataset(
-                labels=["cube", "cylinder"], criterion="XOR"
-            )
+            fxt_annotation_reader.filter_dataset(labels=["cube", "cylinder"], criterion="XOR")
 
         annotation_readers = [fxt_annotation_reader]
         if "_to_" in self.PROJECT_TYPE:
@@ -76,7 +74,7 @@ class TestNightlyProject:
         """
         training_client = fxt_project_service_no_vcr.training_client
         max_attempts = 10
-        jobs: List[Job] = []
+        jobs: list[Job] = []
         n = 0
         # Wait for a while, giving the server time to initialize the jobs
         time.sleep(30)
@@ -122,8 +120,8 @@ class TestNightlyProject:
         n_attempts = 3
         project = fxt_project_service_no_vcr.project
 
-        prediction: Optional[Prediction] = None
-        request_exception: Optional[Exception] = None
+        prediction: Prediction | None = None
+        request_exception: Exception | None = None
         for j in range(n_attempts):
             try:
                 image, prediction = fxt_geti_no_vcr.upload_and_predict_image(
@@ -184,9 +182,8 @@ class TestNightlyProject:
             )
 
             explain_prediction = deployment.explain(image_np)
-            if "anomaly" not in self.PROJECT_TYPE:
-                if all([model.has_xai_head for model in deployment.models]):
-                    assert explain_prediction.feature_vector is not None
+            if "anomaly" not in self.PROJECT_TYPE and all(model.has_xai_head for model in deployment.models):
+                assert explain_prediction.feature_vector is not None
             assert len(explain_prediction.maps) > 0
 
             online_mask = online_prediction.as_mask(image.media_information)
@@ -211,9 +208,7 @@ class TestNightlyProject:
             if not os.path.isdir(predictions_dir):
                 os.makedirs(predictions_dir)
 
-            image_path = os.path.join(
-                predictions_dir, project.name + "_" + image_name + ".jpg"
-            )
+            image_path = os.path.join(predictions_dir, project.name + "_" + image_name + ".jpg")
             plot_predictions_side_by_side(
                 image,
                 prediction_1=local_prediction,

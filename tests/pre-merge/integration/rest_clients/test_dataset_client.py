@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import warnings
-from typing import List
 
 import pytest
 
@@ -24,7 +23,7 @@ from tests.helpers.constants import PROJECT_PREFIX
 class TestDatasetClient:
     @pytest.mark.vcr()
     def test_create_and_delete_dataset(
-        self, fxt_project_service: ProjectService, fxt_default_labels: List[str]
+        self, fxt_project_service: ProjectService, fxt_default_labels: list[str]
     ) -> None:
         """
         Verifies that creating a new dataset in an existing project works

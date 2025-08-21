@@ -20,7 +20,7 @@ try:
     from collections.abc import Iterator
 except ImportError:
     # In python < 3.10 Iterator is in 'collections'
-    from collections import Iterator
+    from collections.abc import Iterator
 
 
 class RateLimiter(Iterator):

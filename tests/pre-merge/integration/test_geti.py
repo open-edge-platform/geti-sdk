@@ -14,7 +14,6 @@
 import logging
 import os
 import time
-from typing import List
 
 import cv2
 import numpy as np
@@ -61,7 +60,7 @@ class TestGeti:
     @staticmethod
     def ensure_annotated_project(
         project_service: ProjectService,
-        annotation_readers: List[AnnotationReader],
+        annotation_readers: list[AnnotationReader],
         project_type: str,
         use_create_from_dataset: bool = False,
         path_to_dataset: str = "",
@@ -76,14 +75,13 @@ class TestGeti:
                 project_name=project_name,
                 enable_auto_train=False,
             )
-        else:
-            return project_service.create_project_from_dataset(
-                annotation_readers=annotation_readers,
-                project_name=project_name,
-                project_type=project_type,
-                path_to_dataset=path_to_dataset,
-                n_images=-1,
-            )
+        return project_service.create_project_from_dataset(
+            annotation_readers=annotation_readers,
+            project_name=project_name,
+            project_type=project_type,
+            path_to_dataset=path_to_dataset,
+            n_images=-1,
+        )
 
     @pytest.mark.parametrize(
         "project_service, project_type, annotation_readers, use_create_from_dataset, path_to_media",
@@ -138,10 +136,8 @@ class TestGeti:
         assert lazy_fxt_project_service.has_project
 
         # For the integration tests we start training manually
-        with fxt_vcr.use_cassette(
-            f"{project.name}_setup_training.{CASSETTE_EXTENSION}"
-        ):
-            jobs: List[Job] = []
+        with fxt_vcr.use_cassette(f"{project.name}_setup_training.{CASSETTE_EXTENSION}"):
+            jobs: list[Job] = []
             for task in project.get_trainable_tasks():
                 jobs.append(
                     attempt_to_train_task(
@@ -239,20 +235,13 @@ class TestGeti:
         default_labels = request.getfixturevalue(default_labels)
         image_folder = request.getfixturevalue(image_folder)
         project_name = f"{PROJECT_PREFIX}_{project_type}_project_from_dataset"
-        annotation_reader.filter_dataset(
-            labels=default_labels, criterion=dataset_filter_criterion
-        )
+        annotation_reader.filter_dataset(labels=default_labels, criterion=dataset_filter_criterion)
         keypoint_structure = None
         if project_type == "keypoint_detection":
+            rng = np.random.default_rng(seed=42)
             joints = annotation_reader.get_keypoint_joints()
-            edges = [
-                {"nodes": [default_labels[a - 1], default_labels[b - 1]]}
-                for a, b in joints
-            ]
-            positions = [
-                {"label": label, "x": np.random.random(), "y": np.random.random()}
-                for label in default_labels
-            ]
+            edges = [{"nodes": [default_labels[a - 1], default_labels[b - 1]]} for a, b in joints]
+            positions = [{"label": label, "x": rng.random(), "y": rng.random()} for label in default_labels]
             keypoint_structure = {"edges": edges, "positions": positions}
         project = fxt_geti.create_single_task_project_from_dataset(
             project_name=project_name,
@@ -280,7 +269,7 @@ class TestGeti:
         project_type,
         fxt_annotation_reader_factory,
         fxt_geti: Geti,
-        fxt_default_labels: List[str],
+        fxt_default_labels: list[str],
         fxt_image_folder: str,
         fxt_project_finalizer,
         request: FixtureRequest,
@@ -295,15 +284,9 @@ class TestGeti:
         project_name = f"{PROJECT_PREFIX}_{project_type}_project_from_dataset"
         annotation_reader_task_1 = fxt_annotation_reader_factory()
         annotation_reader_task_2 = fxt_annotation_reader_factory()
-        annotation_reader_task_1.filter_dataset(
-            labels=fxt_default_labels, criterion="OR"
-        )
-        annotation_reader_task_2.filter_dataset(
-            labels=fxt_default_labels, criterion="OR"
-        )
-        annotation_reader_task_1.group_labels(
-            labels_to_group=fxt_default_labels, group_name="block"
-        )
+        annotation_reader_task_1.filter_dataset(labels=fxt_default_labels, criterion="OR")
+        annotation_reader_task_2.filter_dataset(labels=fxt_default_labels, criterion="OR")
+        annotation_reader_task_1.group_labels(labels_to_group=fxt_default_labels, group_name="block")
         project = fxt_geti.create_task_chain_project_from_dataset(
             project_name=project_name,
             project_type=project_type,
@@ -373,9 +356,7 @@ class TestGeti:
             workspace_id=fxt_geti.workspace_id,
             project=uploaded_project,
         )
-        annotation_target_folder = os.path.join(
-            fxt_temp_directory, "uploaded_annotations", project.name
-        )
+        annotation_target_folder = os.path.join(fxt_temp_directory, "uploaded_annotations", project.name)
 
         if include_videos:
             video_client = VideoClient(
@@ -387,19 +368,12 @@ class TestGeti:
             videos = video_client.get_all_videos()
 
             assert len(videos) == n_videos
-            annotation_client.download_all_annotations(
-                annotation_target_folder, max_threads=1
-            )
+            annotation_client.download_all_annotations(annotation_target_folder, max_threads=1)
 
         else:
-            annotation_client.download_annotations_for_images(
-                images, annotation_target_folder, max_threads=1
-            )
+            annotation_client.download_annotations_for_images(images, annotation_target_folder, max_threads=1)
 
-        assert (
-            len(os.listdir(os.path.join(annotation_target_folder, "annotations")))
-            == n_annotations
-        )
+        assert len(os.listdir(os.path.join(annotation_target_folder, "annotations"))) == n_annotations
 
     @pytest.mark.vcr()
     @pytest.mark.parametrize(
@@ -600,7 +574,7 @@ class TestGeti:
 
         explain_prediction = deployment.explain(image_np)
 
-        if all([model.has_xai_head for model in deployment.models]):
+        if all(model.has_xai_head for model in deployment.models):
             assert explain_prediction.feature_vector is not None
 
         assert len(explain_prediction.maps) > 0
@@ -611,9 +585,7 @@ class TestGeti:
         assert online_mask.shape == local_mask.shape
         # assert np.all(local_mask == online_mask)
 
-        deployment_from_folder = Deployment.from_folder(
-            path_to_folder=deployment_folder
-        )
+        deployment_from_folder = Deployment.from_folder(path_to_folder=deployment_folder)
         assert deployment_from_folder.models[0].name == deployment.models[0].name
 
     @pytest.mark.vcr()
@@ -678,7 +650,7 @@ class TestGeti:
             assert len(os.listdir(os.path.join(hook_data, folder_name))) == 1
 
         # Set deployment to async mode
-        results: List[Prediction] = []
+        results: list[Prediction] = []
 
         def process_results(image, prediction, data):
             results.append(prediction)
@@ -720,9 +692,7 @@ class TestGeti:
         deployment works as expected.
         """
         project = fxt_project_service.project
-        target_folder = os.path.join(
-            fxt_temp_directory, project.name + "_all_inclusive"
-        )
+        target_folder = os.path.join(fxt_temp_directory, project.name + "_all_inclusive")
         fxt_geti.download_project_data(
             project=project,
             target_folder=target_folder,
@@ -754,10 +724,7 @@ class TestGeti:
 
         # Check the contents of the downloaded active model folder
         model_contents = os.listdir(model_path)
-        assert (
-            f"{project.get_trainable_tasks()[0].type}_model_details.json"
-            in model_contents
-        )
+        assert f"{project.get_trainable_tasks()[0].type}_model_details.json" in model_contents
 
         found_base_model = False
         found_optimized_model = False

@@ -14,7 +14,7 @@
 
 import copy
 from pprint import pformat
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar
 
 import attr
 
@@ -46,14 +46,14 @@ class Task:
     :var keypoint_structure: The keypoint structure for the keypoint detection task
     """
 
-    _identifier_fields: ClassVar[List[str]] = ["id", "label_schema_id"]
+    _identifier_fields: ClassVar[list[str]] = ["id", "label_schema_id"]
 
     title: str
     task_type: str = attr.field(converter=str_to_task_type)
-    labels: Optional[List[Label]] = None
-    label_schema_id: Optional[str] = None
-    id: Optional[str] = None
-    keypoint_structure: Optional[Dict] = None
+    labels: list[Label] | None = None
+    label_schema_id: str | None = None
+    id: str | None = None
+    keypoint_structure: dict | None = None
 
     @property
     def type(self) -> TaskType:
@@ -108,7 +108,7 @@ class Task:
             for label in self.labels:
                 deidentify(label)
 
-    def get_label_names(self, include_empty: bool = True) -> List[str]:
+    def get_label_names(self, include_empty: bool = True) -> list[str]:
         """
         Return a list of label names for the task.
 
@@ -122,7 +122,7 @@ class Task:
             labels = [label.name for label in self.labels if not label.is_empty]
         return labels
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return the dictionary representation of the task.
 
@@ -156,10 +156,7 @@ class Task:
         """
         summary_str = f"Task: {self.title}\n  Type: {self.type} \n  Labels:\n"
         for label in self.labels:
-            summary_str += (
-                f"    Name: {label.name},  Group: {label.group},  "
-                f"Parent: {label.parent_id}\n"
-            )
+            summary_str += f"    Name: {label.name},  Group: {label.group},  Parent: {label.parent_id}\n"
         return summary_str
 
     def prepare_for_post(self) -> None:
@@ -170,7 +167,7 @@ class Task:
         :return:
         """
         if self.labels is not None:
-            labels_indices_to_pop: List[int] = []
+            labels_indices_to_pop: list[int] = []
             for ii, label in enumerate(self.labels):
                 if label.is_empty:
                     labels_indices_to_pop.append(ii)

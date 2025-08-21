@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, Dict
+from typing import Any
 
 from geti_sdk.data_models import Job
 from geti_sdk.utils import deserialize_dictionary
@@ -25,7 +25,7 @@ class JobRESTConverter:
     """
 
     @staticmethod
-    def from_dict(job_dict: Dict[str, Any]) -> Job:
+    def from_dict(job_dict: dict[str, Any]) -> Job:
         """
         Create a Job instance from the input dictionary passed in `job_dict`.
 
@@ -35,9 +35,9 @@ class JobRESTConverter:
         """
         # There is an inconsistency in the REST API, the `scores` field was changed
         # from array to object. Preprocess the data to account for that
-        if "metadata" in job_dict.keys():
+        if "metadata" in job_dict:
             metadata = job_dict["metadata"]
-            if "scores" in metadata.keys():
+            if "scores" in metadata:
                 scores = metadata["scores"]
                 if not isinstance(scores, list):
                     metadata["scores"] = [scores]

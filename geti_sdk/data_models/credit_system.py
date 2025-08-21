@@ -17,7 +17,7 @@ Credit system-related entities
 
 from copy import deepcopy
 from pprint import pformat
-from typing import Any, Dict, Optional
+from typing import Any
 
 import attr
 
@@ -39,7 +39,7 @@ class CreditBalance:
 
     incoming: int
     available: int
-    blocked: Optional[int] = None
+    blocked: int | None = None
 
 
 @attr.define
@@ -58,14 +58,14 @@ class CreditAccount:
     balance: CreditBalance
     created: str = attr.field(converter=str_to_datetime)
     updated: str = attr.field(converter=str_to_datetime)
-    expires: Optional[str] = attr.field(
+    expires: str | None = attr.field(
         default=None, converter=str_to_datetime
     )  # renewable account doesn't have an expiration timestamp by default
-    renewal_day_of_month: Optional[int] = None
+    renewal_day_of_month: int | None = None
     # renewable quota, for the welcoming one-off account it's None
-    renewable_amount: Optional[int] = None
+    renewable_amount: int | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return the dictionary representation of the object.
 
@@ -109,19 +109,13 @@ class Subscription:
     product_id: str
     organization_id: str
     workspace_id: str
-    status: SubscriptionStatus = attr.field(
-        converter=str_to_enum_converter(SubscriptionStatus)
-    )
+    status: SubscriptionStatus = attr.field(converter=str_to_enum_converter(SubscriptionStatus))
     created: str = attr.field(converter=str_to_datetime)
     updated: str = attr.field(converter=str_to_datetime)
-    next_renewal_date: Optional[str] = attr.field(
-        default=None, converter=str_to_datetime
-    )
-    previous_renewal_date: Optional[str] = attr.field(
-        default=None, converter=str_to_datetime
-    )
+    next_renewal_date: str | None = attr.field(default=None, converter=str_to_datetime)
+    previous_renewal_date: str | None = attr.field(default=None, converter=str_to_datetime)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return the dictionary representation of the object.
 

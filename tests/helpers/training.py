@@ -1,5 +1,4 @@
 import time
-from typing import Optional, Union
 
 from geti_sdk.data_models import Job, Task
 from geti_sdk.data_models.algorithms import Algorithm
@@ -11,9 +10,9 @@ from .enums import SdkTestMode
 
 def attempt_to_train_task(
     training_client: TrainingClient,
-    task: Union[int, Task],
+    task: int | Task,
     test_mode: SdkTestMode = SdkTestMode.OFFLINE,
-    algorithm: Optional[Algorithm] = None,
+    algorithm: Algorithm | None = None,
 ) -> Job:
     """
     Attempts to train the `task` (either a task or the index of the task in the list
@@ -30,7 +29,7 @@ def attempt_to_train_task(
         SdkTestMode.OFFLINE, no sleep period is used between attempts
     :return: Training job that was created by the training request
     """
-    job: Optional[Job] = None
+    job: Job | None = None
     not_ready_response = "project_not_train_ready"
     n_attempts = 10
 
@@ -46,17 +45,14 @@ def attempt_to_train_task(
 
     if job is not None:
         return job
-    else:
-        raise ValueError(
-            f"Unable to start training on server, received '{not_ready_response}' on "
-            f"each request for {n_attempts} calls in a row. Please make sure that the "
-            f"project is ready to start training the task."
-        )
+    raise ValueError(
+        f"Unable to start training on server, received '{not_ready_response}' on "
+        f"each request for {n_attempts} calls in a row. Please make sure that the "
+        f"project is ready to start training the task."
+    )
 
 
-def await_training_start(
-    test_mode: SdkTestMode, training_client: TrainingClient, timeout: int = 300
-) -> None:
+def await_training_start(test_mode: SdkTestMode, training_client: TrainingClient, timeout: int = 300) -> None:
     """
     Wait for the project to start training. This method will not trigger any training
     jobs, but merely await the project addressed by the `training_client` to start
@@ -76,4 +72,4 @@ def await_training_start(
         while not is_training and time.time() - t_start < timeout:
             is_training = training_client.is_training()
             time.sleep(10)
-    return None
+    return

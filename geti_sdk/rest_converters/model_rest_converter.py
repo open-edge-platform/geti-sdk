@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, Dict
+from typing import Any
 
 from geti_sdk.data_models.model import Model, OptimizedModel
 from geti_sdk.data_models.model_group import ModelGroup
@@ -26,7 +26,7 @@ class ModelRESTConverter:
     """
 
     @staticmethod
-    def model_group_from_dict(input_dict: Dict[str, Any]) -> ModelGroup:
+    def model_group_from_dict(input_dict: dict[str, Any]) -> ModelGroup:
         """
         Convert a dictionary representing a model group to a ModelGroup object.
 
@@ -37,7 +37,7 @@ class ModelRESTConverter:
         return deserialize_dictionary(input_dict, output_type=ModelGroup)
 
     @staticmethod
-    def model_from_dict(input_dict: Dict[str, Any]) -> Model:
+    def model_from_dict(input_dict: dict[str, Any]) -> Model:
         """
         Convert a dictionary representing a model to a Model object.
 
@@ -51,7 +51,7 @@ class ModelRESTConverter:
         return model_object
 
     @staticmethod
-    def optimized_model_from_dict(input_dict: Dict[str, Any]) -> OptimizedModel:
+    def optimized_model_from_dict(input_dict: dict[str, Any]) -> OptimizedModel:
         """
         Convert a dictionary representing an optimized model to a OptimizedModel object.
 

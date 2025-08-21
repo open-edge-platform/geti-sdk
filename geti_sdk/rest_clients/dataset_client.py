@@ -14,7 +14,6 @@
 import logging
 import os
 import warnings
-from typing import List, Optional
 
 from geti_sdk.data_models import (
     Dataset,
@@ -78,14 +77,13 @@ class DatasetClient:
                     "Please make sure that the dataset you are trying to delete exists."
                 )
                 return
-            else:
-                raise error
+            raise error
         if isinstance(response, dict) and response.get("result", None) == "success":
             logging.info(f"Dataset `{dataset.name}` was successfully deleted.")
         else:
             logging.error(f"Failed to delete dataset `{dataset.name}`.")
 
-    def get_all_datasets(self) -> List[Dataset]:
+    def get_all_datasets(self) -> list[Dataset]:
         """
         Query the Intel® Geti™ server to retrieve an up to date list of datasets in
         the project.
@@ -94,14 +92,10 @@ class DatasetClient:
         """
         if self.project.id is None:
             raise ValueError(
-                "Project ID is not defined, please make sure that the project you pass "
-                "contains a valid ID"
+                "Project ID is not defined, please make sure that the project you pass contains a valid ID"
             )
         response = self.session.get_rest_response(url=self.base_url, method="GET")
-        datasets = [
-            deserialize_dictionary(dataset_dict, Dataset)
-            for dataset_dict in response["datasets"]
-        ]
+        datasets = [deserialize_dictionary(dataset_dict, Dataset) for dataset_dict in response["datasets"]]
         self.project.datasets = datasets
         return datasets
 
@@ -109,10 +103,7 @@ class DatasetClient:
         """
         Retrieve the media and annotation statistics for a particular dataset
         """
-        response = self.session.get_rest_response(
-            url=f"{self.base_url}/{dataset.id}/statistics", method="GET"
-        )
-        return response
+        return self.session.get_rest_response(url=f"{self.base_url}/{dataset.id}/statistics", method="GET")
 
     def get_dataset_by_name(self, dataset_name: str) -> Dataset:
         """
@@ -121,15 +112,12 @@ class DatasetClient:
         :param dataset_name: Name of the dataset to retrieve
         :return: Dataset object
         """
-        dataset: Optional[Dataset] = None
+        dataset: Dataset | None = None
         for ds in self.get_all_datasets():
             if ds.name == dataset_name:
                 dataset = ds
         if dataset is None:
-            raise ValueError(
-                f"Dataset named '{dataset_name}' was not found in project "
-                f"'{self.project.name}'"
-            )
+            raise ValueError(f"Dataset named '{dataset_name}' was not found in project '{self.project.name}'")
         return dataset
 
     def has_dataset_subfolders(self, path_to_folder: str) -> bool:
@@ -194,9 +182,7 @@ class DatasetClient:
         )
         return deserialize_dictionary(training_dataset, TrainingDatasetStatistics)
 
-    def get_media_in_training_dataset(
-        self, model: Model, subset: str = "training"
-    ) -> Subset:
+    def get_media_in_training_dataset(self, model: Model, subset: str = "training") -> Subset:
         """
         Return the media in the training dataset for the `model`, for
         the specified `subset`. Subset can be `training`, `validation` or `testing`.
@@ -227,9 +213,7 @@ class DatasetClient:
 
         next_page = f"{self.base_url}/{dataset_storage_id}/training_revisions/{revision_id}/media:query"
         while next_page:
-            response = self.session.get_rest_response(
-                url=next_page, method="POST", data=post_data
-            )
+            response = self.session.get_rest_response(url=next_page, method="POST", data=post_data)
             next_page = response.get("next_page", None)
             for item in response["media"]:
                 if item["type"] == "image":
@@ -251,9 +235,7 @@ class DatasetClient:
                         )
                         for frame in frames_response["media"]:
                             frame["video_id"] = video_id
-                            video_frame = MediaRESTConverter.from_dict(
-                                frame, VideoFrame
-                            )
+                            video_frame = MediaRESTConverter.from_dict(frame, VideoFrame)
                             video_frames.append(video_frame)
                         next_frame_page = frames_response.get("next_page", None)
 

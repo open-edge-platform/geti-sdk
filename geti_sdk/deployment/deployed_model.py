@@ -19,8 +19,9 @@ import shutil
 import tempfile
 import time
 import zipfile
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import attr
 import defusedxml.ElementTree as ET
@@ -70,32 +71,30 @@ class DeployedModel(OptimizedModel):
     can be loaded onto a device to generate predictions.
     """
 
-    hyper_parameters: Optional[dict] = attr.field(
-        kw_only=True, repr=False, default=None
-    )
+    hyper_parameters: dict | None = attr.field(kw_only=True, repr=False, default=None)
 
     def __attrs_post_init__(self):
         """
         Initialize private attributes
         """
         super().__attrs_post_init__()
-        self._domain: Optional[Domain] = None
-        self._model_data_path: Optional[str] = None
-        self._model_python_path: Optional[str] = None
+        self._domain: Domain | None = None
+        self._model_data_path: str | None = None
+        self._model_python_path: str | None = None
         self._needs_tempdir_deletion: bool = False
-        self._tempdir_path: Optional[str] = None
-        self._labels: Optional[LabelList] = None
+        self._tempdir_path: str | None = None
+        self._labels: LabelList | None = None
 
         # Attributes related to model explainability
-        self._saliency_key: Optional[str] = None
-        self._saliency_location: Optional[str] = None
-        self._feature_vector_key: Optional[str] = None
-        self._feature_vector_location: Optional[str] = None
+        self._saliency_key: str | None = None
+        self._saliency_location: str | None = None
+        self._feature_vector_key: str | None = None
+        self._feature_vector_location: str | None = None
 
-        self._converter: Optional[InferenceResultsToPredictionConverter] = None
+        self._converter: InferenceResultsToPredictionConverter | None = None
         self._async_callback_defined: bool = False
         self._tiling_enabled: bool = False
-        self._tiler: Optional[Tiler] = None
+        self._tiler: Tiler | None = None
 
     @property
     def model_data_path(self) -> str:
@@ -105,13 +104,10 @@ class DeployedModel(OptimizedModel):
         :return: path to the directory containing the raw model data
         """
         if self._model_data_path is None:
-            raise ValueError(
-                "Model data path has not been set yet, location of binary model data "
-                "is unknown."
-            )
+            raise ValueError("Model data path has not been set yet, location of binary model data is unknown.")
         return self._model_data_path
 
-    def get_data(self, source: Union[str, os.PathLike, GetiSession]):
+    def get_data(self, source: str | os.PathLike | GetiSession):
         """
         Load the model weights from a data source. The `source` can be one of the
         following:
@@ -124,7 +120,7 @@ class DeployedModel(OptimizedModel):
 
         :param source: Data source to load the weights from
         """
-        if isinstance(source, (os.PathLike, str)):
+        if isinstance(source, os.PathLike | str):
             if os.path.isfile(source) and os.path.splitext(source)[1] == ".zip":
                 # Extract zipfile into temporary directory
                 if self._model_data_path is None:
@@ -146,15 +142,9 @@ class DeployedModel(OptimizedModel):
 
             elif os.path.isdir(source):
                 source_contents = os.listdir(source)
-                if MODEL_DIR_NAME in source_contents:
-                    model_dir = os.path.join(source, MODEL_DIR_NAME)
-                else:
-                    model_dir = source
+                model_dir = os.path.join(source, MODEL_DIR_NAME) if MODEL_DIR_NAME in source_contents else source
                 model_dir_contents = os.listdir(model_dir)
-                if (
-                    "model.bin" in model_dir_contents
-                    and "model.xml" in model_dir_contents
-                ):
+                if "model.bin" in model_dir_contents and "model.xml" in model_dir_contents:
                     self._model_data_path = model_dir
                 else:
                     raise ValueError(
@@ -168,12 +158,9 @@ class DeployedModel(OptimizedModel):
         elif isinstance(source, GetiSession):
             if self.base_url is None:
                 raise ValueError(
-                    f"Insufficient data to retrieve data for model {self}. Please set "
-                    f"a base_url for the model first."
+                    f"Insufficient data to retrieve data for model {self}. Please set a base_url for the model first."
                 )
-            response = source.get_rest_response(
-                url=self.base_url + "/export", method="GET", contenttype="zip"
-            )
+            response = source.get_rest_response(url=self.base_url + "/export", method="GET", contenttype="zip")
             filename = f"{self.name}_{self.optimization_type}_optimized.zip"
             model_dir = tempfile.mkdtemp()
             model_filepath = os.path.join(model_dir, filename)
@@ -189,16 +176,15 @@ class DeployedModel(OptimizedModel):
         Clean up the temporary directory created to store the model data (if any). This
         method is called when the OptimizedModel object is deleted.
         """
-        if self._needs_tempdir_deletion:
-            if self._tempdir_path is not None and os.path.exists(self._tempdir_path):
-                shutil.rmtree(self._tempdir_path)
+        if self._needs_tempdir_deletion and self._tempdir_path is not None and os.path.exists(self._tempdir_path):
+            shutil.rmtree(self._tempdir_path)
 
     def load_inference_model(
         self,
         device: str = "CPU",
-        configuration: Optional[Dict[str, Any]] = None,
-        project: Optional[Project] = None,
-        plugin_configuration: Optional[Dict[str, str]] = None,
+        configuration: dict[str, Any] | None = None,
+        project: Project | None = None,
+        plugin_configuration: dict[str, str] | None = None,
         max_async_infer_requests: int = 0,
         task_index: int = 0,
     ) -> None:
@@ -238,15 +224,10 @@ class DeployedModel(OptimizedModel):
             if max_async_infer_requests == 0:
                 # Compile model to query optimal infer requests for the device
                 compiled_model = core.compile_model(model_adapter.get_model(), device)
-                optimal_requests = compiled_model.get_property(
-                    "OPTIMAL_NUMBER_OF_INFER_REQUESTS"
-                )
+                optimal_requests = compiled_model.get_property("OPTIMAL_NUMBER_OF_INFER_REQUESTS")
                 model_adapter.max_num_requests = optimal_requests
                 compiled_model = None
-                logging.info(
-                    f"Model `{self.name}` -- Optimal number of infer "
-                    f"requests: {optimal_requests}"
-                )
+                logging.info(f"Model `{self.name}` -- Optimal number of infer requests: {optimal_requests}")
         else:
             logging.warning(
                 "Model inference through OpenVINO model server is DEPRECATED and will be removed in the future. "
@@ -254,12 +235,10 @@ class DeployedModel(OptimizedModel):
             )
             # Connect to an OpenVINO model server instance
             model_name = generate_ovms_model_name(project=project, model=self)
-            model_address = generate_ovms_model_address(
-                ovms_address=device, model_name=model_name
-            )
+            model_address = generate_ovms_model_address(ovms_address=device, model_name=model_name)
 
             ovms_connected = False
-            ovms_error: Optional[BaseException] = None
+            ovms_error: BaseException | None = None
             t_start = time.time()
             while not ovms_connected and time.time() - t_start < OVMS_TIMEOUT:
                 # If OVMS has just started, model needs some time to initialize
@@ -272,19 +251,15 @@ class DeployedModel(OptimizedModel):
             if not ovms_connected:
                 if ovms_error is not None:
                     raise RuntimeError("Unable to connect to OVMS") from ovms_error
-                else:
-                    raise RuntimeError(
-                        "Unknown error encountered while connecting to OVMS"
-                    )
+                raise RuntimeError("Unknown error encountered while connecting to OVMS")
 
         # Load model configuration
         config_path = os.path.join(self.model_data_path, "config.json")
         if not os.path.isfile(config_path):
             raise ValueError(
-                f"Missing configuration file `config.json` for deployed model `{self}`,"
-                f" unable to load inference model."
+                f"Missing configuration file `config.json` for deployed model `{self}`, unable to load inference model."
             )
-        with open(config_path, "r") as config_file:
+        with open(config_path) as config_file:
             configuration_json = json.load(config_file)
 
         # Update model parameters
@@ -311,9 +286,7 @@ class DeployedModel(OptimizedModel):
         self._inference_model = model
 
         # Load a Results-to-Prediction converter
-        self._domain = Domain.from_task_type(
-            project.get_trainable_tasks()[task_index].type
-        )
+        self._domain = Domain.from_task_type(project.get_trainable_tasks()[task_index].type)
         self._converter = ConverterFactory.create_converter(
             self.labels, configuration=configuration, domain=self._domain, model=model
         )
@@ -329,9 +302,7 @@ class DeployedModel(OptimizedModel):
                 tile_overlap = legacy_tiling_parameters["tile_overlap"]["value"]
                 tile_max_number = legacy_tiling_parameters["tile_max_number"]["value"]
                 tile_size = legacy_tiling_parameters["tile_size"]["value"]
-                tile_ir_scale_factor = legacy_tiling_parameters["tile_ir_scale_factor"][
-                    "value"
-                ]
+                tile_ir_scale_factor = legacy_tiling_parameters["tile_ir_scale_factor"]["value"]
                 tiling_configuration = {
                     "tile_size": int(tile_size * tile_ir_scale_factor),
                     "tiles_overlap": tile_overlap / tile_ir_scale_factor,
@@ -339,7 +310,8 @@ class DeployedModel(OptimizedModel):
                 }
             except KeyError as exc:
                 logging.warning(
-                    f"Unable to load legacy tiling parameter `{exc.args[0]}` from config.json. Using default tiling parameters."
+                    f"Unable to load legacy tiling parameter `{exc.args[0]}` from config.json. "
+                    f"Using default tiling parameters."
                 )
         else:  # OTX >= 2.0: extract from "rt_info.model_info"
             model_info = model.inference_adapter.get_rt_info("model_info").astype(dict)
@@ -381,11 +353,8 @@ class DeployedModel(OptimizedModel):
         # TODO: This is a workaround to fix the issue that causes the output blob name
         #  to be unset. Remove this once it has been fixed on ModelAPI side
         output_names = list(self._inference_model.outputs.keys())
-        if hasattr(self._inference_model, "output_blob_name"):
-            if not self._inference_model.output_blob_name:
-                self._inference_model.output_blob_name = {
-                    name: name for name in output_names
-                }
+        if hasattr(self._inference_model, "output_blob_name") and not self._inference_model.output_blob_name:
+            self._inference_model.output_blob_name = {name: name for name in output_names}
 
         # Force reload model to account for any postprocessing changes that may have
         # been applied while creating the ModelAPI wrapper
@@ -396,9 +365,7 @@ class DeployedModel(OptimizedModel):
         self._inference_model.load(force=True)
 
     @classmethod
-    def from_model_and_hypers(
-        cls, model: OptimizedModel, hyper_parameters: Optional[dict] = None
-    ) -> "DeployedModel":
+    def from_model_and_hypers(cls, model: OptimizedModel, hyper_parameters: dict | None = None) -> "DeployedModel":
         """
         Create a DeployedModel instance out of an OptimizedModel and it's
         corresponding set of hyper parameters.
@@ -421,7 +388,7 @@ class DeployedModel(OptimizedModel):
         return deployed_model
 
     @classmethod
-    def from_folder(cls, path_to_folder: Union[str, os.PathLike]) -> "DeployedModel":
+    def from_folder(cls, path_to_folder: str | os.PathLike) -> "DeployedModel":
         """
         Create a DeployedModel instance from a folder containing the model data.
 
@@ -430,21 +397,19 @@ class DeployedModel(OptimizedModel):
         """
         config_filepath = os.path.join(path_to_folder, "hyper_parameters.json")
         if os.path.isfile(config_filepath):
-            with open(config_filepath, "r") as config_file:
+            with open(config_filepath) as config_file:
                 hparams = json.load(config_file)
         else:
             hparams = None
         model_detail_path = os.path.join(path_to_folder, "model.json")
-        with open(model_detail_path, "r") as model_detail_file:
+        with open(model_detail_path) as model_detail_file:
             model_detail_dict = json.load(model_detail_file)
         model = ModelRESTConverter.optimized_model_from_dict(model_detail_dict)
-        deployed_model = cls.from_model_and_hypers(
-            model=model, hyper_parameters=hparams
-        )
+        deployed_model = cls.from_model_and_hypers(model=model, hyper_parameters=hparams)
         deployed_model.get_data(source=path_to_folder)
         return deployed_model
 
-    def save(self, path_to_folder: Union[str, os.PathLike]) -> bool:
+    def save(self, path_to_folder: str | os.PathLike) -> bool:
         """
         Save the DeployedModel instance to the designated folder.
 
@@ -452,19 +417,13 @@ class DeployedModel(OptimizedModel):
         :return: True if the model was saved successfully, False otherwise
         """
         if self._model_data_path is None:
-            raise ValueError(
-                "No model definition and model weights data was found for {self}, "
-                "unable to save model."
-            )
+            raise ValueError("No model definition and model weights data was found for {self}, unable to save model.")
         os.makedirs(path_to_folder, exist_ok=True, mode=0o770)
 
         new_model_data_path = os.path.join(path_to_folder, MODEL_DIR_NAME)
         new_model_python_path = os.path.join(path_to_folder, PYTHON_DIR_NAME)
 
-        if (
-            new_model_python_path == self._model_python_path
-            or new_model_data_path == self._model_data_path
-        ):
+        if new_model_python_path == self._model_python_path or new_model_data_path == self._model_data_path:
             logging.warning(
                 f"Model '{self.name}' already exist in target path {path_to_folder}, "
                 f"please save to a different location."
@@ -497,9 +456,7 @@ class DeployedModel(OptimizedModel):
             json.dump(model_detail_dict, model_detail_file, indent=4)
         return True
 
-    def _preprocess(
-        self, image: np.ndarray
-    ) -> Tuple[Dict[str, np.ndarray], Dict[str, Tuple[int, int, int]]]:
+    def _preprocess(self, image: np.ndarray) -> tuple[dict[str, np.ndarray], dict[str, tuple[int, int, int]]]:
         """
         Preprocess an image for inference.
 
@@ -512,9 +469,9 @@ class DeployedModel(OptimizedModel):
 
     def _postprocess(
         self,
-        inference_results: Dict[str, np.ndarray],
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> Union[np.ndarray, List[Tuple[int, float]], Any]:
+        inference_results: dict[str, np.ndarray],
+        metadata: dict[str, Any] | None = None,
+    ) -> np.ndarray | list[tuple[int, float]] | Any:
         """
         Postprocess the model outputs.
 
@@ -544,21 +501,17 @@ class DeployedModel(OptimizedModel):
         if not self._tiling_enabled:
             preprocessed_image, metadata = self._preprocess(image)
             # metadata is a dict with keys 'original_shape' and 'resized_shape'
-            inference_results: Dict[str, np.ndarray] = self._inference_model.infer_sync(
-                preprocessed_image
-            )
+            inference_results: dict[str, np.ndarray] = self._inference_model.infer_sync(preprocessed_image)
         else:
             inference_results = self._tiler(image)
             metadata = {"original_shape": image.shape}
-        return self._apply_postprocessing_steps(
-            inference_results=inference_results, metadata=metadata, explain=explain
-        )
+        return self._apply_postprocessing_steps(inference_results=inference_results, metadata=metadata, explain=explain)
 
     def infer_async(
         self,
         image: np.ndarray,
         explain: bool = False,
-        runtime_data: Optional[Any] = None,
+        runtime_data: Any | None = None,
     ) -> None:
         """
         Perform asynchronous inference on the `image`.
@@ -588,9 +541,7 @@ class DeployedModel(OptimizedModel):
             {"explain": explain, "metadata": metadata, "runtime_data": runtime_data},
         )
 
-    def set_asynchronous_callback(
-        self, callback_function: Callable[[Prediction, Optional[Any]], None]
-    ) -> None:
+    def set_asynchronous_callback(self, callback_function: Callable[[Prediction, Any | None], None]) -> None:
         """
         Set the callback function to handle asynchronous inference results. This
         function is called whenever a result for an asynchronous inference request
@@ -614,15 +565,13 @@ class DeployedModel(OptimizedModel):
                 "Tiling. Please use the synchronous inference mode instead."
             )
 
-        def full_callback(infer_request, async_metadata: Dict[str, Any]):
+        def full_callback(infer_request, async_metadata: dict[str, Any]):
             # Basic postprocessing, convert to `Prediction` object
             metadata = async_metadata["metadata"]
             explain = async_metadata["explain"]
             runtime_data = async_metadata["runtime_data"]
 
-            raw_result = self._inference_model.inference_adapter.get_raw_result(
-                infer_request
-            )
+            raw_result = self._inference_model.inference_adapter.get_raw_result(infer_request)
             prediction = self._apply_postprocessing_steps(raw_result, metadata, explain)
             # User defined callback to further process the prediction results
             callback_function(prediction, runtime_data)
@@ -642,13 +591,12 @@ class DeployedModel(OptimizedModel):
         """
         if self._labels is None:
             raise ValueError(
-                "Inference model is not loaded, unable to retrieve labels. "
-                "Please load inference model first."
+                "Inference model is not loaded, unable to retrieve labels. Please load inference model first."
             )
         return self._labels
 
     def _apply_postprocessing_steps(
-        self, inference_results: Any, metadata: Dict[str, Any], explain: bool
+        self, inference_results: Any, metadata: dict[str, Any], explain: bool
     ) -> Prediction:
         """
         Apply the required postprocessing steps to convert the model output to a
@@ -660,9 +608,7 @@ class DeployedModel(OptimizedModel):
         :return: Prediction object containing the model predictions
         """
         if not self._tiling_enabled:
-            postprocessing_results = self._postprocess(
-                inference_results, metadata=metadata
-            )
+            postprocessing_results = self._postprocess(inference_results, metadata=metadata)
         else:
             postprocessing_results = inference_results
 
@@ -741,8 +687,7 @@ class DeployedModel(OptimizedModel):
                     "callback and set the DeployedModel to asynchronous inference "
                     "mode."
                 )
-            else:
-                logging.debug("DeployedModel is already in asynchronous mode")
+            logging.debug("DeployedModel is already in asynchronous mode")
         else:
 
             def do_nothing(request, userdata):
@@ -751,7 +696,7 @@ class DeployedModel(OptimizedModel):
             self._async_callback_defined = False
             self._inference_model.inference_adapter.set_callback(do_nothing)
 
-    def get_model_config(self) -> Dict[str, Any]:
+    def get_model_config(self) -> dict[str, Any]:
         """
         Return the model configuration as specified in the model.xml metadata file of
         the OpenVINO model
@@ -808,7 +753,7 @@ class DeployedModel(OptimizedModel):
         return config
 
     @staticmethod
-    def _get_clean_model_config(configuration: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_clean_model_config(configuration: dict[str, Any]) -> dict[str, Any]:
         """
         Return a copy of the model configurations with unused values removed.
 

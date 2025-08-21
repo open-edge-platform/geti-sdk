@@ -15,7 +15,6 @@
 import os
 from abc import abstractmethod
 from glob import glob
-from typing import Dict, List, Optional, Union
 
 from geti_sdk.data_models.annotations import Annotation
 from geti_sdk.data_models.enums import TaskType
@@ -32,7 +31,7 @@ class AnnotationReader:
         self,
         base_data_folder: str,
         annotation_format: str = ".json",
-        task_type: Union[TaskType, str] = TaskType.DETECTION,
+        task_type: TaskType | str = TaskType.DETECTION,
         anomaly_reduction: bool = False,
     ):
         if task_type is not None and not isinstance(task_type, TaskType):
@@ -42,7 +41,7 @@ class AnnotationReader:
         self.task_type = task_type
         self.anomaly_reduction = anomaly_reduction
 
-        self._filepaths: Optional[List[str]] = None
+        self._filepaths: list[str] | None = None
 
     @abstractmethod
     def get_data(
@@ -51,13 +50,13 @@ class AnnotationReader:
         label_name_to_id_mapping: dict,
         media_information: MediaInformation,
         preserve_shape_for_global_labels: bool = False,
-    ) -> List[Annotation]:
+    ) -> list[Annotation]:
         """
         Get annotation data for a certain filename
         """
         raise NotImplementedError
 
-    def get_data_filenames(self) -> List[str]:
+    def get_data_filenames(self) -> list[str]:
         """
         Return a list of annotation files found in the `base_data_folder`.
 
@@ -65,17 +64,12 @@ class AnnotationReader:
             the data folder
         """
         if self._filepaths is None:
-            filepaths = glob(
-                os.path.join(self.base_folder, f"*{self.annotation_format}")
-            )
-            self._filepaths = [
-                os.path.splitext(os.path.basename(filepath))[0]
-                for filepath in filepaths
-            ]
+            filepaths = glob(os.path.join(self.base_folder, f"*{self.annotation_format}"))
+            self._filepaths = [os.path.splitext(os.path.basename(filepath))[0] for filepath in filepaths]
         return self._filepaths
 
     @abstractmethod
-    def get_all_label_names(self) -> List[str]:
+    def get_all_label_names(self) -> list[str]:
         """
         Return a list of unique label names that were found in the annotation data
         folder belonging to this AnnotationReader instance.
@@ -91,8 +85,8 @@ class AnnotationReader:
 
     def prepare_and_set_dataset(
         self,
-        task_type: Union[TaskType, str],
-        previous_task_type: Optional[TaskType] = None,
+        task_type: TaskType | str,
+        previous_task_type: TaskType | None = None,
     ) -> None:
         """
         Prepare a dataset for uploading annotations for a certain task_type.
@@ -113,7 +107,7 @@ class AnnotationReader:
             raise ValueError(f"Unsupported task_type {task_type}")
 
     @property
-    def applied_filters(self) -> List[Dict[str, Union[List[str], str]]]:
+    def applied_filters(self) -> list[dict[str, list[str] | str]]:
         """
         Return a list of dictionaries representing the filter settings that have
         been applied to the dataset, if any.

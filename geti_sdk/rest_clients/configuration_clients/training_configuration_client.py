@@ -12,16 +12,13 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import logging
-from typing import Union
 
 from geti_sdk.data_models import Project
 from geti_sdk.data_models.configuration_models import Hyperparameters
-
 from geti_sdk.data_models.configuration_models.training_configuration import (
     TrainingConfiguration,
 )
-from geti_sdk.http_session import GetiSession, GetiRequestException
-
+from geti_sdk.http_session import GetiRequestException, GetiSession
 from geti_sdk.rest_converters.training_configuration_rest_converter import (
     TrainingConfigurationRESTConverter,
 )
@@ -40,9 +37,7 @@ class TrainingConfigurationClient:
         project_id = project.id
         self.project = project
         self.workspace_id = workspace_id
-        self.base_url = (
-            f"workspaces/{workspace_id}/projects/{project_id}/training_configuration"
-        )
+        self.base_url = f"workspaces/{workspace_id}/projects/{project_id}/training_configuration"
 
     def get_configuration(self, model_manifest_id: str) -> TrainingConfiguration:
         """
@@ -58,13 +53,9 @@ class TrainingConfigurationClient:
         url = f"{self.base_url}?model_manifest_id={model_manifest_id}"
         config_rest = self.session.get_rest_response(url=url, method="GET")
         config_rest["model_manifest_id"] = model_manifest_id
-        return TrainingConfigurationRESTConverter.training_configuration_from_rest(
-            config_rest
-        )
+        return TrainingConfigurationRESTConverter.training_configuration_from_rest(config_rest)
 
-    def get_hyperparameters_by_model_id(
-        self, model_id: str, task_id: Union[str, None]
-    ) -> Hyperparameters:
+    def get_hyperparameters_by_model_id(self, model_id: str, task_id: str | None) -> Hyperparameters:
         """
         Retrieve only the hyperparameters for a specific trained model.
 
@@ -103,9 +94,5 @@ class TrainingConfigurationClient:
                             parameters to apply to the project
         :return: None
         """
-        config_rest = TrainingConfigurationRESTConverter.training_configuration_to_rest(
-            configuration
-        )
-        self.session.get_rest_response(
-            url=self.base_url, method="PATCH", data=config_rest
-        )
+        config_rest = TrainingConfigurationRESTConverter.training_configuration_to_rest(configuration)
+        self.session.get_rest_response(url=self.base_url, method="PATCH", data=config_rest)

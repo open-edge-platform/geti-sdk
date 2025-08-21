@@ -13,7 +13,6 @@
 # and limitations under the License.
 
 from enum import Enum
-from typing import List
 
 
 class JobState(Enum):
@@ -38,7 +37,7 @@ class JobState(Enum):
         return self.value
 
     @classmethod
-    def active_states(cls) -> List["JobState"]:
+    def active_states(cls) -> list["JobState"]:
         """
         Return a list of JobState instance which represent jobs that are still active.
 
@@ -47,7 +46,7 @@ class JobState(Enum):
         return [cls.IDLE, cls.PAUSED, cls.RUNNING]
 
     @classmethod
-    def inactive_states(cls) -> List["JobState"]:
+    def inactive_states(cls) -> list["JobState"]:
         """
         Return a list of JobState instance which represent jobs that are inactive,
         i.e. cancelled, errored or finished successfully.

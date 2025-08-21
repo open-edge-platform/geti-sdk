@@ -13,7 +13,7 @@
 # and limitations under the License.
 
 import copy
-from typing import Any, Dict, List
+from typing import Any
 
 import attr
 
@@ -29,7 +29,7 @@ class PredictionRESTConverter:
     """
 
     @staticmethod
-    def from_dict(prediction: Dict[str, Any]) -> Prediction:
+    def from_dict(prediction: dict[str, Any]) -> Prediction:
         """
         Create a Prediction object from a dictionary returned by the
         /predictions REST endpoint in the Intel® Geti™ platform.
@@ -39,27 +39,23 @@ class PredictionRESTConverter:
         :return: Prediction object
         """
         input_copy = copy.deepcopy(prediction)
-        annotations: List[Annotation] = []
+        annotations: list[Annotation] = []
         prediction_dicts = input_copy.pop("predictions", None)
         if prediction_dicts is None:
             # Geti versions lower than 1.13 still use 'annotations' as key
             prediction_dicts = prediction.get("annotations")
         for annotation in prediction_dicts:
             if not isinstance(annotation, Annotation):
-                annotations.append(
-                    AnnotationRESTConverter.annotation_from_dict(annotation)
-                )
+                annotations.append(AnnotationRESTConverter.annotation_from_dict(annotation))
             else:
                 annotations.append(annotation)
-        media_identifier_dict = prediction.get("media_identifier", None)
+        media_identifier_dict = prediction.get("media_identifier")
         if media_identifier_dict is not None:
-            media_identifier = AnnotationRESTConverter._media_identifier_from_dict(
-                prediction["media_identifier"]
-            )
+            media_identifier = AnnotationRESTConverter._media_identifier_from_dict(prediction["media_identifier"])
         else:
             media_identifier = None
 
-        result_media: List[ResultMedium] = []
+        result_media: list[ResultMedium] = []
         for result_medium in prediction.get("maps", []):
             if not isinstance(result_medium, ResultMedium):
                 result_media.append(ResultMedium(**result_medium))
@@ -75,7 +71,7 @@ class PredictionRESTConverter:
         return Prediction(**input_copy)
 
     @staticmethod
-    def to_dict(prediction: Prediction, deidentify: bool = True) -> Dict[str, Any]:
+    def to_dict(prediction: Prediction, deidentify: bool = True) -> dict[str, Any]:
         """
         Convert a Prediction to a dictionary. By default, removes any ID
         fields in the output dictionary
@@ -87,8 +83,6 @@ class PredictionRESTConverter:
         """
         if deidentify:
             prediction.deidentify()
-        prediction_dict = attr.asdict(
-            prediction, recurse=True, value_serializer=attr_value_serializer
-        )
+        prediction_dict = attr.asdict(prediction, recurse=True, value_serializer=attr_value_serializer)
         remove_null_fields(prediction_dict)
         return prediction_dict

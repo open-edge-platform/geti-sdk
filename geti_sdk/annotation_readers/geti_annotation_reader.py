@@ -18,7 +18,7 @@ import logging
 import os
 import warnings
 from random import sample
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from geti_sdk.data_models import Annotation, TaskType
 from geti_sdk.data_models.media import MediaInformation
@@ -40,8 +40,8 @@ class GetiAnnotationReader(AnnotationReader):
         self,
         base_data_folder: str,
         annotation_format: str = ".json",
-        task_type: Optional[Union[TaskType, str]] = None,
-        label_names_to_include: Optional[List[str]] = None,
+        task_type: TaskType | str | None = None,
+        label_names_to_include: list[str] | None = None,
         anomaly_reduction: bool = False,
     ):
         """
@@ -59,8 +59,7 @@ class GetiAnnotationReader(AnnotationReader):
         """
         if annotation_format != ".json":
             raise ValueError(
-                f"Annotation format {annotation_format} is currently not"
-                f" supported by the GetiAnnotationReader"
+                f"Annotation format {annotation_format} is currently not supported by the GetiAnnotationReader"
             )
         super().__init__(
             base_data_folder=base_data_folder,
@@ -71,7 +70,7 @@ class GetiAnnotationReader(AnnotationReader):
         self._label_names_to_include = label_names_to_include
         self._normalized_annotations = self._has_normalized_annotations()
 
-    def _get_label_names(self, all_labels: List[str]) -> List[str]:
+    def _get_label_names(self, all_labels: list[str]) -> list[str]:
         """
         Return the labels for the task type the annotation reader is currently set to.
 
@@ -81,12 +80,10 @@ class GetiAnnotationReader(AnnotationReader):
             logging.info("No label mapping defined, including all labels")
             labels = all_labels
         else:
-            labels = [
-                label for label in all_labels if label in self._label_names_to_include
-            ]
+            labels = [label for label in all_labels if label in self._label_names_to_include]
         return labels
 
-    def _get_raw_annotation_data(self, filename: str) -> Dict[str, Any]:
+    def _get_raw_annotation_data(self, filename: str) -> dict[str, Any]:
         """
         Read the annotation data from the file at `filename`
 
@@ -98,19 +95,15 @@ class GetiAnnotationReader(AnnotationReader):
         )
         if len(filepath) > 1:
             warnings.warn(
-                f"Multiple matching annotation files found for image with "
-                f"name {filename}. Skipping this image..."
+                f"Multiple matching annotation files found for image with name {filename}. Skipping this image..."
             )
             data = {"annotations": []}
         elif len(filepath) == 0:
-            logging.info(
-                f"No matching annotation file found for image with name {filename}."
-                f" Skipping this image..."
-            )
+            logging.info(f"No matching annotation file found for image with name {filename}. Skipping this image...")
             data = {"annotations": []}
         else:
             filepath = filepath[0]
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 data = json.load(f)
         return data
 
@@ -120,7 +113,7 @@ class GetiAnnotationReader(AnnotationReader):
         label_name_to_id_mapping: dict,
         media_information: MediaInformation,
         preserve_shape_for_global_labels: bool = False,
-    ) -> List[Annotation]:
+    ) -> list[Annotation]:
         """
         Return the annotation data for the dataset item corresponding to `filename`.
 
@@ -145,32 +138,22 @@ class GetiAnnotationReader(AnnotationReader):
         new_annotations = []
         for annotation in data["annotations"]:
             if self._normalized_annotations:
-                annotation_object = (
-                    NormalizedAnnotationRESTConverter.normalized_annotation_from_dict(
-                        annotation,
-                        image_width=media_information.width,
-                        image_height=media_information.height,
-                    )
+                annotation_object = NormalizedAnnotationRESTConverter.normalized_annotation_from_dict(
+                    annotation,
+                    image_width=media_information.width,
+                    image_height=media_information.height,
                 )
             else:
-                annotation_object = AnnotationRESTConverter.annotation_from_dict(
-                    annotation
-                )
+                annotation_object = AnnotationRESTConverter.annotation_from_dict(annotation)
             for label in annotation_object.labels:
                 label.id = label_name_to_id_mapping[label.name]
             for label_dict in annotation["labels"]:
-                if self.task_type is not None:
-                    if label_dict["name"] not in self._get_label_names(
-                        list(label_name_to_id_mapping.keys())
-                    ):
-                        annotation_object.pop_label_by_name(
-                            label_name=label_dict["name"]
-                        )
+                if self.task_type is not None and label_dict["name"] not in self._get_label_names(
+                    list(label_name_to_id_mapping.keys())
+                ):
+                    annotation_object.pop_label_by_name(label_name=label_dict["name"])
             new_annotations.append(annotation_object)
-            if (
-                self.anomaly_reduction
-                and annotation_object.labels[0].name.lower() == "anomalous"
-            ):
+            if self.anomaly_reduction and annotation_object.labels[0].name.lower() == "anomalous":
                 # Part of anomaly task reduction in Intel Geti 2.5 -> all anomaly tasks combined into one.
                 # Intel Geti now only accepts full rectangles for anomaly tasks.
                 new_annotations = [
@@ -185,7 +168,7 @@ class GetiAnnotationReader(AnnotationReader):
                 break
         return new_annotations
 
-    def get_all_label_names(self) -> List[str]:
+    def get_all_label_names(self) -> list[str]:
         """
         Retrieve the unique label names for all annotations in the annotation folder
 
@@ -197,11 +180,9 @@ class GetiAnnotationReader(AnnotationReader):
             os.path.join(self.base_folder, f"*{self.annotation_format}"),
         )
         if len(annotation_files) == 0:
-            raise ValueError(
-                f"No valid annotation files were found in folder {self.base_folder}"
-            )
+            raise ValueError(f"No valid annotation files were found in folder {self.base_folder}")
         for annotation_file in annotation_files:
-            with open(annotation_file, "r") as f:
+            with open(annotation_file) as f:
                 data = json.load(f)
             annotations = data.get("annotations", None)
             if annotations is None:
@@ -223,10 +204,7 @@ class GetiAnnotationReader(AnnotationReader):
         """
         filenames = self.get_data_filenames()
         n_sample = min(len(filenames), 50)
-        if n_sample == 50:
-            list_to_check = sample(filenames, n_sample)
-        else:
-            list_to_check = filenames
+        list_to_check = sample(filenames, n_sample) if n_sample == 50 else filenames
 
         NORMALIZED_KEY = "normalized"
         PIXEL_KEY = "pixel"
@@ -235,9 +213,7 @@ class GetiAnnotationReader(AnnotationReader):
         for filename in list_to_check:
             data = self._get_raw_annotation_data(filename=filename)
             for annotation_dict in data["annotations"]:
-                annotation_object = AnnotationRESTConverter.annotation_from_dict(
-                    annotation_dict
-                )
+                annotation_object = AnnotationRESTConverter.annotation_from_dict(annotation_dict)
                 shape = annotation_object.shape
                 x_max, y_max = shape.x_max, shape.y_max
                 if x_max <= 1 and y_max <= 1:
@@ -247,7 +223,7 @@ class GetiAnnotationReader(AnnotationReader):
 
         if annotation_stats[NORMALIZED_KEY] == 0:
             return False
-        elif annotation_stats[PIXEL_KEY] == 0:
+        if annotation_stats[PIXEL_KEY] == 0:
             logging.info(
                 "Legacy annotation format detected. The annotations you are trying to "
                 "upload were most likely downloaded from a pre-production version of "
@@ -255,10 +231,9 @@ class GetiAnnotationReader(AnnotationReader):
                 "annotation format upon upload to the Intel Geti platform. "
             )
             return True
-        else:
-            raise ValueError(
-                f"The annotation directory '{self.base_folder}' contains both "
-                f"normalized ({annotation_stats[NORMALIZED_KEY]} shapes) and "
-                f"non-normalized ({annotation_stats[PIXEL_KEY]} shapes) objects. "
-                f"Unable to parse annotation data."
-            )
+        raise ValueError(
+            f"The annotation directory '{self.base_folder}' contains both "
+            f"normalized ({annotation_stats[NORMALIZED_KEY]} shapes) and "
+            f"non-normalized ({annotation_stats[PIXEL_KEY]} shapes) objects. "
+            f"Unable to parse annotation data."
+        )

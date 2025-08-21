@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
+
 from pydantic import BaseModel, Field
-from typing import Union
 
 
 class CenterCrop(BaseModel):
@@ -111,9 +111,7 @@ class GaussianBlur(BaseModel):
         title="Enable Gaussian blur",
         description="Whether to apply Gaussian blur to the image",
     )
-    kernel_size: int = Field(
-        gt=0, default=3, title="Kernel size", description="Size of the Gaussian kernel"
-    )
+    kernel_size: int = Field(gt=0, default=3, title="Kernel size", description="Size of the Gaussian kernel")
 
 
 class Tiling(BaseModel):
@@ -127,9 +125,7 @@ class Tiling(BaseModel):
         title="Adaptive tiling",
         description="Whether to use adaptive tiling based on image content",
     )
-    tile_size: int = Field(
-        gt=0, default=128, title="Tile size", description="Size of each tile in pixels"
-    )
+    tile_size: int = Field(gt=0, default=128, title="Tile size", description="Size of each tile in pixels")
     tile_overlap: float = Field(
         ge=0.0,
         lt=1.0,
@@ -142,46 +138,44 @@ class Tiling(BaseModel):
 class AugmentationParameters(BaseModel):
     """Configuration parameters for data augmentation during training."""
 
-    center_crop: Union[CenterCrop, None] = Field(
+    center_crop: CenterCrop | None = Field(
         default=None,
         title="Center crop",
         description="Settings for center cropping images",
     )
-    random_resize_crop: Union[RandomResizeCrop, None] = Field(
+    random_resize_crop: RandomResizeCrop | None = Field(
         default=None,
         title="Random resize crop",
         description="Settings for random resize and crop augmentation",
     )
-    random_affine: Union[RandomAffine, None] = Field(
+    random_affine: RandomAffine | None = Field(
         default=None,
         title="Random affine",
         description="Settings for random affine transformations",
     )
-    random_horizontal_flip: Union[RandomHorizontalFlip, None] = Field(
+    random_horizontal_flip: RandomHorizontalFlip | None = Field(
         default=None,
         title="Random horizontal flip",
         description="Randomly flip images horizontally along the vertical axis (swap left and right)",
     )
-    random_vertical_flip: Union[RandomVerticalFlip, None] = Field(
+    random_vertical_flip: RandomVerticalFlip | None = Field(
         default=None,
         title="Random vertical flip",
         description="Randomly flip images vertically along the horizontal axis (swap top and bottom)",
     )
-    random_iou_crop: Union[RandomIOUCrop, None] = Field(
+    random_iou_crop: RandomIOUCrop | None = Field(
         default=None,
         title="Random IoU crop",
         description="Randomly crop images based on Intersection over Union (IoU) criteria",
     )
-    color_jitter: Union[ColorJitter, None] = Field(
+    color_jitter: ColorJitter | None = Field(
         default=None,
         title="Color jitter",
         description="Settings for random color jitter (brightness, contrast, saturation, hue)",
     )
-    gaussian_blur: Union[GaussianBlur, None] = Field(
+    gaussian_blur: GaussianBlur | None = Field(
         default=None,
         title="Gaussian blur",
         description="Settings for Gaussian blur augmentation",
     )
-    tiling: Union[Tiling, None] = Field(
-        default=None, title="Tiling", description="Settings for image tiling"
-    )
+    tiling: Tiling | None = Field(default=None, title="Tiling", description="Settings for image tiling")

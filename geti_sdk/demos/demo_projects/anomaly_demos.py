@@ -13,7 +13,6 @@
 # and limitations under the License.
 
 import logging
-from typing import Optional
 
 from geti_sdk import Geti
 from geti_sdk.annotation_readers import DirectoryTreeAnnotationReader
@@ -29,7 +28,7 @@ def create_anomaly_classification_demo_project(
     n_images: int,
     n_annotations: int = -1,
     project_name: str = "Anomaly demo",
-    dataset_path: Optional[str] = None,
+    dataset_path: str | None = None,
 ) -> Project:
     """
     Create a demo project of type 'anomaly', based off the MVTec
@@ -57,9 +56,7 @@ def create_anomaly_classification_demo_project(
     logging.info(" ------- Creating anomaly project --------------- ")
 
     # Create annotation reader
-    annotation_reader = DirectoryTreeAnnotationReader(
-        base_data_folder=data_path, subset_folder_names=["train", "test"]
-    )
+    annotation_reader = DirectoryTreeAnnotationReader(base_data_folder=data_path, subset_folder_names=["train", "test"])
     annotation_reader.group_labels(
         labels_to_group=["damaged_case", "cut_lead", "misplaced", "bent_lead"],
         group_name="Anomalous",
@@ -75,9 +72,7 @@ def create_anomaly_classification_demo_project(
 
     # Upload images to the project
     data_filepaths = annotation_reader.get_data_filenames()
-    image_client = ImageClient(
-        session=geti.session, workspace_id=geti.workspace_id, project=project
-    )
+    image_client = ImageClient(session=geti.session, workspace_id=geti.workspace_id, project=project)
     images = image_client.upload_from_list(
         path_to_folder=data_path,
         image_names=data_filepaths,
@@ -103,9 +98,7 @@ def create_anomaly_classification_demo_project(
     return project
 
 
-def ensure_trained_anomaly_project(
-    geti: Geti, project_name: str = "Transistor anomaly detection"
-):
+def ensure_trained_anomaly_project(geti: Geti, project_name: str = "Transistor anomaly detection"):
     """
     Check whether the project named `project_name` exists on the server, and create it
     if it not.
@@ -122,13 +115,8 @@ def ensure_trained_anomaly_project(
     if project is None:
         logging.info(f"Project '{project_name}' does not exist yet, creating it...")
 
-        project = create_anomaly_classification_demo_project(
-            geti=geti, n_images=-1, project_name=project_name
-        )
-        logging.info(
-            f"Project `{project_name}` of type `anomaly` was created on "
-            f"host `{geti.session.config.host}`."
-        )
+        project = create_anomaly_classification_demo_project(geti=geti, n_images=-1, project_name=project_name)
+        logging.info(f"Project `{project_name}` of type `anomaly` was created on host `{geti.session.config.host}`.")
 
     ensure_project_is_trained(geti, project)
     return project

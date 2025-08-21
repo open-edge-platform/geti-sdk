@@ -13,7 +13,7 @@
 # and limitations under the License.
 
 import copy
-from typing import Any, Dict
+from typing import Any
 
 from geti_sdk.data_models import Project
 from geti_sdk.data_models.utils import remove_null_fields
@@ -27,7 +27,7 @@ class ProjectRESTConverter:
     """
 
     @classmethod
-    def from_dict(cls, project_input: Dict[str, Any]) -> Project:
+    def from_dict(cls, project_input: dict[str, Any]) -> Project:
         """
         Create a Project from a dictionary representing a project, as
         returned by the /projects endpoint on the Intel® Geti™ platform.
@@ -44,7 +44,7 @@ class ProjectRESTConverter:
         return deserialize_dictionary(prepared_project, output_type=Project)
 
     @classmethod
-    def to_dict(cls, project: Project, deidentify: bool = True) -> Dict[str, Any]:
+    def to_dict(cls, project: Project, deidentify: bool = True) -> dict[str, Any]:
         """
         Convert the `project` to its dictionary representation.
         This functions removes database UID's and optional fields that are `None`

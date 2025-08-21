@@ -14,11 +14,11 @@
 import logging
 import math
 import time
+from collections.abc import Sequence
 from random import randint
-from typing import Dict, List, Sequence, Tuple
 
 
-def generate_segmentation_labels(detection_labels: List[str]) -> List[str]:
+def generate_segmentation_labels(detection_labels: list[str]) -> list[str]:
     """
     Generate segmentation label names from a list of detection label names.
 
@@ -28,9 +28,7 @@ def generate_segmentation_labels(detection_labels: List[str]) -> List[str]:
     return [f"{label} shape" for label in detection_labels]
 
 
-def generate_classification_labels(
-    labels: List[str], multilabel: bool = False
-) -> List[Dict[str, str]]:
+def generate_classification_labels(labels: list[str], multilabel: bool = False) -> list[dict[str, str]]:
     """
     Generate label creation data from a list of label names. If `multiclass = True`,
     the labels will be generated in such a way that multiple labels can be assigned to
@@ -43,7 +41,7 @@ def generate_classification_labels(
     :return: List of dictionaries containing the label data that can be sent to the
         Intel® Geti™ project creation endpoint
     """
-    label_list: List[Dict[str, str]] = []
+    label_list: list[dict[str, str]] = []
     if multilabel or len(labels) == 1:
         for label in labels:
             label_list.append({"name": label, "group": f"{label}_group"})
@@ -62,7 +60,7 @@ def generate_unique_label_color(label_colors: Sequence[str]) -> str:
     :return: hex string containing the new label color
     """
 
-    def _generate_random_rgb_tuple() -> Tuple[int, int, int]:
+    def _generate_random_rgb_tuple() -> tuple[int, int, int]:
         """
         Generate a random R,G,B color tuple. R,G,B are integers on the interval [0,255].
 
@@ -70,21 +68,15 @@ def generate_unique_label_color(label_colors: Sequence[str]) -> str:
         """
         return randint(0, 255), randint(0, 255), randint(0, 255)  # nosec B311
 
-    def _calculate_rgb_distance(
-        color_a: Tuple[int, int, int], color_b: Tuple[int, int, int]
-    ) -> float:
+    def _calculate_rgb_distance(color_a: tuple[int, int, int], color_b: tuple[int, int, int]) -> float:
         """
         Calculate the root-mean-square difference between two RGB color tuples.
         """
         return math.sqrt(
-            (color_a[0] - color_b[0]) ** 2
-            + (color_a[1] - color_b[1]) ** 2
-            + (color_a[2] - color_b[2]) ** 2
+            (color_a[0] - color_b[0]) ** 2 + (color_a[1] - color_b[1]) ** 2 + (color_a[2] - color_b[2]) ** 2
         )
 
-    existing_colors = [
-        tuple(int(label[i : i + 2], 16) for i in (1, 3, 5)) for label in label_colors
-    ]
+    existing_colors = [tuple(int(label[i : i + 2], 16) for i in (1, 3, 5)) for label in label_colors]
 
     success = False
     t_start = time.time()
@@ -92,11 +84,9 @@ def generate_unique_label_color(label_colors: Sequence[str]) -> str:
     distance_threshold = 30 if len(label_colors) < 100 else 10
     while not success and (time.time() - t_start < 100):
         new_color = _generate_random_rgb_tuple()
-        min_distance = min(
-            [_calculate_rgb_distance(color, new_color) for color in existing_colors]
-        )
+        min_distance = min([_calculate_rgb_distance(color, new_color) for color in existing_colors])
         if min_distance > distance_threshold:
             success = True
     if not success:
         logging.warning("Unable to generate sufficiently distinct label color.")
-    return "#{0:02x}{1:02x}{2:02x}".format(*new_color)
+    return "#{:02x}{:02x}{:02x}".format(*new_color)

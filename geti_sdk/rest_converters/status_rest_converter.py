@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, Dict
+from typing import Any
 
 from geti_sdk.data_models import ProjectStatus
 from geti_sdk.utils import deserialize_dictionary
@@ -25,7 +25,7 @@ class StatusRESTConverter:
     """
 
     @staticmethod
-    def from_dict(project_status_dict: Dict[str, Any]) -> ProjectStatus:
+    def from_dict(project_status_dict: dict[str, Any]) -> ProjectStatus:
         """
         Create a ProjectStatus instance from the input dictionary passed in
         `project_status_dict`.

@@ -15,7 +15,7 @@
 import json
 import logging
 import os
-from typing import List, Optional, TypeVar, Union
+from typing import TypeVar
 
 from requests import Response
 
@@ -54,7 +54,7 @@ class ModelClient:
             rest_session=self.session, project=project, workspace_id=workspace_id
         )
 
-    def get_all_model_groups(self) -> List[ModelGroup]:
+    def get_all_model_groups(self) -> list[ModelGroup]:
         """
         Return a list of all model groups in the project.
 
@@ -62,35 +62,29 @@ class ModelClient:
         """
         response = self.session.get_rest_response(url=self.base_url, method="GET")
         response_array = response["model_groups"]
-        model_groups = [
-            ModelRESTConverter.model_group_from_dict(group) for group in response_array
-        ]
+        model_groups = [ModelRESTConverter.model_group_from_dict(group) for group in response_array]
         # Update algorithm details
         for group in model_groups:
-            group.algorithm = self.supported_algos.get_by_model_manifest_id(
-                model_manifest_id=group.model_template_id
-            )
+            group.algorithm = self.supported_algos.get_by_model_manifest_id(model_manifest_id=group.model_template_id)
             for model in group.models:
                 # set the model storage id, to link models to their parent group
                 model.model_storage_id = group.id
         return model_groups
 
-    def get_latest_model_for_all_model_groups(self) -> List[Model]:
+    def get_latest_model_for_all_model_groups(self) -> list[Model]:
         """
         Return the latest trained models for each model group in the project.
 
         :return: List of models, one for each trained algorithm in the project.
         """
         model_groups = self.get_all_model_groups()
-        latest_models: List[Model] = []
+        latest_models: list[Model] = []
         for model_group in model_groups:
             lm = model_group.get_latest_model()
-            latest_models.append(
-                self._get_model_detail(group_id=model_group.id, model_id=lm.id)
-            )
+            latest_models.append(self._get_model_detail(group_id=model_group.id, model_id=lm.id))
         return latest_models
 
-    def get_model_group_by_algo_name(self, algorithm_name: str) -> Optional[ModelGroup]:
+    def get_model_group_by_algo_name(self, algorithm_name: str) -> ModelGroup | None:
         """
         Return the model group for the algorithm named `algorithm_name`, if any. If
         no model group for this algorithm is found in the project, this method returns
@@ -105,7 +99,7 @@ class ModelClient:
             None,
         )
 
-    def get_latest_model_by_algo_name(self, algorithm_name: str) -> Optional[Model]:
+    def get_latest_model_by_algo_name(self, algorithm_name: str) -> Model | None:
         """
         Return the latest model for a specific algorithm. If no model has been trained
         for the algorithm, this method returns None.
@@ -116,11 +110,8 @@ class ModelClient:
         model_group = self.get_model_group_by_algo_name(algorithm_name)
         if model_group:
             model_summary = model_group.get_latest_model()
-            return self._get_model_detail(
-                group_id=model_group.id, model_id=model_summary.id
-            )
-        else:
-            return None
+            return self._get_model_detail(group_id=model_group.id, model_id=model_summary.id)
+        return None
 
     def get_latest_optimized_model(
         self,
@@ -148,9 +139,7 @@ class ModelClient:
         """
         base_model = self.get_latest_model_by_algo_name(algorithm_name=algorithm_name)
         if base_model is None:
-            raise RuntimeError(
-                f"No trained model was found for algorithm `{algorithm_name}`"
-            )
+            raise RuntimeError(f"No trained model was found for algorithm `{algorithm_name}`")
         n_optimized_models = len(base_model.optimized_models)
         logging.info(
             f"{n_optimized_models} optimized models were found for algorithm "
@@ -171,38 +160,34 @@ class ModelClient:
         supported_precisions = ["FP32", "FP16", "INT8"]
         if cap_prec not in supported_precisions:
             raise ValueError(
-                f"Invalid target precision specified: {precision}. Supported options "
-                f"are: {supported_precisions}"
+                f"Invalid target precision specified: {precision}. Supported options are: {supported_precisions}"
             )
         opt_models_precision = [om for om in opt_models if cap_prec in om.name]
         cap_opt_type = optimization_type.upper()
         opt_type = OptimizationType(cap_opt_type)
-        opt_models_prec_type = [
-            om for om in opt_models_precision if om.optimization_type == opt_type
-        ]
+        opt_models_prec_type = [om for om in opt_models_precision if om.optimization_type == opt_type]
         if len(opt_models_prec_type) == 0:
             raise RuntimeError(
                 f"Algorithm {algorithm_name} has a trained base model and "
                 f"{n_optimized_models} optimized models, but no optimized model "
                 f"matches the required optimization type and precision."
             )
-        elif len(opt_models_prec_type) == 1:
+        if len(opt_models_prec_type) == 1:
             return opt_models_prec_type[0]
-        else:
-            logging.info(
-                f"Found {len(opt_models_prec_type)} models that match the selection "
-                f"criteria. Returning the most recently created matching model."
-            )
-            creation_dates = [om.creation_date for om in opt_models_prec_type]
-            max_index = creation_dates.index(max(creation_dates))
-            return opt_models_prec_type[max_index]
+        logging.info(
+            f"Found {len(opt_models_prec_type)} models that match the selection "
+            f"criteria. Returning the most recently created matching model."
+        )
+        creation_dates = [om.creation_date for om in opt_models_prec_type]
+        max_index = creation_dates.index(max(creation_dates))
+        return opt_models_prec_type[max_index]
 
     def get_model_by_algorithm_task_and_version(
         self,
         algorithm: Algorithm,
-        version: Optional[int] = None,
-        task: Optional[Task] = None,
-    ) -> Optional[Model]:
+        version: int | None = None,
+        task: Task | None = None,
+    ) -> Model | None:
         """
         Retrieve a Model from the Intel® Geti™ server, corresponding to a specific
         algorithm and model version. If no version is passed, this method will
@@ -220,23 +205,20 @@ class ModelClient:
             specific `task`, if any. If no model is found by those parameters, this
             method returns None
         """
-        if task is not None:
-            if algorithm.task != task.type:
-                raise ValueError(
-                    f"Unable to retrieve model. The algorithm {algorithm} is not "
-                    f"available for the task {task}"
-                )
+        if task is not None and algorithm.task != task.type:
+            raise ValueError(
+                f"Unable to retrieve model. The algorithm {algorithm} is not available for the task {task}"
+            )
         model_groups = self.get_all_model_groups()
-        model_group: Optional[ModelGroup] = None
+        model_group: ModelGroup | None = None
         for group in model_groups:
             if group.algorithm == algorithm:
                 if task is None:
                     model_group = group
                     break
-                else:
-                    if group.task_id == task.id:
-                        model_group = group
-                        break
+                if group.task_id == task.id:
+                    model_group = group
+                    break
         if model_group is None:
             return None
         if version is not None:
@@ -258,15 +240,13 @@ class ModelClient:
         :param model_id: Unique database ID of the model to get
         :return: Model instance holding detailed information about the model
         """
-        model_detail = self.session.get_rest_response(
-            url=f"{self.base_url}/{group_id}/models/{model_id}", method="GET"
-        )
+        model_detail = self.session.get_rest_response(url=f"{self.base_url}/{group_id}/models/{model_id}", method="GET")
         model = ModelRESTConverter.model_from_dict(model_detail)
         model.model_group_id = group_id
         model.base_url = self.base_url
         return model
 
-    def update_model_detail(self, model: Union[Model, ModelSummary]) -> Model:
+    def update_model_detail(self, model: Model | ModelSummary) -> Model:
         """
         Update the model such that its details are up to date. This includes updating
         the list of available optimized models for the model.
@@ -280,12 +260,9 @@ class ModelClient:
             group_id = model.model_group_id
         else:
             raise TypeError(
-                f"Invalid type {type(model)}. Argument `model` must be either a "
-                f"Model or ModelSummary object"
+                f"Invalid type {type(model)}. Argument `model` must be either a Model or ModelSummary object"
             )
-        model_detail = self.session.get_rest_response(
-            url=f"{self.base_url}/{group_id}/models/{model.id}", method="GET"
-        )
+        model_detail = self.session.get_rest_response(url=f"{self.base_url}/{group_id}/models/{model.id}", method="GET")
         updated_model = ModelRESTConverter.model_from_dict(model_detail)
         updated_model.model_group_id = group_id
         updated_model.base_url = self.base_url
@@ -293,8 +270,8 @@ class ModelClient:
 
     def set_active_model(
         self,
-        model: Optional[Union[Model, ModelSummary]] = None,
-        algorithm: Optional[Union[Algorithm, str]] = None,
+        model: Model | ModelSummary | None = None,
+        algorithm: Algorithm | str | None = None,
     ) -> None:
         """
         Set the model as the active model.
@@ -321,9 +298,7 @@ class ModelClient:
                     "either a string representing the algorith name or an Algorithm object"
                 )
         else:
-            raise ValueError(
-                "Either `model` or `algorithm` must be specified to set the active model"
-            )
+            raise ValueError("Either `model` or `algorithm` must be specified to set the active model")
         # Now we make sure that the algorithm is supported in the project
         algorithms_supported_in_the_project = {
             algorithm.name
@@ -331,10 +306,7 @@ class ModelClient:
             for algorithm in self.supported_algos.get_by_task_type(task.type)
         }
         if algorithm_name not in algorithms_supported_in_the_project:
-            raise ValueError(
-                f"Algorithm `{algorithm_name}` is not supported in the project "
-                f"{self.project.name}."
-            )
+            raise ValueError(f"Algorithm `{algorithm_name}` is not supported in the project {self.project.name}.")
         # We get a model group for the algorithm
         model_group = self.get_model_group_by_algo_name(algorithm_name=algorithm_name)
         model_group_id = model_group.id if model_group is not None else None
@@ -345,7 +317,7 @@ class ModelClient:
         _ = self.session.get_rest_response(url=url, method="POST")
         logging.info(f"{algorithm_name} model set as active successfully")
 
-    def get_active_model_for_task(self, task: Task) -> Optional[Model]:
+    def get_active_model_for_task(self, task: Task) -> Model | None:
         """
         Return the Model details for the currently active model, for a task if any.
         If the task does not have any trained models, this method returns None
@@ -355,34 +327,30 @@ class ModelClient:
             Intel® Geti™ project, if any
         """
         model_groups = self.get_all_model_groups()
-        model_id: Optional[str] = None
-        group_id: Optional[str] = None
+        model_id: str | None = None
+        group_id: str | None = None
         for group in model_groups:
             if not group.has_trained_models:
                 continue
             if group.algorithm.task != task.type:
                 continue
             model_summary = group.get_latest_model()
-            if model_summary is not None:
-                if model_summary.active_model:
-                    model_id = model_summary.id
-                    group_id = group.id
-                    break
+            if model_summary is not None and model_summary.active_model:
+                model_id = model_summary.id
+                group_id = group.id
+                break
         if model_id is not None:
             return self._get_model_detail(group_id=group_id, model_id=model_id)
-        else:
-            # Sometimes the `active_model` flag is not set by the server, even though
-            # there is a model available for the task. In that case we fall back to
-            # returning the latest model in the available model group
-            if len(model_groups) == 1:
-                model_summary_no_active_check = model_groups[0].get_latest_model()
-                if model_summary_no_active_check is not None:
-                    model_id = model_summary_no_active_check.id
-                    group_id = model_groups[0].id
-                    if model_id is not None:
-                        return self._get_model_detail(
-                            group_id=group_id, model_id=model_id
-                        )
+        # Sometimes the `active_model` flag is not set by the server, even though
+        # there is a model available for the task. In that case we fall back to
+        # returning the latest model in the available model group
+        if len(model_groups) == 1:
+            model_summary_no_active_check = model_groups[0].get_latest_model()
+            if model_summary_no_active_check is not None:
+                model_id = model_summary_no_active_check.id
+                group_id = model_groups[0].id
+                if model_id is not None:
+                    return self._get_model_detail(group_id=group_id, model_id=model_id)
         return None
 
     def _download_model(self, model: ModelType, path_to_folder: str) -> ModelType:
@@ -404,12 +372,8 @@ class ModelClient:
             )
             filename = f"{model.name}_{model.optimization_type}_optimized.zip"
         else:
-            raise ValueError(
-                f"Invalid model type: `{type(model)}. Unable to download model data."
-            )
-        response = self.session.get_rest_response(
-            url=url, method="GET", contenttype="zip"
-        )
+            raise ValueError(f"Invalid model type: `{type(model)}. Unable to download model data.")
+        response = self.session.get_rest_response(url=url, method="GET", contenttype="zip")
         model_folder = os.path.join(path_to_folder, "models")
         os.makedirs(model_folder, exist_ok=True, mode=0o770)
         model_filepath = os.path.join(model_folder, filename)
@@ -417,9 +381,7 @@ class ModelClient:
             f.write(response.content)
         return model
 
-    def download_active_model_for_task(
-        self, path_to_folder: str, task: Task
-    ) -> Optional[Model]:
+    def download_active_model_for_task(self, path_to_folder: str, task: Task) -> Model | None:
         """
         Download the currently active model for the task.
         If the task does not have an active model yet, this method returns None
@@ -436,8 +398,7 @@ class ModelClient:
         model = self.get_active_model_for_task(task=task)
         if model is None:
             logging.info(
-                f"Project '{self.project.name} does not have any trained models yet, "
-                f"unable to download active model."
+                f"Project '{self.project.name} does not have any trained models yet, unable to download active model."
             )
             return None
         model_filepath = os.path.join(path_to_folder, "models")
@@ -448,14 +409,12 @@ class ModelClient:
         self._download_model(model, path_to_folder=path_to_folder)
         for optimized_model in model.optimized_models:
             self._download_model(optimized_model, path_to_folder=path_to_folder)
-        model_info_filepath = os.path.join(
-            model_filepath, f"{task.type}_model_details.json"
-        )
+        model_info_filepath = os.path.join(model_filepath, f"{task.type}_model_details.json")
         with open(model_info_filepath, "w") as f:
             json.dump(model.to_dict(), f, indent=4)
         return model
 
-    def get_all_active_models(self) -> List[Optional[Model]]:
+    def get_all_active_models(self) -> list[Model | None]:
         """
         Return the Model details for the active model for all tasks in the project,
         if the tasks have any.
@@ -469,12 +428,9 @@ class ModelClient:
         :return: Model object representing the currently active model for the task in
             the Intel® Geti™ project, if any
         """
-        return [
-            self.get_active_model_for_task(task=task)
-            for task in self.project.get_trainable_tasks()
-        ]
+        return [self.get_active_model_for_task(task=task) for task in self.project.get_trainable_tasks()]
 
-    def download_all_active_models(self, path_to_folder: str) -> List[Optional[Model]]:
+    def download_all_active_models(self, path_to_folder: str) -> list[Model | None]:
         """
         Download the active models for all tasks in the project.
 
@@ -489,9 +445,7 @@ class ModelClient:
             trainable tasks for the project.
         """
         return [
-            self.download_active_model_for_task(
-                path_to_folder=path_to_folder, task=task
-            )
+            self.download_active_model_for_task(path_to_folder=path_to_folder, task=task)
             for task in self.project.get_trainable_tasks()
         ]
 
@@ -520,26 +474,15 @@ class ModelClient:
         metadata = job.metadata
         task_data = metadata.task
         version = task_data.model_version
-        algorithm = self.supported_algos.get_by_model_manifest_id(
-            task_data.model_template_id
-        )
+        algorithm = self.supported_algos.get_by_model_manifest_id(task_data.model_template_id)
         if hasattr(task_data, "name") and job.type in (
             JobType.TRAIN,
             JobType.INFERENCE,
             JobType.EVALUATE,
         ):
             task_name = task_data.name
-            task = next(
-                (
-                    task
-                    for task in self.project.get_trainable_tasks()
-                    if task.title == task_name
-                )
-            )
-            model = self.get_model_by_algorithm_task_and_version(
-                algorithm=algorithm, version=version, task=task
-            )
-            return model
+            task = next(task for task in self.project.get_trainable_tasks() if task.title == task_name)
+            return self.get_model_by_algorithm_task_and_version(algorithm=algorithm, version=version, task=task)
         if job.type == JobType.OPTIMIZATION:
             model_group_id, optimized_model_id = None, None
             if hasattr(metadata, "model_group_id"):
@@ -553,7 +496,7 @@ class ModelClient:
             f"the model for this job type is not supported. "
         )
 
-    def get_task_for_model(self, model: Union[Model, OptimizedModel]) -> Task:
+    def get_task_for_model(self, model: Model | OptimizedModel) -> Task:
         """
         Return the task to which a certain model belongs, if possible. This method only
         works when the model identifiers are still in place, if they have been stripped
@@ -567,37 +510,28 @@ class ModelClient:
         """
         project_model_groups = self.get_all_model_groups()
         tasks = self.project.get_trainable_tasks()
-        model_group: Optional[ModelGroup] = None
-        error_msg = (
-            f"Unable to match model '{model}' to any task in project {self.project}. "
-        )
+        model_group: ModelGroup | None = None
+        error_msg = f"Unable to match model '{model}' to any task in project {self.project}. "
         if model.model_group_id is None:
-            raise ValueError(
-                error_msg + "The model does not contain a model group identifier"
-            )
+            raise ValueError(error_msg + "The model does not contain a model group identifier")
         for group in project_model_groups:
             if group.id == model.model_group_id:
                 model_group = group
                 break
         if model_group is None:
-            raise ValueError(
-                error_msg + "The model does not belong to any of the model groups in "
-                "the project."
-            )
-        else:
-            task_id = model_group.task_id
-            model_task: Optional[Task] = None
-            for task in tasks:
-                if task.id == task_id:
-                    model_task = task
-                    break
+            raise ValueError(error_msg + "The model does not belong to any of the model groups in the project.")
+        task_id = model_group.task_id
+        model_task: Task | None = None
+        for task in tasks:
+            if task.id == task_id:
+                model_task = task
+                break
         if model_task is None:
             raise ValueError(
                 error_msg + f"Model was found on the server but could not be linked "
                 f"to specific task for 'task_id={model_group.task_id}'."
             )
-        else:
-            return model_task
+        return model_task
 
     def optimize_model(self, model: Model, optimization_type: str = "pot") -> Job:
         """
@@ -611,8 +545,7 @@ class ModelClient:
         """
         if isinstance(model, OptimizedModel):
             raise ValueError(
-                f"Model {model.name} is already optimized, please specify a base "
-                f"model for optimization instead."
+                f"Model {model.name} is already optimized, please specify a base model for optimization instead."
             )
         valid_optimization_types = ["pot"]
         optimization_type = optimization_type.lower()
@@ -623,18 +556,15 @@ class ModelClient:
             )
         optimize_model_url = model.base_url + ":optimize"
         payload = {}
-        response = self.session.get_rest_response(
-            url=optimize_model_url, method="POST", data=payload
-        )
-        job = get_job_with_timeout(
+        response = self.session.get_rest_response(url=optimize_model_url, method="POST", data=payload)
+        return get_job_with_timeout(
             job_id=response["job_id"],
             session=self.session,
             workspace_id=self.workspace_id,
             job_type="optimization",
         )
-        return job
 
-    def purge_model(self, model: Union[Model, ModelSummary]) -> None:
+    def purge_model(self, model: Model | ModelSummary) -> None:
         """
         Purge the model from the Intel® Geti™ server.
 
@@ -648,9 +578,7 @@ class ModelClient:
         """
         model = self.update_model_detail(model)
         if model.base_url is None:
-            raise ValueError(
-                f"Model {model.name} does not have a base_url. Unable to purge the model."
-            )
+            raise ValueError(f"Model {model.name} does not have a base_url. Unable to purge the model.")
         purge_model_url = model.base_url + ":purge"
         response = self.session.get_rest_response(
             url=purge_model_url,
@@ -674,6 +602,4 @@ class ModelClient:
             the server to update the status of the jobs. Defaults to 15 seconds
         :return: job with it's status updated
         """
-        return monitor_job(
-            session=self.session, job=job, timeout=timeout, interval=interval
-        )
+        return monitor_job(session=self.session, job=job, timeout=timeout, interval=interval)

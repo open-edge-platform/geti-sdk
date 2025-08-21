@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import List, Optional
 
 import attr
 
@@ -67,12 +66,10 @@ class ModelInfo:
     n_labels: int
     task_type: str = attr.field(converter=str_to_task_type)
     template_id: str
-    optimization_type: str = attr.field(
-        converter=str_to_enum_converter(OptimizationType)
-    )
+    optimization_type: str = attr.field(converter=str_to_enum_converter(OptimizationType))
     version: int
-    precision: Optional[List[str]] = None  # Added in Geti v1.9
-    task_id: Optional[str] = None  # Added in Geti v2.0
+    precision: list[str] | None = None  # Added in Geti v1.9
+    task_id: str | None = None  # Added in Geti v2.0
 
 
 @attr.define()
@@ -87,7 +84,7 @@ class Score:
 
     name: str
     value: float
-    label_id: Optional[str] = None
+    label_id: str | None = None
 
 
 @attr.define()
@@ -97,13 +94,13 @@ class TestResult:
     model and dataset in an Intel® Geti™ project
     """
 
-    datasets_info: List[DatasetInfo]
+    datasets_info: list[DatasetInfo]
     id: str
     job_info: JobInfo
     model_info: ModelInfo
     name: str
-    scores: List[Score]
-    creation_time: Optional[str] = attr.field(default=None, converter=str_to_datetime)
+    scores: list[Score]
+    creation_time: str | None = attr.field(default=None, converter=str_to_datetime)
 
     def get_mean_score(self) -> Score:
         """
@@ -112,8 +109,5 @@ class TestResult:
         :return: Mean score on the dataset
         """
         if not self.job_info.is_done:
-            raise ValueError(
-                "Unable to retrieve mean model score, the model testing job is not "
-                "finished yet."
-            )
+            raise ValueError("Unable to retrieve mean model score, the model testing job is not finished yet.")
         return [score for score in self.scores if score.label_id is None][0]

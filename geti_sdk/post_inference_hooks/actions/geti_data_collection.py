@@ -15,7 +15,7 @@ import copy
 import logging
 import warnings
 from datetime import datetime
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import attrs
 import cv2
@@ -56,8 +56,8 @@ class GetiDataCollection(PostInferenceAction):
         self,
         session: GetiSession,
         workspace_id: str,
-        project: Union[str, Project],
-        dataset: Optional[Union[str, Dataset]] = None,
+        project: str | Project,
+        dataset: str | Dataset | None = None,
         log_level: str = "debug",
     ):
         super().__init__(log_level=log_level)
@@ -71,9 +71,7 @@ class GetiDataCollection(PostInferenceAction):
                     f"server, unable to initialize the Intel® Geti™ data collection "
                     f"action"
                 )
-        dataset_client = DatasetClient(
-            session=session, workspace_id=workspace_id, project=project
-        )
+        dataset_client = DatasetClient(session=session, workspace_id=workspace_id, project=project)
         if dataset is None:
             datasets = dataset_client.get_all_datasets()
             dataset = [ds for ds in datasets if ds.use_for_training][0]
@@ -84,17 +82,11 @@ class GetiDataCollection(PostInferenceAction):
                 dataset = dataset_client.get_dataset_by_name(dataset_name)
             except ValueError:
                 dataset = dataset_client.create_dataset(dataset_name)
-                self.log_function(
-                    f"Dataset `{dataset_name}` was created in project `{project.name}`"
-                )
-        self.image_client = ImageClient(
-            session=session, workspace_id=workspace_id, project=project
-        )
+                self.log_function(f"Dataset `{dataset_name}` was created in project `{project.name}`")
+        self.image_client = ImageClient(session=session, workspace_id=workspace_id, project=project)
         self.dataset = dataset
         self._repr_info_ = (
-            f"target_server=`{session.config.host}`, "
-            f"target_project={project.name}, "
-            f"target_dataset={dataset.name}"
+            f"target_server=`{session.config.host}`, target_project={project.name}, target_dataset={dataset.name}"
         )
 
         # Serialize input arguments
@@ -106,9 +98,9 @@ class GetiDataCollection(PostInferenceAction):
         self,
         image: np.ndarray,
         prediction: Prediction,
-        score: Optional[float] = None,
-        name: Optional[str] = None,
-        timestamp: Optional[datetime] = None,
+        score: float | None = None,
+        name: str | None = None,
+        timestamp: datetime | None = None,
     ):
         """
         Execute the action, upload the given `image` to the Intel® Geti™ server.
@@ -131,13 +123,10 @@ class GetiDataCollection(PostInferenceAction):
             self.image_client.upload_image(image=image_bgr, dataset=self.dataset)
         except GetiRequestException as e:
             logging.exception(e)
-        self.log_function(
-            f"GetiDataCollection inference action uploaded image to dataset "
-            f"`{self.dataset.name}`"
-        )
+        self.log_function(f"GetiDataCollection inference action uploaded image to dataset `{self.dataset.name}`")
 
     @classmethod
-    def from_dict(cls, input_dict: Dict[str, Any]) -> "GetiDataCollection":
+    def from_dict(cls, input_dict: dict[str, Any]) -> "GetiDataCollection":
         """
         Construct a GetiDataCollection post inference action object from an input
         dictionary `input_dict`
@@ -152,14 +141,12 @@ class GetiDataCollection(PostInferenceAction):
         elif "token" in session_dict:
             server_config_class = ServerTokenConfig
         else:
-            raise ValueError(
-                f"Invalid `GetiSession` parameters encountered: {session_dict}"
-            )
+            raise ValueError(f"Invalid `GetiSession` parameters encountered: {session_dict}")
         session = GetiSession(server_config_class(**session_dict))
         input_copy.update({"session": session})
         return cls(**input_copy)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return a dictionary representation of the PostInferenceObject
 

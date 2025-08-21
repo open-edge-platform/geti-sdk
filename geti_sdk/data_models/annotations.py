@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import ClassVar, List, Optional, Sequence, Union
+from collections.abc import Sequence
+from typing import ClassVar
 
 import attr
 
@@ -42,11 +43,11 @@ class Annotation:
 
     _identifier_fields: ClassVar[str] = ["id", "modified"]
 
-    labels: List[ScoredLabel]
-    shape: Union[Rectangle, Ellipse, Polygon, RotatedRectangle, Keypoint]
-    modified: Optional[str] = attr.field(converter=str_to_datetime, default=None)
-    id: Optional[str] = None
-    labels_to_revisit: Optional[List[str]] = None
+    labels: list[ScoredLabel]
+    shape: Rectangle | Ellipse | Polygon | RotatedRectangle | Keypoint
+    modified: str | None = attr.field(converter=str_to_datetime, default=None)
+    id: str | None = None
+    labels_to_revisit: list[str] | None = None
 
     def deidentify(self) -> None:
         """
@@ -58,7 +59,7 @@ class Annotation:
             deidentify(label)
 
     @property
-    def label_names(self) -> List[str]:
+    def label_names(self) -> list[str]:
         """
         Return a list of label names for this Annotation.
         """
@@ -73,7 +74,7 @@ class Annotation:
         """
         self.labels.append(label)
 
-    def extend_labels(self, labels: List[ScoredLabel]) -> None:
+    def extend_labels(self, labels: list[ScoredLabel]) -> None:
         """
         Add a list of labels to the labels already attached to this annotation.
 
@@ -96,7 +97,7 @@ class Annotation:
         if index is not None:
             self.labels.pop(index)
 
-    def map_labels(self, labels: Sequence[Union[ScoredLabel, Label]]) -> "Annotation":
+    def map_labels(self, labels: Sequence[ScoredLabel | Label]) -> "Annotation":
         """
         Attempt to map the labels found in `labels` to those in the Annotation
         instance. Labels are matched by name. This method will return a new
@@ -109,7 +110,7 @@ class Annotation:
         mapped_label_names = [label.name for label in labels]
         mapped_label_ids = [label.id for label in labels]
 
-        new_labels: List[ScoredLabel] = []
+        new_labels: list[ScoredLabel] = []
         for label in self.labels:
             if label.name in mapped_label_names:
                 label_index = mapped_label_names.index(label.name)
@@ -122,11 +123,7 @@ class Annotation:
                         source=label.source,
                     )
                 )
-        new_labels_to_revisit = [
-            new_label.id
-            for new_label in new_labels
-            if new_label.id in self.labels_to_revisit
-        ]
+        new_labels_to_revisit = [new_label.id for new_label in new_labels if new_label.id in self.labels_to_revisit]
         return Annotation(
             labels=new_labels,
             shape=self.shape,

@@ -16,7 +16,7 @@ import datetime
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from threading import BoundedSemaphore
-from typing import Any, Dict, Optional
+from typing import Any
 
 import numpy as np
 
@@ -72,19 +72,16 @@ class PostInferenceHook(PostInferenceHookInterface):
         super().__init__(trigger=trigger, action=action)
 
         self.parallel_execution = max_threads != 0
-        self._semaphore: Optional[BoundedSemaphore] = None
+        self._semaphore: BoundedSemaphore | None = None
 
         if self.parallel_execution:
             self.executor = ThreadPoolExecutor(max_workers=max_threads)
-            logging.debug(
-                f"Parallel inference hook execution enabled, using a maximum of "
-                f"{max_threads} threads."
-            )
+            logging.debug(f"Parallel inference hook execution enabled, using a maximum of {max_threads} threads.")
             if queue_limit > 0:
                 self._semaphore = BoundedSemaphore(queue_limit + max_threads)
 
         if limit_action_rate:
-            self.rate_limiter: Optional[RateLimiter] = RateLimiter(
+            self.rate_limiter: RateLimiter | None = RateLimiter(
                 frames_per_second=max_frames_per_second, is_blocking=False
             )
         else:
@@ -94,8 +91,8 @@ class PostInferenceHook(PostInferenceHookInterface):
         self,
         image: np.ndarray,
         prediction: Prediction,
-        name: Optional[str] = None,
-        timestamp: Optional[datetime.datetime] = None,
+        name: str | None = None,
+        timestamp: datetime.datetime | None = None,
     ) -> None:
         """
         Run the post inference hook. First evaluate the trigger, then execute the
@@ -109,20 +106,13 @@ class PostInferenceHook(PostInferenceHookInterface):
         :param timestamp: Optional timestamp belonging to the image
         """
 
-        def execution_function(
-            im: np.ndarray, pred: Prediction, ts: datetime.datetime
-        ) -> None:
+        def execution_function(im: np.ndarray, pred: Prediction, ts: datetime.datetime) -> None:
             score = self.trigger(image=im, prediction=pred)
             decision = self.trigger.get_decision(score=score)
             if decision:
-                if self.rate_limiter is not None:
-                    take_action = next(self.rate_limiter)
-                else:
-                    take_action = True
+                take_action = next(self.rate_limiter) if self.rate_limiter is not None else True
                 if take_action:
-                    self.action(
-                        image=im, prediction=pred, score=score, name=name, timestamp=ts
-                    )
+                    self.action(image=im, prediction=pred, score=score, name=name, timestamp=ts)
 
         if timestamp is None:
             timestamp = datetime.datetime.now()
@@ -130,9 +120,7 @@ class PostInferenceHook(PostInferenceHookInterface):
             if self._semaphore is not None:
                 self._semaphore.acquire()
             try:
-                future = self.executor.submit(
-                    execution_function, image, prediction, timestamp
-                )
+                future = self.executor.submit(execution_function, image, prediction, timestamp)
             except Exception as error:
                 if self._semaphore is not None:
                     self._semaphore.release()
@@ -159,10 +147,7 @@ class PostInferenceHook(PostInferenceHookInterface):
         """
         rate_msg = ""
         if self.rate_limiter is not None:
-            rate_msg = (
-                f"Action rate limited to {1 / self.rate_limiter.interval:.1f} "
-                f"frames per second."
-            )
+            rate_msg = f"Action rate limited to {1 / self.rate_limiter.interval:.1f} frames per second."
         thread_msg = ""
         if self.parallel_execution:
             thread_msg = "Multithreaded execution enabled."
@@ -173,7 +158,7 @@ class PostInferenceHook(PostInferenceHookInterface):
         return f"PostInferenceHook(trigger={self.trigger}, action={self.action}){suffix_msg}"
 
     @classmethod
-    def from_dict(cls, input_dict: Dict[str, Any]) -> "PostInferenceHook":
+    def from_dict(cls, input_dict: dict[str, Any]) -> "PostInferenceHook":
         """
         Create a PostInferenceHook object from it's dictionary representation
 

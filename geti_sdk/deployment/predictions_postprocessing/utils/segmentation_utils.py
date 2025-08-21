@@ -13,7 +13,7 @@
 # in the License.
 import logging
 from copy import copy
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Optional, cast
 
 import cv2
 import numpy as np
@@ -24,11 +24,11 @@ from geti_sdk.data_models.shapes import Point, Polygon
 
 logger = logging.getLogger(__name__)
 
-Contour = List[Tuple[float, float]]
-ContourInternal = Optional[List[Tuple[float, float]]]
+Contour = list[tuple[float, float]]
+ContourInternal = Optional[list[tuple[float, float]]]  # noqa: UP045
 
 
-def get_subcontours(contour: Contour) -> List[Contour]:
+def get_subcontours(contour: Contour) -> list[Contour]:
     """
     Split contour into sub-contours that do not have self intersections.
 
@@ -36,11 +36,9 @@ def get_subcontours(contour: Contour) -> List[Contour]:
     :return: list of sub-contours
     """
 
-    def find_loops(points: ContourInternal) -> List:
+    def find_loops(points: ContourInternal) -> list:
         """For each consecutive pair of equivalent rows in the input matrix returns their indices."""
-        _, inverse, count = np.unique(
-            points, axis=0, return_inverse=True, return_counts=True
-        )  # type: ignore
+        _, inverse, count = np.unique(points, axis=0, return_inverse=True, return_counts=True)  # type: ignore
         duplicates = np.where(count > 1)[0]
         indices = []
         for x in duplicates:
@@ -49,27 +47,27 @@ def get_subcontours(contour: Contour) -> List[Contour]:
                 indices.append(y[i : i + 2])
         return indices
 
-    base_contour = cast(ContourInternal, copy(contour))
+    base_contour = cast("ContourInternal", copy(contour))
 
     # Make sure that contour is closed.
     if not np.array_equal(base_contour[0], base_contour[-1]):  # type: ignore
         base_contour.append(base_contour[0])
 
-    subcontours: List[Contour] = []
+    subcontours: list[Contour] = []
     loops = sorted(find_loops(base_contour), key=lambda x: x[0], reverse=True)
     for loop in loops:
         i, j = loop
         subcontour = base_contour[i:j]
         subcontour = [x for x in subcontour if x is not None]
-        subcontours.append(cast(Contour, subcontour))
+        subcontours.append(cast("Contour", subcontour))
         base_contour[i:j] = [None] * (j - i)
 
     return [i for i in subcontours if len(i) > 2]
 
 
 def create_annotation_from_segmentation_map(
-    hard_prediction: np.ndarray, soft_prediction: np.ndarray, label_map: Dict
-) -> List[Annotation]:
+    hard_prediction: np.ndarray, soft_prediction: np.ndarray, label_map: dict
+) -> list[Annotation]:
     """
     Create polygons from the soft predictions.
 
@@ -91,7 +89,7 @@ def create_annotation_from_segmentation_map(
     img_class = hard_prediction.swapaxes(0, 1)
 
     # pylint: disable=too-many-nested-blocks
-    annotations: List[Annotation] = []
+    annotations: list[Annotation] = []
     for label_index, label in label_map.items():
         # Skip background
         if label_index == 0:
@@ -108,9 +106,7 @@ def create_annotation_from_segmentation_map(
 
         # Contour retrieval mode CCOMP (Connected components) creates a two-level
         # hierarchy of contours
-        contours, hierarchies = cv2.findContours(
-            label_index_map, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE
-        )
+        contours, hierarchies = cv2.findContours(label_index_map, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
 
         if hierarchies is not None:
             for contour, hierarchy in zip(contours, hierarchies[0]):

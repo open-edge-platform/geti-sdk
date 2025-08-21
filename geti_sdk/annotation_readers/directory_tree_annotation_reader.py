@@ -14,8 +14,8 @@
 import logging
 import os
 import warnings
+from collections.abc import Sequence
 from glob import glob
-from typing import Dict, List, Optional, Sequence, Set, Union
 
 from geti_sdk.annotation_readers import AnnotationReader
 from geti_sdk.data_models import Annotation, ScoredLabel, TaskType
@@ -43,37 +43,30 @@ class DirectoryTreeAnnotationReader(AnnotationReader):
     def __init__(
         self,
         base_data_folder: str,
-        subset_folder_names: Optional[Sequence[str]] = None,
-        task_type: Union[TaskType, str] = TaskType.CLASSIFICATION,
+        subset_folder_names: Sequence[str] | None = None,
+        task_type: TaskType | str = TaskType.CLASSIFICATION,
     ):
         if not task_type.is_global:
-            raise ValueError(
-                "The DirectoryTreeAnnotationReader only supports annotations for "
-                "global task types."
-            )
+            raise ValueError("The DirectoryTreeAnnotationReader only supports annotations for global task types.")
         super().__init__(
             base_data_folder=base_data_folder,
             annotation_format="directory",
             task_type=task_type,
         )
 
-        has_root_level_subsets = True if subset_folder_names is not None else False
+        has_root_level_subsets = subset_folder_names is not None
         if has_root_level_subsets:
-            self.target_data_dirs = [
-                os.path.join(base_data_folder, subset) for subset in subset_folder_names
-            ]
+            self.target_data_dirs = [os.path.join(base_data_folder, subset) for subset in subset_folder_names]
         else:
             self.target_data_dirs = [base_data_folder]
         # Label map is a dictionary mapping the root labels to new label names. It
         # can be used to filter or group the labels in the dataset
         self.has_filters_or_grouping = False
         self._original_labels = self.get_all_label_names()
-        self._label_map: Dict[str, str] = {
-            label: label for label in self._original_labels
-        }
+        self._label_map: dict[str, str] = {label: label for label in self._original_labels}
 
     @property
-    def label_map(self) -> Dict[str, str]:
+    def label_map(self) -> dict[str, str]:
         """
         Return the label map for the dataset, mapping the root label names (keys) to
         potential new label names (values). It is used to filter or group the dataset.
@@ -97,7 +90,7 @@ class DirectoryTreeAnnotationReader(AnnotationReader):
         media_information: MediaInformation,
         preserve_shape_for_global_labels: bool = False,
         image_name_as_full_path: bool = False,
-    ) -> List[Annotation]:
+    ) -> list[Annotation]:
         """
         Return the list of annotations for the media item with name `filename`
 
@@ -113,7 +106,7 @@ class DirectoryTreeAnnotationReader(AnnotationReader):
         :return: A list of Annotation objects for the media item
         """
         filepath = ""
-        annotations: List[Annotation] = []
+        annotations: list[Annotation] = []
         if image_name_as_full_path:
             label_matches = [os.path.basename(os.path.dirname(filename))]
             extension = filename[:-4]
@@ -126,16 +119,11 @@ class DirectoryTreeAnnotationReader(AnnotationReader):
                         filepath = full_name
                 if filepath == "":
                     raise ValueError(
-                        f"No valid image file found at path {filename}, unable to "
-                        f"generate annotation data."
+                        f"No valid image file found at path {filename}, unable to generate annotation data."
                     )
         else:
-            matches = glob(
-                os.path.join(self.base_folder, "**", f"{filename}.*"), recursive=True
-            )
-            label_matches = [
-                os.path.basename(os.path.dirname(match)) for match in matches
-            ]
+            matches = glob(os.path.join(self.base_folder, "**", f"{filename}.*"), recursive=True)
+            label_matches = [os.path.basename(os.path.dirname(match)) for match in matches]
             if len(label_matches) > 1:
                 warnings.warn(
                     f"Multiple matching labels found for image with "
@@ -167,41 +155,34 @@ class DirectoryTreeAnnotationReader(AnnotationReader):
         )
         return annotations
 
-    def get_all_label_names(self) -> List[str]:
+    def get_all_label_names(self) -> list[str]:
         """
         Identify all label names contained in the dataset
         """
-        label_names: Set[str] = set()
+        label_names: set[str] = set()
         for directory in self.target_data_dirs:
             for path, sub_directories, files in os.walk(directory):
                 for sub_directory in sub_directories:
-                    if self.has_filters_or_grouping:
-                        if sub_directory not in self.label_map.keys():
-                            continue
-                    if self.has_filters_or_grouping:
-                        label_name = self.label_map[sub_directory]
-                    else:
-                        label_name = sub_directory
+                    if self.has_filters_or_grouping and sub_directory not in self.label_map:
+                        continue
+                    label_name = self.label_map[sub_directory] if self.has_filters_or_grouping else sub_directory
                     label_names.add(label_name)
         return list(label_names)
 
-    def get_data_filenames(self) -> List[str]:
+    def get_data_filenames(self) -> list[str]:
         """
         Return a list of annotated media files found in the dataset.
 
         :return: List of filenames (excluding extension) for all annotated files in
             the data folder
         """
-        data_file_paths: List[str] = []
+        data_file_paths: list[str] = []
         for directory in self.target_data_dirs:
             for path, sub_directories, files in os.walk(directory):
                 for name in files:
-                    if self.has_filters_or_grouping:
-                        if os.path.basename(path) not in self.label_map.keys():
-                            continue
-                    data_file_paths.append(
-                        os.path.join(path, os.path.splitext(name)[0])
-                    )
+                    if self.has_filters_or_grouping and os.path.basename(path) not in self.label_map:
+                        continue
+                    data_file_paths.append(os.path.join(path, os.path.splitext(name)[0]))
         return data_file_paths
 
     def filter_dataset(self, labels: Sequence[str], criterion: str = "OR") -> None:
@@ -215,7 +196,7 @@ class DirectoryTreeAnnotationReader(AnnotationReader):
         self.applied_filters.append({"labels": labels, "criterion": criterion})
         self.has_filters_or_grouping = True
 
-    def group_labels(self, labels_to_group: List[str], group_name: str) -> None:
+    def group_labels(self, labels_to_group: list[str], group_name: str) -> None:
         """
         Group multiple labels into one. Grouping converts the list of labels into one
         single label named `group_name`.
@@ -231,20 +212,18 @@ class DirectoryTreeAnnotationReader(AnnotationReader):
                 self._label_map.update({org_label_name: group_name})
         self.has_filters_or_grouping = True
 
-    def get_annotation_stats(self) -> Dict[str, Dict[str, int]]:
+    def get_annotation_stats(self) -> dict[str, dict[str, int]]:
         """
         Return the image counts per label in the dataset.
 
         :return: Dictionary containing label names as keys, and as values:
             - n_images: Number of images containing this label
         """
-        label_statistics: Dict[str, Dict[str, int]] = {}
+        label_statistics: dict[str, dict[str, int]] = {}
         label_names = self.get_all_label_names()
         for label in label_names:
             label_statistics[label] = {"n_images": 0}
         for item_filepath in self.get_data_filenames():
-            item_label = self.label_map[
-                os.path.basename(os.path.dirname(item_filepath))
-            ]
+            item_label = self.label_map[os.path.basename(os.path.dirname(item_filepath))]
             label_statistics[item_label]["n_images"] += 1
         return label_statistics

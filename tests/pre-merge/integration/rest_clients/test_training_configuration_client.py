@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import List
 
 import pytest
 
@@ -23,7 +22,7 @@ from tests.helpers.project_service import ProjectService
 class TestConfigurationClient:
     @pytest.mark.vcr()
     def test_get_and_set_training_configuration(
-        self, fxt_project_service: ProjectService, fxt_default_labels: List[str]
+        self, fxt_project_service: ProjectService, fxt_default_labels: list[str]
     ):
         """
         Verifies that getting and setting the training configuration for a single task project
@@ -43,16 +42,10 @@ class TestConfigurationClient:
         )
         task = project.get_trainable_tasks()[0]
         model_client = fxt_project_service.model_client
-        model_manifest = model_client.supported_algos.get_default_for_task_type(
-            task_type=task.type
-        )
+        model_manifest = model_client.supported_algos.get_default_for_task_type(task_type=task.type)
 
-        training_configuration_client = (
-            fxt_project_service.training_configuration_client
-        )
-        config = training_configuration_client.get_configuration(
-            model_manifest_id=model_manifest.model_manifest_id
-        )
+        training_configuration_client = fxt_project_service.training_configuration_client
+        config = training_configuration_client.get_configuration(model_manifest_id=model_manifest.model_manifest_id)
         assert config.hyperparameters.training.learning_rate > 0.0
 
         new_lr = config.hyperparameters.training.learning_rate + 0.001
@@ -61,9 +54,7 @@ class TestConfigurationClient:
         config.hyperparameters.training.max_epochs = new_max_epochs
         training_configuration_client.set_configuration(config)
 
-        config = training_configuration_client.get_configuration(
-            model_manifest_id=model_manifest.model_manifest_id
-        )
+        config = training_configuration_client.get_configuration(model_manifest_id=model_manifest.model_manifest_id)
 
         assert config.hyperparameters.training.learning_rate == new_lr
         assert config.hyperparameters.training.max_epochs == new_max_epochs

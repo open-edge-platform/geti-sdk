@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, Dict, Optional, Type, TypeVar, cast, get_args
+from typing import Any, TypeVar, cast, get_args
 
 from attr import fields, has
 from omegaconf import OmegaConf
@@ -21,9 +21,7 @@ from omegaconf.errors import ConfigKeyError, ConfigTypeError, MissingMandatoryVa
 OutputTypeVar = TypeVar("OutputTypeVar")
 
 
-def deserialize_dictionary(
-    input_dictionary: Dict[str, Any], output_type: Type[OutputTypeVar]
-) -> OutputTypeVar:
+def deserialize_dictionary(input_dictionary: dict[str, Any], output_type: type[OutputTypeVar]) -> OutputTypeVar:
     """
     Deserialize an `input_dictionary` to an object of the type passed in `output_type`.
 
@@ -34,7 +32,7 @@ def deserialize_dictionary(
         `input_dictionary`.
     """
 
-    def prune_dict(data: dict, cls: Type[Any]) -> dict:
+    def prune_dict(data: dict, cls: type[Any]) -> dict:
         """Recursively prune a dictionary to match the structure of an attr class."""
         pruned_data = {}
         for attribute in fields(cls):
@@ -56,10 +54,10 @@ def deserialize_dictionary(
     filtered_input_dictionary = prune_dict(input_dictionary, output_type)
     model_dict_config = OmegaConf.create(filtered_input_dictionary)
     schema = OmegaConf.structured(output_type)
-    schema_error: Optional[DataModelMismatchException] = None
+    schema_error: DataModelMismatchException | None = None
     try:
         values = OmegaConf.merge(schema, model_dict_config)
-        output = cast(output_type, OmegaConf.to_object(values))
+        output = cast("output_type", OmegaConf.to_object(values))
     except (ConfigKeyError, MissingMandatoryValue, ConfigTypeError) as error:
         schema_error = DataModelMismatchException(
             input_dictionary=filtered_input_dictionary,
@@ -90,9 +88,9 @@ class DataModelMismatchException(BaseException):
     def __init__(
         self,
         input_dictionary: dict,
-        output_data_model: Type,
+        output_data_model: type,
         message: str,
-        error_type: Type,
+        error_type: type,
     ) -> None:
         self.output_data_model = output_data_model
         self.message = message

@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import ClassVar, Dict, List, Optional
+from typing import ClassVar
 
 import attr
 
@@ -35,12 +35,12 @@ class Dataset:
     """
 
     _identifier_fields: ClassVar[str] = ["id", "creation_time"]
-    _GET_only_fields: ClassVar[List[str]] = ["use_for_training", "creation_time"]
+    _GET_only_fields: ClassVar[list[str]] = ["use_for_training", "creation_time"]
 
     name: str
-    id: Optional[str] = None
-    creation_time: Optional[str] = attr.field(default=None, converter=str_to_datetime)
-    use_for_training: Optional[bool] = None
+    id: str | None = None
+    creation_time: str | None = attr.field(default=None, converter=str_to_datetime)
+    use_for_training: bool | None = None
 
     def deidentify(self) -> None:
         """
@@ -68,8 +68,8 @@ class TrainingDatasetStatistics:
 
     id: str
     creation_time: str = attr.field(converter=str_to_datetime)
-    subset_info: Dict[str, int]
-    dataset_info: Dict[str, int]
+    subset_info: dict[str, int]
+    dataset_info: dict[str, int]
 
     @property
     def training_size(self) -> int:

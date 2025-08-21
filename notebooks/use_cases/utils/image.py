@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import Union
 
 import cv2
 import numpy as np
@@ -21,9 +20,7 @@ from PIL import Image as PILImage
 from geti_sdk.data_models import Image
 
 
-def simulate_low_light_image(
-    image: Union[np.ndarray, Image], reduction_factor: float = 0.5
-) -> np.ndarray:
+def simulate_low_light_image(image: np.ndarray | Image, reduction_factor: float = 0.5) -> np.ndarray:
     """
     Simulate a reduced intensity and exposure time for an input image.
     It does so by reducing the image brightness and adding simulated shot noise to the
@@ -47,13 +44,11 @@ def simulate_low_light_image(
 
     # Add some shot noise to simulate reduced exposure time
     PEAK = 255 * reduction_factor
-    new_image_with_noise = np.clip(
-        np.random.poisson(new_image / 255.0 * PEAK) / PEAK * 255, 0, 255
-    ).astype("uint8")
-    return new_image_with_noise
+    rng = np.random.default_rng(seed=42)
+    return np.clip(rng.poisson(new_image / 255.0 * PEAK) / PEAK * 255, 0, 255).astype("uint8")
 
 
-def display_image_in_notebook(image: Union[np.ndarray, Image], bgr: bool = True):
+def display_image_in_notebook(image: np.ndarray | Image, bgr: bool = True):
     """
     Display an image inline in a Juypter notebook.
 
@@ -68,9 +63,6 @@ def display_image_in_notebook(image: Union[np.ndarray, Image], bgr: bool = True)
     else:
         raise TypeError(f"Unsupported image type '{type(image)}'")
 
-    if bgr:
-        result = cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB)
-    else:
-        result = new_image
+    result = cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB) if bgr else new_image
     img = PILImage.fromarray(result)
     display(img)

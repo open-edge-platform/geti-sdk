@@ -13,16 +13,18 @@
 # and limitations under the License.
 from collections import defaultdict
 from copy import deepcopy
-from typing import Any, Union
+from typing import Any
 
 from geti_sdk.data_models.configuration_models import (
     DatasetPreparationParameters as HyperparametersDatasetPreparationParameters,
+)
+from geti_sdk.data_models.configuration_models import (
     EvaluationParameters,
-    Hyperparameters,
-    TrainingHyperParameters,
     GlobalDatasetPreparationParameters,
     GlobalParameters,
+    Hyperparameters,
     TrainingConfiguration,
+    TrainingHyperParameters,
 )
 from geti_sdk.rest_converters.configurable_parameters_rest_converter import (
     ConfigurableParametersRESTConverter,
@@ -46,8 +48,8 @@ class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
     @classmethod
     def _dataset_preparation_to_rest(
         cls,
-        global_parameters: Union[GlobalParameters, None],
-        hyperparameters: Union[Hyperparameters, None],
+        global_parameters: GlobalParameters | None,
+        hyperparameters: Hyperparameters | None,
     ) -> dict[str, Any]:
         """
         Convert dataset preparation parameters from both global and hyperparameters to REST format.
@@ -78,18 +80,12 @@ class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
             if hyperparameters and hyperparameters.dataset_preparation
             else {}
         )
-        if not isinstance(global_parameters_rest, dict) or not isinstance(
-            hyperparameters_rest, dict
-        ):
-            raise ValueError(
-                "Expected dictionary for global and hyperparameters REST views"
-            )
+        if not isinstance(global_parameters_rest, dict) or not isinstance(hyperparameters_rest, dict):
+            raise ValueError("Expected dictionary for global and hyperparameters REST views")
         return global_parameters_rest | hyperparameters_rest
 
     @classmethod
-    def training_configuration_to_rest(
-        cls, training_configuration: TrainingConfiguration
-    ) -> dict[str, Any]:
+    def training_configuration_to_rest(cls, training_configuration: TrainingConfiguration) -> dict[str, Any]:
         """
         Convert a TrainingConfiguration object to its REST API representation.
 
@@ -106,8 +102,7 @@ class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
             cls.configurable_parameters_to_rest(
                 configurable_parameters=training_configuration.hyperparameters.training,
             )
-            if training_configuration.hyperparameters
-            and training_configuration.hyperparameters.training
+            if training_configuration.hyperparameters and training_configuration.hyperparameters.training
             else []
         )
 
@@ -137,29 +132,21 @@ class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
                 for TrainingConfiguration model validation, plus any additional fields from rest_input
         """
         rest_input = deepcopy(rest_input)
-        dataset_preparation = cls.configurable_parameters_from_rest(
-            rest_input.pop(DATASET_PREPARATION, {})
-        )
+        dataset_preparation = cls.configurable_parameters_from_rest(rest_input.pop(DATASET_PREPARATION, {}))
         training = cls.configurable_parameters_from_rest(rest_input.pop(TRAINING, {}))
-        evaluation = cls.configurable_parameters_from_rest(
-            rest_input.pop(EVALUATION, {})
-        )
+        evaluation = cls.configurable_parameters_from_rest(rest_input.pop(EVALUATION, {}))
 
         global_parameters: dict = defaultdict(dict)
         hyperparameters: dict = defaultdict(dict)
 
         for field, _ in GlobalDatasetPreparationParameters.model_fields.items():
-            global_parameters[DATASET_PREPARATION][field] = dataset_preparation.pop(
-                field, None
-            )
+            global_parameters[DATASET_PREPARATION][field] = dataset_preparation.pop(field, None)
 
         for (
             field,
             _,
         ) in HyperparametersDatasetPreparationParameters.model_fields.items():
-            hyperparameters[DATASET_PREPARATION][field] = dataset_preparation.pop(
-                field, None
-            )
+            hyperparameters[DATASET_PREPARATION][field] = dataset_preparation.pop(field, None)
 
         for field, _ in TrainingHyperParameters.model_fields.items():
             hyperparameters[TRAINING][field] = training.pop(field, None)
@@ -184,9 +171,7 @@ class TrainingConfigurationRESTConverter(ConfigurableParametersRESTConverter):
         } | rest_input
 
     @classmethod
-    def training_configuration_from_rest(
-        cls, rest_input: dict[str, Any]
-    ) -> TrainingConfiguration:
+    def training_configuration_from_rest(cls, rest_input: dict[str, Any]) -> TrainingConfiguration:
         """
         Create a TrainingConfiguration object from REST API input.
 

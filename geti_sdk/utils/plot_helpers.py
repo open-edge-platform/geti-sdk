@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import List, Optional, Union
 
 import cv2
 import numpy as np
@@ -27,9 +26,9 @@ from geti_sdk.prediction_visualization.visualizer import Visualizer
 
 
 def show_image_with_annotation_scene(
-    image: Union[Image, VideoFrame, np.ndarray],
-    annotation_scene: Union[AnnotationScene, Prediction],
-    filepath: Optional[str] = None,
+    image: Image | VideoFrame | np.ndarray,
+    annotation_scene: AnnotationScene | Prediction,
+    filepath: str | None = None,
     show_in_notebook: bool = False,
     show_results: bool = True,
     channel_order: str = "rgb",
@@ -67,13 +66,8 @@ def show_image_with_annotation_scene(
     elif annotation_scene.kind == AnnotationKind.PREDICTION:
         plot_type = "Prediction"
     else:
-        raise ValueError(
-            f"Invalid input: Unable to plot object of type {type(annotation_scene)}."
-        )
-    if isinstance(image, np.ndarray):
-        name = "Numpy image"
-    else:
-        name = image.name
+        raise ValueError(f"Invalid input: Unable to plot object of type {type(annotation_scene)}.")
+    name = "Numpy image" if isinstance(image, np.ndarray) else image.name
 
     window_name = f"{plot_type} for {name}"
     visualizer = Visualizer(
@@ -82,24 +76,16 @@ def show_image_with_annotation_scene(
         show_confidence=show_confidences,
     )
 
-    if isinstance(image, np.ndarray):
-        numpy_image = image.copy()
-    else:
-        numpy_image = image.numpy.copy()
+    numpy_image = image.copy() if isinstance(image, np.ndarray) else image.numpy.copy()
 
     if channel_order == "bgr":
         rgb_image = cv2.cvtColor(numpy_image, cv2.COLOR_BGR2RGB)
     elif channel_order == "rgb":
         rgb_image = numpy_image
     else:
-        raise ValueError(
-            f"Invalid channel order '{channel_order}'. Please use either `rgb` or "
-            f"`bgr`."
-        )
+        raise ValueError(f"Invalid channel order '{channel_order}'. Please use either `rgb` or `bgr`.")
 
-    result = visualizer.draw(
-        image=rgb_image, annotation=annotation_scene, fill_shapes=fill_shapes
-    )
+    result = visualizer.draw(image=rgb_image, annotation=annotation_scene, fill_shapes=fill_shapes)
 
     # For compatibility with the previous version of the function
     # return image in BGR order; to be changed in 2.0.
@@ -131,9 +117,9 @@ def show_image_with_annotation_scene(
 
 def show_video_frames_with_annotation_scenes(
     video_frames: MediaList[VideoFrame],
-    annotation_scenes: List[Union[AnnotationScene, Prediction]],
+    annotation_scenes: list[AnnotationScene | Prediction],
     wait_time: float = 1,
-    filepath: Optional[str] = None,
+    filepath: str | None = None,
     show_labels: bool = True,
     show_confidences: bool = True,
     fill_shapes: bool = True,
@@ -157,7 +143,7 @@ def show_video_frames_with_annotation_scenes(
     """
     first_frame = video_frames[0]
 
-    out_writer: Optional[cv2.VideoWriter] = None
+    out_writer: cv2.VideoWriter | None = None
     if filepath is not None:
         out_writer = cv2.VideoWriter(
             filename=f"{filepath}",
@@ -174,10 +160,7 @@ def show_video_frames_with_annotation_scenes(
     elif annotation_scenes[0].kind == AnnotationKind.PREDICTION:
         name = "Prediction"
     else:
-        raise ValueError(
-            f"Invalid input: Unable to plot object of type "
-            f"{type(annotation_scenes[0])}."
-        )
+        raise ValueError(f"Invalid input: Unable to plot object of type {type(annotation_scenes[0])}.")
     window_name = f"{name} for '{video_frames[0].video_name}'"
     visualizer = Visualizer(
         window_name=window_name,
@@ -187,9 +170,7 @@ def show_video_frames_with_annotation_scenes(
 
     for frame, annotation_scene in zip(video_frames, annotation_scenes):
         numpy_frame = frame.numpy.copy()
-        result = visualizer.draw(
-            numpy_frame, annotation=annotation_scene, fill_shapes=fill_shapes
-        )
+        result = visualizer.draw(numpy_frame, annotation=annotation_scene, fill_shapes=fill_shapes)
 
         if out_writer is None:
             cv2.imshow(window_name, result)
@@ -209,9 +190,9 @@ def pad_image_and_put_caption(
     run_name: int,
     model_1: str,
     model_1_score: str,
-    model_2: Optional[str] = None,
-    model_2_score: Optional[str] = None,
-    fps: Optional[int] = None,
+    model_2: str | None = None,
+    model_2_score: str | None = None,
+    fps: int | None = None,
 ) -> np.ndarray:
     """
     Pad the image with white and put the caption on it.
@@ -228,9 +209,7 @@ def pad_image_and_put_caption(
     # Calculate text and image padding size
     text_scale = round(image.shape[1] / 1280, 1)
     thickness = int(text_scale / 1.5)
-    (_, label_height), baseline = cv2.getTextSize(
-        "Test caption", cv2.FONT_HERSHEY_SIMPLEX, text_scale, thickness
-    )
+    (_, label_height), baseline = cv2.getTextSize("Test caption", cv2.FONT_HERSHEY_SIMPLEX, text_scale, thickness)
     universal_padding = 2
     bottom_padding_pre_line = label_height + baseline
     # Prepare image captions
@@ -264,7 +243,7 @@ def pad_image_and_put_caption(
     return padded_image
 
 
-def concat_prediction_results(results: List[List[np.ndarray]]) -> np.ndarray:
+def concat_prediction_results(results: list[list[np.ndarray]]) -> np.ndarray:
     """
     Merge the prediction images to one.
 
