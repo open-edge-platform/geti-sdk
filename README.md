@@ -1,6 +1,6 @@
 <div align="center">
 
-[![python](https://img.shields.io/badge/python-3.9%2B-green)]()
+[![python](https://img.shields.io/badge/python-3.10%2B-green)]()
 [![openvino](https://img.shields.io/badge/openvino-2023.2.0%2B-purple)](https://github.com/openvinotoolkit/openvino)
 ![Intel Geti](https://img.shields.io/badge/Intel%C2%AE%20Geti%E2%84%A2-1.14%2B-blue?link=https%3A%2F%2Fgeti.intel.com%2F)
 
@@ -59,11 +59,11 @@ feeling for use cases for the package.
 Make sure to set up your environment using one of the supported Python versions for your
 operating system, as indicated in the table below.
 
-|             | Python <= 3.8 | Python 3.9         | Python 3.10        | Python 3.11        | Python 3.12        | Python 3.13 |
-|:------------|:-------------:|:------------------:|:------------------:|:------------------:|:------------------:|:-----------:|
-| **Linux**   | :x:           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :x:         |
-| **Windows** | :x:           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :x:         |
-| **MacOS**   | :x:           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :x:         |
+|             | Python <= 3.9 |    Python 3.10     | Python 3.11        | Python 3.12        | Python 3.13 |
+|:------------|:-------------:|:------------------:|:------------------:|:------------------:|:-----------:|
+| **Linux**   |      :x:      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |     :x:     |
+| **Windows** |      :x:      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |     :x:     |
+| **MacOS**   |      :x:      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |     :x:     |
 
 Once you have created and activated a new environment, follow the steps below to install
 the package.
