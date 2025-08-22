@@ -184,5 +184,6 @@ fixable = ["ALL"]
 ]
 
 "notebooks/**/*.ipynb" = [
+    "A004",     # Allow shadowing built-in functions in notebooks.
     "E501",     # Notebooks skips lines that are too long.
 ]

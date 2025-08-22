@@ -16,14 +16,14 @@
 The package contains classes for inference results post-processing and conversion to internal Prediction entities.
 
 The package contains the following classes:
-    - `AnomalyToPredictionConverter` - class for converting anomaly classification / segmentation / detection results to internal Prediction entities
-    - `ClassificationToPredictionConverter` - class for converting classification results to internal Prediction entities
-    - `DetectionToPredictionConverter` - class for converting detection results to internal Prediction entities
-    - `MaskToAnnotationConverter` - class for converting rotated detection results to internal Prediction entities
-    - `RotatedRectToPredictionConverter` - class for converting rotated detection results to internal Prediction entities
-    - `SegmentationToPredictionConverter` - class for converting segmentation results to internal Prediction entities
+    - `AnomalyToPredictionConverter` - class to convert anomaly detection results to internal Prediction entities
+    - `ClassificationToPredictionConverter` - class to convert classification results to internal Prediction entities
+    - `DetectionToPredictionConverter` - class to convert detection results to internal Prediction entities
+    - `MaskToAnnotationConverter` - class to convert rotated detection results to internal Prediction entities
+    - `RotatedRectToPredictionConverter` - class to convert rotated detection results to internal Prediction entities
+    - `SegmentationToPredictionConverter` - class to convert segmentation results to internal Prediction entities
 
-    - `ConverterFactory` - factory class for creating the appropriate converter based on the domain of the inference results
+    - `ConverterFactory` - factory class to create the right converter based on the domain of the inference results
 """
 
 from .results_to_prediction_converter import ConverterFactory
