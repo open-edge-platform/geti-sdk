@@ -16,7 +16,6 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from typing import List
 
 import cv2
 import numpy as np
@@ -31,9 +30,7 @@ from tests.helpers.project_service import ProjectService
 
 class TestImageClient:
     @staticmethod
-    def ensure_test_project(
-        project_service: ProjectService, labels: List[str]
-    ) -> Project:
+    def ensure_test_project(project_service: ProjectService, labels: list[str]) -> Project:
         return project_service.get_or_create_project(
             project_name=f"{PROJECT_PREFIX}_image_client",
             project_type="detection",
@@ -44,7 +41,7 @@ class TestImageClient:
     def test_upload_and_delete_image(
         self,
         fxt_project_service: ProjectService,
-        fxt_default_labels: List[str],
+        fxt_default_labels: list[str],
         fxt_image_path: str,
     ):
         """
@@ -64,9 +61,7 @@ class TestImageClient:
         7. Assert that deleting the image works by checking that the number of images
             in the project reduces by one upon deletion of the image
         """
-        self.ensure_test_project(
-            project_service=fxt_project_service, labels=fxt_default_labels
-        )
+        self.ensure_test_project(project_service=fxt_project_service, labels=fxt_default_labels)
         image_client = fxt_project_service.image_client
         image = image_client.upload_image(fxt_image_path)
         image_numpy = cv2.imread(fxt_image_path)
@@ -90,7 +85,7 @@ class TestImageClient:
     def test_upload_image_folder_and_download(
         self,
         fxt_project_service: ProjectService,
-        fxt_default_labels: List[str],
+        fxt_default_labels: list[str],
         fxt_image_folder: str,
         request: FixtureRequest,
     ):
@@ -108,9 +103,7 @@ class TestImageClient:
         7. Assert that all images were downloaded
         """
 
-        self.ensure_test_project(
-            project_service=fxt_project_service, labels=fxt_default_labels
-        )
+        self.ensure_test_project(project_service=fxt_project_service, labels=fxt_default_labels)
         image_client = fxt_project_service.image_client
 
         old_images = image_client.get_all_images()
@@ -141,7 +134,7 @@ class TestImageClient:
     def test_upload_from_list(
         self,
         fxt_project_service: ProjectService,
-        fxt_default_labels: List[str],
+        fxt_default_labels: list[str],
         fxt_image_folder: str,
         request: FixtureRequest,
     ):
@@ -150,9 +143,7 @@ class TestImageClient:
         n_old_images = len(old_images)
 
         # Upload images from list
-        image_base_names = [
-            p.name.split(".")[0] for p in Path.glob(Path(fxt_image_folder), "*")
-        ]
+        image_base_names = [p.name.split(".")[0] for p in Path.glob(Path(fxt_image_folder), "*")]
         n_to_upload = len(image_base_names) // 2
         assert n_to_upload > 0
         images = image_client.upload_from_list(
@@ -170,7 +161,7 @@ class TestImageClient:
     def test_download_specific_dataset(
         self,
         fxt_project_service: ProjectService,
-        fxt_default_labels: List[str],
+        fxt_default_labels: list[str],
         fxt_image_folder: str,
         fxt_image_folder_light_bulbs: str,
         request: FixtureRequest,
@@ -187,9 +178,7 @@ class TestImageClient:
         5. Assert that all images are downloaded correctly for each dataset
         """
 
-        self.ensure_test_project(
-            project_service=fxt_project_service, labels=fxt_default_labels
-        )
+        self.ensure_test_project(project_service=fxt_project_service, labels=fxt_default_labels)
 
         project = fxt_project_service.project
         dataset_client = DatasetClient(
@@ -204,12 +193,8 @@ class TestImageClient:
         dataset2 = dataset_client.create_dataset(name="dataset2")
 
         # Upload images to datasets
-        images_dataset1 = image_client.upload_folder(
-            fxt_image_folder, dataset=dataset1, max_threads=1
-        )
-        images_dataset2 = image_client.upload_folder(
-            fxt_image_folder_light_bulbs, dataset=dataset2, max_threads=1
-        )
+        images_dataset1 = image_client.upload_folder(fxt_image_folder, dataset=dataset1, max_threads=1)
+        images_dataset2 = image_client.upload_folder(fxt_image_folder_light_bulbs, dataset=dataset2, max_threads=1)
 
         assert len(images_dataset1) == len(os.listdir(fxt_image_folder))
         assert len(images_dataset2) == len(os.listdir(fxt_image_folder_light_bulbs))
@@ -224,12 +209,8 @@ class TestImageClient:
         image_client.download_all(target_dir2, dataset=dataset2, max_threads=1)
 
         # Verify downloads
-        downloaded_filenames1 = os.listdir(
-            os.path.join(target_dir1, "images", dataset1.name)
-        )
-        downloaded_filenames2 = os.listdir(
-            os.path.join(target_dir2, "images", dataset2.name)
-        )
+        downloaded_filenames1 = os.listdir(os.path.join(target_dir1, "images", dataset1.name))
+        downloaded_filenames2 = os.listdir(os.path.join(target_dir2, "images", dataset2.name))
 
         assert len(downloaded_filenames1) == len(images_dataset1)
         assert len(downloaded_filenames2) == len(images_dataset2)

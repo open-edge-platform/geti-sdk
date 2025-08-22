@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Dict, Optional
 
 from geti_sdk.data_models.containers import AlgorithmList
 from geti_sdk.data_models.enums import TaskType
@@ -22,9 +21,9 @@ from geti_sdk.http_session import GetiSession
 
 def get_supported_algorithms(
     rest_session: GetiSession,
-    task_type: Optional[TaskType] = None,
-    project: Optional[Project] = None,
-    workspace_id: Optional[str] = None,
+    task_type: TaskType | None = None,
+    project: Project | None = None,
+    workspace_id: str | None = None,
 ) -> AlgorithmList:
     """
     Return the list of supported algorithms (including algorithm metadata) for the
@@ -55,16 +54,14 @@ def get_supported_algorithms(
             if algo["task_type"].upper() == task_type.name
         ]
         algorithm_rest_response["items"] = filtered_response
-    return AlgorithmList.from_rest(
-        algorithm_rest_response, geti_version=rest_session.version
-    )
+    return AlgorithmList.from_rest(algorithm_rest_response, geti_version=rest_session.version)
 
 
 def get_default_algorithm_info(
     session: GetiSession,
     workspace_id: str,
     project: Project,
-) -> Dict[TaskType, str]:
+) -> dict[TaskType, str]:
     """
     Return the names of the default algorithms for the tasks in the `project`. The
     returned response is a map of TaskType to the default algorithm name for that task
@@ -91,10 +88,8 @@ def get_default_algorithm_info(
             "default algorithms. Most likely the Geti server you are using does not "
             "support this functionality yet."
         )
-    task_type_names = [
-        task.type.value.lower() for task in project.get_trainable_tasks()
-    ]
-    result: Dict[TaskType, str] = {}
+    task_type_names = [task.type.value.lower() for task in project.get_trainable_tasks()]
+    result: dict[TaskType, str] = {}
     for entry in defaults:
         task_type = entry["task_type"]
         if task_type in task_type_names:

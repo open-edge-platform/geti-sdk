@@ -14,8 +14,8 @@
 import atexit
 import os
 import tempfile
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Optional, Sequence, Union
 
 import cv2
 import numpy as np
@@ -35,7 +35,7 @@ class VideoClient(BaseMediaClient[Video]):
 
     _MEDIA_TYPE = MediaType.VIDEO
 
-    def get_all_videos(self, dataset: Optional[Dataset] = None) -> MediaList[Video]:
+    def get_all_videos(self, dataset: Dataset | None = None) -> MediaList[Video]:
         """
         Get the ID's and filenames of all videos in the project, from a specific
         dataset. If no dataset is passed, videos from the training dataset will be
@@ -49,8 +49,8 @@ class VideoClient(BaseMediaClient[Video]):
 
     def upload_video(
         self,
-        video: Union[np.ndarray, str, os.PathLike],
-        dataset: Optional[Dataset] = None,
+        video: np.ndarray | str | os.PathLike,
+        dataset: Dataset | None = None,
     ) -> Video:
         """
         Upload a video file to the server. Accepts either a path to a video file, or
@@ -67,7 +67,7 @@ class VideoClient(BaseMediaClient[Video]):
         :return: Video object representing the uploaded video on the server
         """
         temporary_file_created = False
-        if isinstance(video, (str, os.PathLike)):
+        if isinstance(video, str | os.PathLike):
             video_path = video
         elif isinstance(video, np.ndarray):
             try:
@@ -79,7 +79,7 @@ class VideoClient(BaseMediaClient[Video]):
                     f"shape {video.shape}"
                 ) from error
             timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-            video_file = tempfile.NamedTemporaryFile(
+            video_file = tempfile.NamedTemporaryFile(  # noqa: SIM115
                 prefix="geti-sdk_temp_video_", suffix=f"_{timestamp}.avi", delete=False
             )
             # Close the file, opencv will open it again from the path
@@ -99,9 +99,7 @@ class VideoClient(BaseMediaClient[Video]):
             raise TypeError(f"Invalid video type: {type(video)}.")
 
         video_dict = self._upload(video_path, dataset=dataset)
-        uploaded_video = MediaRESTConverter.from_dict(
-            input_dict=video_dict, media_type=Video
-        )
+        uploaded_video = MediaRESTConverter.from_dict(input_dict=video_dict, media_type=Video)
         uploaded_video._data = video_path
         if temporary_file_created:
             uploaded_video._needs_tempfile_deletion = True
@@ -118,7 +116,7 @@ class VideoClient(BaseMediaClient[Video]):
         path_to_folder: str,
         n_videos: int = -1,
         skip_if_filename_exists: bool = False,
-        dataset: Optional[Dataset] = None,
+        dataset: Dataset | None = None,
         max_threads: int = 5,
     ) -> MediaList[Video]:
         """
@@ -149,7 +147,7 @@ class VideoClient(BaseMediaClient[Video]):
         path_to_folder: str,
         append_video_uid: bool = False,
         max_threads: int = 10,
-        dataset: Optional[Dataset] = None,
+        dataset: Dataset | None = None,
     ) -> None:
         """
         Download all videos in a project to a folder on the local disk.

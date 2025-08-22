@@ -14,7 +14,8 @@
 
 import copy
 from collections import UserList
-from typing import Any, Dict, List, Optional, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from geti_sdk.data_models.algorithms import Algorithm, LegacyAlgorithm
 from geti_sdk.data_models.enums import TaskType
@@ -38,15 +39,13 @@ class AlgorithmList(UserList):
     A list containing the algorithms supported in Intel® Geti™.
     """
 
-    def __init__(self, data: Optional[Sequence[Algorithm]] = None):
-        self.data: List[Algorithm] = []
+    def __init__(self, data: Sequence[Algorithm] | None = None):
+        self.data: list[Algorithm] = []
         if data is not None:
             super().__init__(list(data))
 
     @staticmethod
-    def from_rest(
-        rest_input: Dict[str, Any], geti_version: GetiVersion
-    ) -> "AlgorithmList":
+    def from_rest(rest_input: dict[str, Any], geti_version: GetiVersion) -> "AlgorithmList":
         """
         Create an AlgorithmList from the response of the /supported_algorithms REST
         endpoint in Intel® Geti™.
@@ -61,18 +60,14 @@ class AlgorithmList(UserList):
         elif "supported_algorithms" in rest_input:
             algo_rest = rest_input["supported_algorithms"]
         else:
-            raise KeyError(
-                "The input dictionary does not contain the supported algorithms."
-            )
+            raise KeyError("The input dictionary does not contain the supported algorithms.")
         algo_rest_list = copy.deepcopy(algo_rest)
         for algorithm_dict in algo_rest_list:
             algorithm: Algorithm
             if geti_version.is_configuration_revamped:
                 algorithm = Algorithm.model_validate(algorithm_dict)
             else:
-                algorithm = Algorithm.from_legacy_algorithm(
-                    LegacyAlgorithm(**algorithm_dict)
-                )
+                algorithm = Algorithm.from_legacy_algorithm(LegacyAlgorithm(**algorithm_dict))
             algorithm_list.append(algorithm)
         algorithm_list.sort(key=lambda x: x.stats.gigaflops)
         return algorithm_list
@@ -129,9 +124,7 @@ class AlgorithmList(UserList):
         for algo in self.data:
             if algo.name == name:
                 return algo
-        raise ValueError(
-            f"Algorithm named {name} was not found in the list of supported algorithms."
-        )
+        raise ValueError(f"Algorithm named {name} was not found in the list of supported algorithms.")
 
     def get_default_for_task_type(self, task_type: TaskType) -> Algorithm:
         """
@@ -147,6 +140,5 @@ class AlgorithmList(UserList):
         default = [algo for algo in task_algos if algo.is_default_model]
         if len(default) == 1:
             return default[0]
-        else:
-            # The old method used in Geti v1.8 and lower. Keep for backwards compatibility
-            return self.get_by_model_manifest_id(DEFAULT_ALGORITHMS[str(task_type)])
+        # The old method used in Geti v1.8 and lower. Keep for backwards compatibility
+        return self.get_by_model_manifest_id(DEFAULT_ALGORITHMS[str(task_type)])

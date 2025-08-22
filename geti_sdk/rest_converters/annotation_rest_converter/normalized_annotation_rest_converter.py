@@ -13,7 +13,7 @@
 # and limitations under the License.
 
 import copy
-from typing import Any, Dict, List
+from typing import Any
 
 import attr
 
@@ -40,9 +40,7 @@ class NormalizedAnnotationRESTConverter(AnnotationRESTConverter):
     """
 
     @staticmethod
-    def _normalized_shape_from_dict(
-        input_dict: Dict[str, Any], image_width: int, image_height: int
-    ) -> Shape:
+    def _normalized_shape_from_dict(input_dict: dict[str, Any], image_width: int, image_height: int) -> Shape:
         """
         Legacy method to convert shapes represented in normalized coordinates to Shape
         objects. This method is used for reading annotations in SCv1.1 or lower format.
@@ -57,7 +55,7 @@ class NormalizedAnnotationRESTConverter(AnnotationRESTConverter):
         input_copy = copy.deepcopy(input_dict)
         type_ = str_to_shape_type(input_copy.get("type"))
         if type_ != ShapeType.POLYGON:
-            denormalized_coordinates: Dict[str, float] = {}
+            denormalized_coordinates: dict[str, float] = {}
             for key, value in input_copy.items():
                 if key in coordinate_keys_x:
                     new_value = value * image_width
@@ -69,17 +67,12 @@ class NormalizedAnnotationRESTConverter(AnnotationRESTConverter):
             input_copy.update(denormalized_coordinates)
         else:
             points_dicts = input_copy.pop("points")
-            points = [
-                dict(x=point["x"] * image_width, y=point["y"] * image_height)
-                for point in points_dicts
-            ]
+            points = [{"x": point["x"] * image_width, "y": point["y"] * image_height} for point in points_dicts]
             input_copy.update({"points": points})
         return AnnotationRESTConverter._shape_from_dict(input_dict=input_copy)
 
     @staticmethod
-    def normalized_annotation_from_dict(
-        input_dict: Dict[str, Any], image_width: int, image_height: int
-    ) -> Annotation:
+    def normalized_annotation_from_dict(input_dict: dict[str, Any], image_width: int, image_height: int) -> Annotation:
         """
         Legacy method that converts a dictionary representing an annotation (in
         normalized coordinates) to an Annotation object
@@ -90,7 +83,7 @@ class NormalizedAnnotationRESTConverter(AnnotationRESTConverter):
         :return: Annotation object corresponding to input_dict
         """
         input_copy = copy.deepcopy(input_dict)
-        labels: List[ScoredLabel] = []
+        labels: list[ScoredLabel] = []
         for label in input_dict["labels"]:
             labels.append(AnnotationRESTConverter._scored_label_from_dict(label))
         shape = NormalizedAnnotationRESTConverter._normalized_shape_from_dict(
@@ -101,7 +94,7 @@ class NormalizedAnnotationRESTConverter(AnnotationRESTConverter):
 
     @staticmethod
     def normalized_annotation_scene_from_dict(
-        annotation_scene: Dict[str, Any], image_width: int, image_height: int
+        annotation_scene: dict[str, Any], image_width: int, image_height: int
     ) -> AnnotationScene:
         """
         Legacy method that creates an AnnotationScene object from a dictionary
@@ -114,7 +107,7 @@ class NormalizedAnnotationRESTConverter(AnnotationRESTConverter):
         :return: AnnotationScene object
         """
         input_copy = copy.deepcopy(annotation_scene)
-        annotations: List[Annotation] = []
+        annotations: list[Annotation] = []
         for annotation in annotation_scene["annotations"]:
             annotations.append(
                 NormalizedAnnotationRESTConverter.normalized_annotation_from_dict(
@@ -132,7 +125,7 @@ class NormalizedAnnotationRESTConverter(AnnotationRESTConverter):
         image_width: int,
         image_height: int,
         deidentify: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Convert an AnnotationScene to a dictionary. By default, removes any ID
         fields in the output dictionary
@@ -146,14 +139,10 @@ class NormalizedAnnotationRESTConverter(AnnotationRESTConverter):
         """
         if deidentify:
             annotation_scene.deidentify()
-        annotation_scene_dict = attr.asdict(
-            annotation_scene, recurse=True, value_serializer=attr_value_serializer
-        )
-        annotations_serialized: List[Dict[str, Any]] = []
+        annotation_scene_dict = attr.asdict(annotation_scene, recurse=True, value_serializer=attr_value_serializer)
+        annotations_serialized: list[dict[str, Any]] = []
         for annotation in annotation_scene.annotations:
-            annotation_dict = attr.asdict(
-                annotation, recurse=True, value_serializer=attr_value_serializer
-            )
+            annotation_dict = attr.asdict(annotation, recurse=True, value_serializer=attr_value_serializer)
             annotation_dict["shape"] = annotation.shape.to_normalized_coordinates(
                 image_width=image_width, image_height=image_height
             )

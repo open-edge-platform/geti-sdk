@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar
 
 import attr
 
@@ -42,10 +42,8 @@ class ConfigurableParameters(ParameterGroup):
 
     _identifier_fields: ClassVar[str] = ["id"]
 
-    entity_identifier: Union[
-        HyperParameterGroupIdentifier, ComponentEntityIdentifier
-    ] = attr.field(kw_only=True)
-    id: Optional[str] = attr.field(default=None, kw_only=True)
+    entity_identifier: HyperParameterGroupIdentifier | ComponentEntityIdentifier = attr.field(kw_only=True)
+    id: str | None = attr.field(default=None, kw_only=True)
 
     def deidentify(self) -> None:
         """
@@ -63,9 +61,9 @@ class Configuration:
     or task.
     """
 
-    _identifier_fields: ClassVar[List[str]] = []
+    _identifier_fields: ClassVar[list[str]] = []
 
-    components: List[ConfigurableParameters]
+    components: list[ConfigurableParameters]
 
     def __attrs_post_init__(self):
         """
@@ -74,7 +72,7 @@ class Configuration:
         for parameter_name in self.get_all_parameter_names():
             setattr(self, parameter_name, self.get_parameter_by_name(parameter_name))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return the dictionary representation of the Configuration.
         """
@@ -96,12 +94,12 @@ class Configuration:
         for parameter_name in parameter_names:
             yield self.get_parameter_by_name(parameter_name)
 
-    def get_all_parameter_names(self) -> List[str]:
+    def get_all_parameter_names(self) -> list[str]:
         """
         Return a list of names of all configurable parameters within the task
         configuration.
         """
-        parameters: List[str] = []
+        parameters: list[str] = []
         for config in self.components:
             parameters.extend(config.parameter_names())
         return parameters
@@ -109,9 +107,9 @@ class Configuration:
     def _set_parameter_value(
         self,
         parameter_name: str,
-        value: Union[bool, float, int, str],
-        group_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        value: bool | float | int | str,
+        group_name: str | None = None,
+    ) -> dict[str, Any]:
         """
         Prepare a dictionary that can be used for setting a parameter value in GETi.
 
@@ -130,7 +128,7 @@ class Configuration:
                 f" {self}. Unable to prepare data to set "
                 f"parameter value"
             )
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         for config in self.components:
             parameter = config.get_parameter_by_name(parameter_name, group_name)
             if parameter is not None:
@@ -155,7 +153,7 @@ class Configuration:
                 break
         return result
 
-    def get_parameter_by_name(self, name: str) -> Optional[PARAMETER_TYPES]:
+    def get_parameter_by_name(self, name: str) -> PARAMETER_TYPES | None:
         """
         Return the configurable parameter named `name`. If no parameter by that name
         is found within the Configuration, this method returns None
@@ -170,7 +168,7 @@ class Configuration:
         parameters = [parameter for parameter in parameters if parameter is not None]
         if len(parameters) == 0:
             return None
-        elif len(parameters) > 1:
+        if len(parameters) > 1:
             raise ValueError(
                 f"Multiple parameters named '{name}' were found in the configuration "
                 f"{self}. Unable to unambiguously retrieve "
@@ -179,21 +177,15 @@ class Configuration:
         return parameters[0]
 
     @property
-    def component_configurations(self) -> List[ConfigurableParameters]:
+    def component_configurations(self) -> list[ConfigurableParameters]:
         """
         Return all configurable parameters that are component-related.
 
         :return:
         """
-        return [
-            config
-            for config in self.components
-            if isinstance(config.entity_identifier, ComponentEntityIdentifier)
-        ]
+        return [config for config in self.components if isinstance(config.entity_identifier, ComponentEntityIdentifier)]
 
-    def get_component_configuration(
-        self, component: str
-    ) -> Optional[ConfigurableParameters]:
+    def get_component_configuration(self, component: str) -> ConfigurableParameters | None:
         """
         Return the configurable parameters for a certain component. If
         no configuration is found for the specified component, this method returns None
@@ -202,11 +194,7 @@ class Configuration:
         :return: ConfigurableParameters for the component
         """
         return next(
-            (
-                config
-                for config in self.component_configurations
-                if config.entity_identifier.component == component
-            ),
+            (config for config in self.component_configurations if config.entity_identifier.component == component),
             None,
         )
 
@@ -220,9 +208,9 @@ class GlobalConfiguration(Configuration):
     def set_parameter_value(
         self,
         parameter_name: str,
-        value: Union[bool, float, int, str],
-        group_name: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        value: bool | float | int | str,
+        group_name: str | None = None,
+    ) -> list[dict[str, Any]]:
         """
         Prepare a dictionary that can be used for setting a parameter value in GETi.
 
@@ -270,30 +258,28 @@ class TaskConfiguration(Configuration):
     Representation of the configurable parameters for a task in GETi.
     """
 
-    _identifier_fields: ClassVar[List[str]] = ["task_id"]
+    _identifier_fields: ClassVar[list[str]] = ["task_id"]
 
-    task_id: Optional[str] = attr.field(default=None, kw_only=True)
+    task_id: str | None = attr.field(default=None, kw_only=True)
     task_title: str = attr.field(kw_only=True)
 
     @property
-    def model_configurations(self) -> List[ConfigurableParameters]:
+    def model_configurations(self) -> list[ConfigurableParameters]:
         """
         Return all configurable parameters that are model-related.
 
         :return: List of configurable parameters
         """
         return [
-            config
-            for config in self.components
-            if isinstance(config.entity_identifier, HyperParameterGroupIdentifier)
+            config for config in self.components if isinstance(config.entity_identifier, HyperParameterGroupIdentifier)
         ]
 
     def set_parameter_value(
         self,
         parameter_name: str,
-        value: Union[bool, float, int, str],
-        group_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        value: bool | float | int | str,
+        group_name: str | None = None,
+    ) -> dict[str, Any]:
         """
         Prepare a dictionary that can be used for setting a configurable parameter
         value in GETi.
@@ -321,9 +307,7 @@ class TaskConfiguration(Configuration):
         for config in self.model_configurations:
             config.entity_identifier.resolve_algorithm(algorithm=algorithm)
 
-    def apply_identifiers(
-        self, workspace_id: str, project_id: str, task_id: str, model_storage_id: str
-    ):
+    def apply_identifiers(self, workspace_id: str, project_id: str, task_id: str, model_storage_id: str):
         """
         Apply the unique database identifiers passed in `workspace_id`,
         `project_id`, `task_id` and `model_storage_id` to all configurable parameters
@@ -365,7 +349,7 @@ class FullConfiguration:
     """
 
     global_: GlobalConfiguration
-    task_chain: List[TaskConfiguration]
+    task_chain: list[TaskConfiguration]
 
     def deidentify(self) -> None:
         """
@@ -375,7 +359,7 @@ class FullConfiguration:
         for task_config in self.task_chain:
             task_config.deidentify()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return the dictionary representation of the FullConfiguration.
         """

@@ -64,13 +64,10 @@ class TestNormalizedAnnotationRESTConverter:
         assert annotation.shape.x_max == int(img_width * x_max)
         assert annotation.shape.y_max == int(img_heigth * y_max)
         assert annotation.shape.area == (
-            (int(img_width * x_max) - int(img_width * x_min))
-            * (int(img_heigth * y_max) - int(img_heigth * y_min))
+            (int(img_width * x_max) - int(img_width * x_min)) * (int(img_heigth * y_max) - int(img_heigth * y_min))
         )
 
-    def test_to_normalized_dict(
-        self, fxt_annotation_scene_from_normalized: AnnotationScene
-    ):
+    def test_to_normalized_dict(self, fxt_annotation_scene_from_normalized: AnnotationScene):
         # Act
         annotation_rest = NormalizedAnnotationRESTConverter.to_normalized_dict(
             fxt_annotation_scene_from_normalized, image_height=2000, image_width=1000
@@ -104,10 +101,8 @@ class TestNormalizedAnnotationRESTConverter:
         }
 
         # Act
-        annotation_scene = (
-            NormalizedAnnotationRESTConverter.normalized_annotation_scene_from_dict(
-                annotation_scene_dict, image_width=img_width, image_height=img_height
-            )
+        annotation_scene = NormalizedAnnotationRESTConverter.normalized_annotation_scene_from_dict(
+            annotation_scene_dict, image_width=img_width, image_height=img_height
         )
 
         # Assert

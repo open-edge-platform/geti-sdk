@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-PARKING_LOT_VIDEO_HASH = "28bae958647218e58e473c8365403b3e5061aed9e62e4a03adde3b778d8a8adb0dc50bc08df880a134dd2c558133ae7b318f79c7b94eb2997204272171ee47bb"
+PARKING_LOT_VIDEO_HASH = "28bae958647218e58e473c8365403b3e5061aed9e62e4a03adde3b778d8a8adb0dc50bc08df880a134dd2c558133ae7b318f79c7b94eb2997204272171ee47bb"  # noqa: E501

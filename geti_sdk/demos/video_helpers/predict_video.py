@@ -18,7 +18,6 @@ import shutil
 import subprocess  # nosec B404
 import tempfile
 import time
-from typing import List, Optional, Union
 
 import cv2
 import imageio_ffmpeg
@@ -31,11 +30,11 @@ from geti_sdk.utils import show_image_with_annotation_scene
 
 
 def predict_video_from_deployment(
-    video_path: Union[str, os.PathLike],
-    deployment: Union[Deployment, str, os.PathLike],
+    video_path: str | os.PathLike,
+    deployment: Deployment | str | os.PathLike,
     device: str = "CPU",
-    preserve_audio: Optional[bool] = True,
-) -> Optional[str]:
+    preserve_audio: bool | None = True,
+) -> str | None:
     """
     Create a video reconstruction with overlaid model predictions.
     This function runs inference on the local machine for every frame in the video.
@@ -48,10 +47,10 @@ def predict_video_from_deployment(
         If ffmpeg could not be found, this option is ignored and no audio would be preserved.
     :return: The file path of the output video if generated successfully. Otherwise None.
     """
-    retval: Optional[str] = None
+    retval: str | None = None
 
     # prepare deployment for running inference
-    if isinstance(deployment, (str, os.PathLike)):
+    if isinstance(deployment, str | os.PathLike):
         deployment = Deployment.from_folder(deployment)
     elif not isinstance(deployment, Deployment):
         raise ValueError(f"Unable to read deployment {deployment}")
@@ -72,14 +71,11 @@ def predict_video_from_deployment(
     num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     video_duration = num_frames / fps
-    logging.info(
-        f"Input video contains {num_frames:.1f} frames, "
-        f"for a total duration of {video_duration:.1f} seconds"
-    )
+    logging.info(f"Input video contains {num_frames:.1f} frames, for a total duration of {video_duration:.1f} seconds")
 
     t_start = time.time()
 
-    predictions: List[Prediction] = []
+    predictions: list[Prediction] = []
     logging.info("Running video prediction... ")
     with (
         logging_redirect_tqdm(tqdm_class=tqdm),
@@ -99,9 +95,7 @@ def predict_video_from_deployment(
 
     if len(predictions) == num_frames:
         t_prediction = time.time() - t_start
-        logging.info(
-            f"Prediction completed successfully in {t_prediction:.1f} seconds. "
-        )
+        logging.info(f"Prediction completed successfully in {t_prediction:.1f} seconds. ")
 
         # Determine the output video path
         fname, ext = os.path.splitext(video_path)
@@ -161,26 +155,19 @@ def predict_video_from_deployment(
                     p = subprocess.run(  # nosec B603
                         cmd,
                         stdin=subprocess.PIPE,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
+                        capture_output=True,
                     )
                     if p.returncode == 0:
                         shutil.copy(temp.name, output_video_path)
                     else:
-                        logging.warning(
-                            "Error occurred while processing audio. No audio would be preserved."
-                        )
+                        logging.warning("Error occurred while processing audio. No audio would be preserved.")
 
             except RuntimeError:  # FFMPEG binary could not be found.
-                logging.warning(
-                    "ffmpeg could not be found on your system. No audio would be preserved."
-                )
+                logging.warning("ffmpeg could not be found on your system. No audio would be preserved.")
 
         retval = output_video_path
         t_reconstruction = time.time() - t_prediction - t_start
-        logging.info(
-            f"Reconstruction completed successfully in {t_reconstruction:.1f} seconds."
-        )
+        logging.info(f"Reconstruction completed successfully in {t_reconstruction:.1f} seconds.")
         logging.info(f"Output video saved to `{output_video_path}`")
     else:
         logging.warning("Prediction process failed. ")

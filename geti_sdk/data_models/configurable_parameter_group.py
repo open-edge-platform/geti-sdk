@@ -13,7 +13,8 @@
 # and limitations under the License.
 
 import copy
-from typing import Any, ClassVar, Dict, List, Optional, Sequence, Type, Union, get_args
+from collections.abc import Sequence
+from typing import Any, ClassVar, Optional, Union, get_args
 
 import attr
 
@@ -37,7 +38,7 @@ from geti_sdk.data_models.utils import (
     str_to_enum_converter,
 )
 
-PARAMETER_TYPES = Union[
+PARAMETER_TYPES = Union[  # noqa: UP007
     SelectableFloat,
     SelectableString,
     ConfigurableFloat,
@@ -47,8 +48,8 @@ PARAMETER_TYPES = Union[
 
 
 def _parameter_dicts_to_list(
-    parameter_dicts: List[Union[Dict[str, Any], PARAMETER_TYPES]],
-) -> List[PARAMETER_TYPES]:
+    parameter_dicts: list[dict[str, Any] | PARAMETER_TYPES],
+) -> list[PARAMETER_TYPES]:
     """
     Convert a list of dictionary representations of configurable parameters to a
     list of ConfigurableParameter objects.
@@ -57,7 +58,7 @@ def _parameter_dicts_to_list(
         configurable parameter
     :return: List of corresponding ConfigurableParameter objects
     """
-    parameters: List[PARAMETER_TYPES] = []
+    parameters: list[PARAMETER_TYPES] = []
     for parameter in parameter_dicts:
         if isinstance(parameter, get_args(PARAMETER_TYPES)):
             parameters.append(parameter)
@@ -74,31 +75,16 @@ def _parameter_dicts_to_list(
             )
         data_type = ParameterDataType(data_type)
         template_type = ParameterInputType(template_type)
-        parameter_type: Type[ConfigurableParameter]
-        if (
-            data_type == ParameterDataType.STRING
-            and template_type == ParameterInputType.SELECTABLE
-        ):
+        parameter_type: type[ConfigurableParameter]
+        if data_type == ParameterDataType.STRING and template_type == ParameterInputType.SELECTABLE:
             parameter_type = SelectableString
-        elif (
-            data_type == ParameterDataType.INTEGER
-            and template_type == ParameterInputType.INPUT
-        ):
+        elif data_type == ParameterDataType.INTEGER and template_type == ParameterInputType.INPUT:
             parameter_type = ConfigurableInteger
-        elif (
-            data_type == ParameterDataType.BOOLEAN
-            and template_type == ParameterInputType.INPUT
-        ):
+        elif data_type == ParameterDataType.BOOLEAN and template_type == ParameterInputType.INPUT:
             parameter_type = ConfigurableBoolean
-        elif (
-            data_type == ParameterDataType.FLOAT
-            and template_type == ParameterInputType.INPUT
-        ):
+        elif data_type == ParameterDataType.FLOAT and template_type == ParameterInputType.INPUT:
             parameter_type = ConfigurableFloat
-        elif (
-            data_type == ParameterDataType.FLOAT
-            and template_type == ParameterInputType.SELECTABLE
-        ):
+        elif data_type == ParameterDataType.FLOAT and template_type == ParameterInputType.SELECTABLE:
             parameter_type = SelectableFloat
         else:
             raise ValueError(
@@ -123,23 +109,23 @@ class ParameterGroup:
     :var groups: List of parameter groups
     """
 
-    _non_minimal_fields: ClassVar[List[str]] = ["description"]
+    _non_minimal_fields: ClassVar[list[str]] = ["description"]
 
     header: str
     type: str = attr.field(converter=str_to_enum_converter(ConfigurableParameterType))
-    description: Optional[str] = None
-    parameters: Optional[Sequence[PARAMETER_TYPES]] = None
-    name: Optional[str] = None
-    groups: Optional[List["ParameterGroup"]] = None
+    description: str | None = None
+    parameters: Sequence[PARAMETER_TYPES] | None = None
+    name: str | None = None
+    groups: list["ParameterGroup"] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return the dictionary representation of the ParameterGroup
         """
         return attr.asdict(self, recurse=True, value_serializer=attr_value_serializer)
 
     @classmethod
-    def from_dict(cls, input_dict: Dict[str, Any]) -> "ParameterGroup":
+    def from_dict(cls, input_dict: dict[str, Any]) -> "ParameterGroup":
         """
         Create a ParameterGroup object from an input dictionary.
 
@@ -150,15 +136,11 @@ class ParameterGroup:
         input_copy = copy.deepcopy(input_dict)
         for deprecated_key in DEPRECATED_PARAMETERS:
             input_copy.pop(deprecated_key, None)
-        parameter_dicts: List[Union[Dict[str, Any], ConfigurableParameter]] = (
-            input_copy.pop("parameters", [])
-        )
-        group_dicts: List[Union[Dict[str, Any], ParameterGroup]] = input_copy.pop(
-            "groups", []
-        )
+        parameter_dicts: list[dict[str, Any] | ConfigurableParameter] = input_copy.pop("parameters", [])
+        group_dicts: list[dict[str, Any] | ParameterGroup] = input_copy.pop("groups", [])
 
         parameters = _parameter_dicts_to_list(parameter_dicts=parameter_dicts)
-        groups: List[ParameterGroup] = []
+        groups: list[ParameterGroup] = []
         for group_dict in group_dicts:
             if isinstance(group_dict, ParameterGroup):
                 groups.append(group_dict)
@@ -175,7 +157,7 @@ class ParameterGroup:
         for group in self.groups:
             group.deidentify()
 
-    def parameter_names(self, get_nested: bool = True) -> List[str]:
+    def parameter_names(self, get_nested: bool = True) -> list[str]:
         """
         Return a list of names of all parameters in the ParameterGroup.
 
@@ -206,9 +188,7 @@ class ParameterGroup:
             all_groups.extend(group.groups)
         return next((group for group in all_groups if group.name == name), None)
 
-    def get_parameter_by_name(
-        self, name: str, group_name: Optional[str] = None
-    ) -> Optional[PARAMETER_TYPES]:
+    def get_parameter_by_name(self, name: str, group_name: str | None = None) -> PARAMETER_TYPES | None:
         """
         Get the data for the configurable parameter named `name` from the
         ParameterGroup. This method returns None if no parameter by that name was found
@@ -223,17 +203,9 @@ class ParameterGroup:
             return None
 
         if group_name is None:
-            parameters = [
-                parameter for parameter in self.parameters if parameter.name == name
-            ]
+            parameters = [parameter for parameter in self.parameters if parameter.name == name]
             for group in self.groups:
-                parameters.extend(
-                    [
-                        parameter
-                        for parameter in group.parameters
-                        if parameter.name == name
-                    ]
-                )
+                parameters.extend([parameter for parameter in group.parameters if parameter.name == name])
             if len(parameters) != 1:
                 raise ValueError(
                     f"Found multiple parameters named {name}, please specify a "
@@ -242,10 +214,7 @@ class ParameterGroup:
             parameter = parameters[0]
         else:
             group = self.get_parameter_group_by_name(group_name)
-            if group is not None:
-                parameter = group.get_parameter_by_name(name)
-            else:
-                parameter = None
+            parameter = group.get_parameter_by_name(name) if group is not None else None
         return parameter
 
     def get_group_containing(self, parameter_name: str) -> Optional["ParameterGroup"]:
@@ -263,6 +232,7 @@ class ParameterGroup:
         for group_name in group_names:
             if self.get_parameter_by_name(parameter_name, group_name) is not None:
                 return self.get_parameter_group_by_name(group_name)
+        return None
 
     @property
     def summary(self) -> str:

@@ -13,7 +13,6 @@
 # and limitations under the License.
 
 from datetime import datetime, timezone
-from typing import List
 
 import pytest
 
@@ -42,9 +41,7 @@ class DummyValues:
     MEDIA_WIDTH = 640
     LABEL_NAMES = ["rectangle", "ellipse", "triangle"]
     CREATOR_NAME = "SC SDK Fixtures"
-    CREATION_DATE = datetime.strptime(
-        "01-01-1971_00:00:01", "%d-%m-%Y_%H:%M:%S"
-    ).astimezone(timezone.utc)
+    CREATION_DATE = datetime.strptime("01-01-1971_00:00:01", "%d-%m-%Y_%H:%M:%S").astimezone(timezone.utc)
     ANNOTATION_SCENE_KIND = AnnotationKind.ANNOTATION
     ANNOTATION_EDITOR_NAME = "editor"
     MODIFICATION_DATE = datetime(2021, 7, 15, tzinfo=timezone.utc)
@@ -191,7 +188,7 @@ def fxt_anomalous_label():
 
 @pytest.fixture
 def fxt_anomaly_labels_factory():
-    def _build_anom_labels(domain: Domain) -> List[Label]:
+    def _build_anom_labels(domain: Domain) -> list[Label]:
         if domain not in (
             Domain.ANOMALY_CLASSIFICATION,
             Domain.ANOMALY_SEGMENTATION,

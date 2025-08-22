@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import Any, Callable, Dict, List
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -29,7 +30,7 @@ from geti_sdk.data_models.shapes import Point, Polygon, Rectangle
 
 
 @pytest.fixture()
-def fxt_normalized_annotation_dict() -> Dict[str, Any]:
+def fxt_normalized_annotation_dict() -> dict[str, Any]:
     yield {
         "labels": [{"probability": 1.0, "name": "Dog", "color": "#000000ff"}],
         "shape": {
@@ -47,9 +48,7 @@ def fxt_normalized_annotation_dict() -> Dict[str, Any]:
 def fxt_rectangle_annotation_factory(
     fxt_scored_label: ScoredLabel,
 ) -> Callable[[int, int], Annotation]:
-    def _generate_rectangle_annotation(
-        image_width: int = 1000, image_height: int = 2000
-    ) -> Annotation:
+    def _generate_rectangle_annotation(image_width: int = 1000, image_height: int = 2000) -> Annotation:
         return Annotation(
             shape=Rectangle(
                 x=0.05 * image_width,
@@ -64,7 +63,7 @@ def fxt_rectangle_annotation_factory(
 
 
 @pytest.fixture()
-def fxt_normalized_annotation_polygon_dict() -> Dict[str, Any]:
+def fxt_normalized_annotation_polygon_dict() -> dict[str, Any]:
     yield {
         "labels": [{"probability": 1.0, "name": "Dog", "color": "#000000ff"}],
         "shape": {
@@ -84,9 +83,7 @@ def fxt_normalized_annotation_polygon_dict() -> Dict[str, Any]:
 def fxt_polygon_annotation_factory(
     fxt_scored_label: ScoredLabel,
 ) -> Callable[[int, int], Annotation]:
-    def _generate_polygon_annotation(
-        image_width: int = 1000, image_height: int = 2000
-    ) -> Annotation:
+    def _generate_polygon_annotation(image_width: int = 1000, image_height: int = 2000) -> Annotation:
         return Annotation(
             shape=Polygon(
                 points=[
@@ -125,7 +122,7 @@ def fxt_video_annotation_scenes(
     fxt_rectangle_annotation_factory,
     fxt_polygon_annotation_factory,
     fxt_video_frames: MediaList[VideoFrame],
-) -> List[AnnotationScene]:
+) -> list[AnnotationScene]:
     width = fxt_geti_video.media_information.width
     height = fxt_geti_video.media_information.height
     yield [

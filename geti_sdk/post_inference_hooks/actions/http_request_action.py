@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 from datetime import datetime
-from typing import Dict, Optional
 
 import numpy as np
 import requests
@@ -39,7 +38,7 @@ class HttpRequestAction(PostInferenceAction):
         self,
         url: str,
         method: str = "GET",
-        headers: Optional[Dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
         include_prediction_data: bool = False,
         log_level: str = "info",
     ):
@@ -56,20 +55,15 @@ class HttpRequestAction(PostInferenceAction):
         if self.include_data:
             self.headers.update({"Content-Type": "application/json"})
 
-        self._repr_info_ = (
-            f"url=`{url}`, "
-            f"method={method}, "
-            f"headers={headers}, "
-            f"include_data={self.include_data}"
-        )
+        self._repr_info_ = f"url=`{url}`, method={method}, headers={headers}, include_data={self.include_data}"
 
     def __call__(
         self,
         image: np.ndarray,
         prediction: Prediction,
-        score: Optional[float] = None,
-        name: Optional[str] = None,
-        timestamp: Optional[datetime] = None,
+        score: float | None = None,
+        name: str | None = None,
+        timestamp: datetime | None = None,
     ):
         """
         Execute the action, send an HTTP request to the predefined url
@@ -86,7 +80,5 @@ class HttpRequestAction(PostInferenceAction):
             prediction_dict = PredictionRESTConverter.to_dict(prediction)
             data = prediction_dict
 
-        requests.request(
-            method=self.method, url=self.url, headers=self.headers, json=data
-        )
+        requests.request(method=self.method, url=self.url, headers=self.headers, json=data)
         self.log_function(f"HTTP {self.method} request send to `{self.url}`.")

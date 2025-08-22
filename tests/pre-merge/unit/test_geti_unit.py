@@ -13,7 +13,6 @@
 # and limitations under the License.
 
 import os
-from typing import List
 
 import pytest
 from pytest_mock import MockerFixture
@@ -34,9 +33,7 @@ class TestGeti:
     ):
         # Arrange
         mocker.patch("geti_sdk.geti.GetiSession", new=fxt_mocked_session_factory)
-        mock_get_workspace_id = mocker.patch(
-            "geti_sdk.geti.get_workspace_id", return_value=1
-        )
+        mock_get_workspace_id = mocker.patch("geti_sdk.geti.get_workspace_id", return_value=1)
 
         # Act and assert
         # host is None and server_config is None
@@ -71,7 +68,7 @@ class TestGeti:
         # When the new authentication mechanism is detected (Geti v1.15 and up), do
         # not acquire token
         geti = Geti(host=DUMMY_HOST, token=DUMMY_TOKEN)
-        assert "x-api-key" in geti.session.headers.keys()
+        assert "x-api-key" in geti.session.headers
 
     def test_connection_to_legacy_platform(
         self,
@@ -97,9 +94,7 @@ class TestGeti:
             "geti_sdk.http_session.geti_session.GetiSession._get_organization_id",
             return_value="dummy_org_id",
         )
-        mocker.patch(
-            "geti_sdk.http_session.geti_session.GetiSession.authenticate_with_password"
-        )
+        mocker.patch("geti_sdk.http_session.geti_session.GetiSession.authenticate_with_password")
 
         # Act
         # Legacy platforms are no longer supported
@@ -141,7 +136,7 @@ class TestGeti:
         mocker: MockerFixture,
         fxt_mocked_geti: Geti,
         fxt_temp_directory: str,
-        fxt_nightly_projects: List[Project],
+        fxt_nightly_projects: list[Project],
     ):
         # Arrange
         mock_get_all_projects = mocker.patch(
@@ -153,9 +148,7 @@ class TestGeti:
         )
 
         # Act
-        projects = fxt_mocked_geti.download_all_projects(
-            target_folder=fxt_temp_directory, include_predictions=False
-        )
+        projects = fxt_mocked_geti.download_all_projects(target_folder=fxt_temp_directory, include_predictions=False)
 
         # Assert
         mock_get_all_projects.assert_called_once()
@@ -166,15 +159,13 @@ class TestGeti:
         mocker: MockerFixture,
         fxt_mocked_geti: Geti,
         fxt_temp_directory: str,
-        fxt_nightly_projects: List[Project],
+        fxt_nightly_projects: list[Project],
     ):
         # Arrange
         target_dir = os.path.join(fxt_temp_directory, "test_upload_all_projects")
         for project in fxt_nightly_projects:
             os.makedirs(os.path.join(target_dir, project.name))
-        mock_is_project_dir = mocker.patch(
-            "geti_sdk.geti.ProjectClient._is_project_dir", return_value=True
-        )
+        mock_is_project_dir = mocker.patch("geti_sdk.geti.ProjectClient._is_project_dir", return_value=True)
         mock_upload_project_data = mocker.patch(
             "geti_sdk.import_export.import_export_module.GetiIE.upload_project_data"
         )

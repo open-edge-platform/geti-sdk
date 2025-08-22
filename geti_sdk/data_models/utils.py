@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import logging
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, TypeVar
 
 import attr
 import cv2
@@ -39,8 +39,8 @@ def deidentify(instance: Any):
 
 
 def str_to_enum_converter(
-    enum: Type[EnumType],
-) -> Callable[[Union[str, EnumType]], EnumType]:
+    enum: type[EnumType],
+) -> Callable[[str | EnumType], EnumType]:
     """
     Construct a converter function to convert an input value into an instance of the
     Enum subclass passed in `enum`.
@@ -50,7 +50,7 @@ def str_to_enum_converter(
         into an instance of `enum`
     """
 
-    def _converter(input_value: Union[str, EnumType]) -> EnumType:
+    def _converter(input_value: str | EnumType) -> EnumType:
         """
         Convert an input value to an instance of an Enum.
 
@@ -59,20 +59,16 @@ def str_to_enum_converter(
         """
         if isinstance(input_value, str):
             return enum(input_value)
-        elif isinstance(input_value, enum):
+        if isinstance(input_value, enum):
             return input_value
-        else:
-            raise ValueError(
-                f"Invalid argument! Cannot convert value {input_value} to Enum "
-                f"{enum.__name__}"
-            )
+        raise ValueError(f"Invalid argument! Cannot convert value {input_value} to Enum {enum.__name__}")
 
     return _converter
 
 
 def str_to_optional_enum_converter(
-    enum: Type[EnumType],
-) -> Callable[[Union[str, EnumType]], EnumType]:
+    enum: type[EnumType],
+) -> Callable[[str | EnumType], EnumType]:
     """
     Construct a converter function to convert an input value into an instance of the
     Enum subclass passed in `enum`.
@@ -82,7 +78,7 @@ def str_to_optional_enum_converter(
         into an instance of `enum`
     """
 
-    def _converter(input_value: Optional[Union[str, EnumType]]) -> Optional[EnumType]:
+    def _converter(input_value: str | EnumType | None) -> EnumType | None:
         """
         Convert an input value to an instance of an Enum.
 
@@ -91,22 +87,18 @@ def str_to_optional_enum_converter(
         """
         if isinstance(input_value, str):
             return enum(input_value)
-        elif isinstance(input_value, enum):
+        if isinstance(input_value, enum):
             return input_value
-        elif input_value is None:
+        if input_value is None:
             return None
-        else:
-            raise ValueError(
-                f"Invalid argument! Cannot convert value {input_value} to Enum "
-                f"{enum.__name__}"
-            )
+        raise ValueError(f"Invalid argument! Cannot convert value {input_value} to Enum {enum.__name__}")
 
     return _converter
 
 
 def str_to_enum_converter_by_name_or_value(
-    enum: Type[EnumType], allow_none: bool = False
-) -> Callable[[Union[str, EnumType]], EnumType]:
+    enum: type[EnumType], allow_none: bool = False
+) -> Callable[[str | EnumType], EnumType]:
     """
     Construct a converter function to convert an input value into an instance of the
     Enum subclass passed in `enum`.
@@ -119,7 +111,7 @@ def str_to_enum_converter_by_name_or_value(
         into an instance of `enum`
     """
 
-    def _converter(input_value: Union[str, EnumType]) -> EnumType:
+    def _converter(input_value: str | EnumType) -> EnumType:
         """
         Convert an input value to an instance of an Enum.
 
@@ -135,16 +127,12 @@ def str_to_enum_converter_by_name_or_value(
             return input_value
         if (input_value is None) and allow_none:
             return None
-        else:
-            raise ValueError(
-                f"Invalid argument! Cannot convert value {input_value} to Enum "
-                f"{enum.__name__}"
-            )
+        raise ValueError(f"Invalid argument! Cannot convert value {input_value} to Enum {enum.__name__}")
 
     return _converter
 
 
-def str_to_task_type(task_type: Union[str, TaskType]) -> TaskType:
+def str_to_task_type(task_type: str | TaskType) -> TaskType:
     """
     Convert an input string to a task type.
 
@@ -153,11 +141,10 @@ def str_to_task_type(task_type: Union[str, TaskType]) -> TaskType:
     """
     if isinstance(task_type, str):
         return TaskType(task_type)
-    else:
-        return task_type
+    return task_type
 
 
-def str_to_media_type(media_type: Union[str, MediaType]) -> MediaType:
+def str_to_media_type(media_type: str | MediaType) -> MediaType:
     """
     Convert an input string to a media type.
 
@@ -166,11 +153,10 @@ def str_to_media_type(media_type: Union[str, MediaType]) -> MediaType:
     """
     if isinstance(media_type, str):
         return MediaType(media_type)
-    else:
-        return media_type
+    return media_type
 
 
-def str_to_shape_type(shape_type: Union[str, ShapeType]) -> ShapeType:
+def str_to_shape_type(shape_type: str | ShapeType) -> ShapeType:
     """
     Convert an input string to a shape type.
 
@@ -179,12 +165,11 @@ def str_to_shape_type(shape_type: Union[str, ShapeType]) -> ShapeType:
     """
     if isinstance(shape_type, str):
         return ShapeType(shape_type)
-    else:
-        return shape_type
+    return shape_type
 
 
 def str_to_annotation_kind(
-    annotation_kind: Union[str, AnnotationKind],
+    annotation_kind: str | AnnotationKind,
 ) -> AnnotationKind:
     """
     Convert an input string to an annotation kind.
@@ -194,11 +179,10 @@ def str_to_annotation_kind(
     """
     if isinstance(annotation_kind, str):
         return AnnotationKind(annotation_kind)
-    else:
-        return annotation_kind
+    return annotation_kind
 
 
-def str_to_datetime(datetime_str: Optional[Union[str, datetime]]) -> Optional[datetime]:
+def str_to_datetime(datetime_str: str | datetime | None) -> datetime | None:
     """
     Convert a string to a datetime.
 
@@ -210,19 +194,16 @@ def str_to_datetime(datetime_str: Optional[Union[str, datetime]]) -> Optional[da
             if datetime_str.isdigit():
                 # POSIX timestamp
                 return datetime.fromtimestamp(int(datetime_str) / 1000)
-            else:
-                # ISO format
-                return datetime.fromisoformat(datetime_str)
+            # ISO format
+            return datetime.fromisoformat(datetime_str)
         except ValueError:
-            logging.debug(
-                f"Unable to convert str '{datetime_str}' to datetime, converter "
-                f"returns None instead."
-            )
+            logging.debug(f"Unable to convert str '{datetime_str}' to datetime, converter returns None instead.")
             return None
     elif isinstance(datetime_str, datetime):
         return datetime_str
     elif datetime_str is None:
         return None
+    return None
 
 
 def attr_value_serializer(instance, field, value):
@@ -239,10 +220,9 @@ def attr_value_serializer(instance, field, value):
     """
     if isinstance(value, Enum):
         return str(value)
-    elif isinstance(value, datetime):
+    if isinstance(value, datetime):
         return datetime.isoformat(value)
-    else:
-        return value
+    return value
 
 
 def numpy_from_buffer(buffer: bytes) -> np.ndarray:
@@ -256,9 +236,7 @@ def numpy_from_buffer(buffer: bytes) -> np.ndarray:
     return cv2.imdecode(numpy_array, cv2.IMREAD_COLOR)
 
 
-def round_dictionary(
-    input_data: Union[Dict[str, Any], List[Any]], decimal_places: int = 3
-) -> Union[Dict[str, Any], List[Any]]:
+def round_dictionary(input_data: dict[str, Any] | list[Any], decimal_places: int = 3) -> dict[str, Any] | list[Any]:
     """
     Convert all floats in a dictionary to string representation, rounded to
     `decimal_places`.
@@ -271,17 +249,18 @@ def round_dictionary(
         for key, value in input_data.items():
             if isinstance(value, float):
                 input_data[key] = f"{value:.{decimal_places}f}"
-            elif isinstance(value, (dict, list)):
+            elif isinstance(value, dict | list):
                 input_data[key] = round_dictionary(value, decimal_places=decimal_places)
         return input_data
-    elif isinstance(input_data, list):
+    if isinstance(input_data, list):
         new_list = []
         for item in input_data:
             if isinstance(item, float):
                 new_list.append(f"{item:.{decimal_places}f}")
-            elif isinstance(item, (dict, list)):
+            elif isinstance(item, dict | list):
                 new_list.append(round_dictionary(item, decimal_places=decimal_places))
         return new_list
+    return None
 
 
 def round_to_n_digits(n: int) -> Callable[[float], float]:
@@ -299,7 +278,7 @@ def round_to_n_digits(n: int) -> Callable[[float], float]:
     return _n_digit_rounder
 
 
-def remove_null_fields(input: Any):
+def remove_null_fields(input: Any):  # noqa: A002
     """
     Remove fields that have 'None' or an emtpy string '' as their value from a
     dictionary.

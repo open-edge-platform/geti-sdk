@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -21,7 +21,7 @@ from geti_sdk.rest_converters import ProjectRESTConverter
 
 
 @pytest.fixture()
-def fxt_nightly_projects_rest() -> List[Dict[str, Any]]:
+def fxt_nightly_projects_rest() -> list[dict[str, Any]]:
     yield [
         {
             "name": "geti_sdk_test_nightly_classification",
@@ -583,20 +583,17 @@ def fxt_nightly_projects_rest() -> List[Dict[str, Any]]:
 
 
 @pytest.fixture()
-def fxt_nightly_projects(fxt_nightly_projects_rest) -> List[Project]:
-    yield [
-        ProjectRESTConverter.from_dict(project_rest)
-        for project_rest in fxt_nightly_projects_rest
-    ]
+def fxt_nightly_projects(fxt_nightly_projects_rest) -> list[Project]:
+    yield [ProjectRESTConverter.from_dict(project_rest) for project_rest in fxt_nightly_projects_rest]
 
 
 @pytest.fixture()
-def fxt_classification_project(fxt_nightly_projects: List[Project]) -> Project:
+def fxt_classification_project(fxt_nightly_projects: list[Project]) -> Project:
     yield fxt_nightly_projects[0]
 
 
 @pytest.fixture()
 def fxt_detection_to_classification_project(
-    fxt_nightly_projects: List[Project],
+    fxt_nightly_projects: list[Project],
 ) -> Project:
     yield fxt_nightly_projects[2]

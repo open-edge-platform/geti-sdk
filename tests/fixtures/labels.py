@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Dict, List
 
 import pytest
 
 
 @pytest.fixture()
-def fxt_hierarchical_classification_labels() -> List[Dict[str, str]]:
+def fxt_hierarchical_classification_labels() -> list[dict[str, str]]:
     yield [
         {"name": "animal", "group": "animal"},
         {"name": "dog", "parent_id": "animal", "group": "species"},
@@ -35,12 +34,12 @@ def fxt_hierarchical_classification_labels() -> List[Dict[str, str]]:
 
 
 @pytest.fixture()
-def fxt_default_labels() -> List[str]:
+def fxt_default_labels() -> list[str]:
     yield ["cube", "cylinder"]
 
 
 @pytest.fixture()
-def fxt_default_keypoint_labels() -> List[str]:
+def fxt_default_keypoint_labels() -> list[str]:
     yield [
         "left_shoulder",
         "left_wrist",
@@ -63,5 +62,5 @@ def fxt_default_keypoint_labels() -> List[str]:
 
 
 @pytest.fixture()
-def fxt_light_bulbs_labels() -> List[str]:
+def fxt_light_bulbs_labels() -> list[str]:
     yield ["On", "Off"]

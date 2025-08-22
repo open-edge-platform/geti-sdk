@@ -14,7 +14,6 @@
 
 import os
 import tempfile
-from typing import Union
 
 import cv2
 import numpy as np
@@ -49,7 +48,7 @@ def add_text_to_top_of_image(image: np.ndarray, text: str) -> np.ndarray:
 
 
 def plot_predictions_side_by_side(
-    image: Union[Image, np.ndarray],
+    image: Image | np.ndarray,
     prediction_1: Prediction,
     prediction_2: Prediction,
     filepath: str,
@@ -66,12 +65,8 @@ def plot_predictions_side_by_side(
     with tempfile.TemporaryDirectory() as temp_dir:
         im_1_pred_path = os.path.join(temp_dir, "im_1.jpg")
         im_2_pred_path = os.path.join(temp_dir, "im_2.jpg")
-        show_image_with_annotation_scene(
-            image=image, annotation_scene=prediction_1, filepath=im_1_pred_path
-        )
-        show_image_with_annotation_scene(
-            image=image, annotation_scene=prediction_2, filepath=im_2_pred_path
-        )
+        show_image_with_annotation_scene(image=image, annotation_scene=prediction_1, filepath=im_1_pred_path)
+        show_image_with_annotation_scene(image=image, annotation_scene=prediction_2, filepath=im_2_pred_path)
         im1 = cv2.imread(im_1_pred_path)
         im2 = cv2.imread(im_2_pred_path)
 

@@ -15,7 +15,7 @@ import logging
 import os
 import sys
 import warnings
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from collections.abc import Sequence
 
 import numpy as np
 from packaging.version import Version
@@ -112,16 +112,14 @@ class Geti:
 
     def __init__(
         self,
-        host: Optional[str] = None,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        token: Optional[str] = None,
-        workspace_id: Optional[str] = None,
+        host: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        token: str | None = None,
+        workspace_id: str | None = None,
         verify_certificate: bool = True,
-        proxies: Optional[Dict[str, str]] = None,
-        server_config: Optional[
-            Union[ServerTokenConfig, ServerCredentialConfig]
-        ] = None,
+        proxies: dict[str, str] | None = None,
+        server_config: ServerTokenConfig | ServerCredentialConfig | None = None,
     ):
         # Set up default logging for the SDK.
         if not logging.root.handlers:
@@ -134,8 +132,7 @@ class Geti:
         # Validate input parameters
         if host is None and server_config is None:
             raise TypeError(
-                "__init__ missing required keyword arguments: Either `host` or "
-                "`server_config` must be specified."
+                "__init__ missing required keyword arguments: Either `host` or `server_config` must be specified."
             )
 
         if server_config is None:
@@ -149,8 +146,7 @@ class Geti:
                 )
                 if username is not None or password is not None:
                     warnings.warn(
-                        "Both a personal access token and credentials were passed to "
-                        "Geti, using token authentication."
+                        "Both a personal access token and credentials were passed to Geti, using token authentication."
                     )
             elif username is not None and password is not None:
                 server_config = ServerCredentialConfig(
@@ -168,8 +164,7 @@ class Geti:
         else:
             if host is not None:
                 warnings.warn(
-                    "Both `host` and `server_config` were passed to `Geti`, ignoring "
-                    "the value set for `host`."
+                    "Both `host` and `server_config` were passed to `Geti`, ignoring the value set for `host`."
                 )
             if proxies is not None:
                 warnings.warn(
@@ -190,20 +185,16 @@ class Geti:
         if workspace_id is None:
             workspace_id = get_workspace_id(self.session)
         self.workspace_id = workspace_id
-        self.project_client = ProjectClient(
-            workspace_id=workspace_id, session=self.session
-        )
+        self.project_client = ProjectClient(workspace_id=workspace_id, session=self.session)
         self.import_export_module = GetiIE(
             session=self.session,
             workspace_id=self.workspace_id,
             project_client=self.project_client,
         )
-        self.credit_system_client = CreditSystemClient(
-            session=self.session, workspace_id=self.workspace_id
-        )
+        self.credit_system_client = CreditSystemClient(session=self.session, workspace_id=self.workspace_id)
 
         # Cache of deployment clients for projects in the workspace
-        self._deployment_clients: Dict[str, DeploymentClient] = {}
+        self._deployment_clients: dict[str, DeploymentClient] = {}
 
     def _check_platform_version(self) -> None:
         """
@@ -233,7 +224,7 @@ class Geti:
             )
 
     @property
-    def projects(self) -> List[Project]:
+    def projects(self) -> list[Project]:
         """
         Return a list of projects that are currently available in the workspace on
         the Intel® Geti™ server.
@@ -244,7 +235,7 @@ class Geti:
         return self.project_client.get_all_projects()
 
     @property
-    def credit_balance(self) -> Optional[int]:
+    def credit_balance(self) -> int | None:
         """
         Get the current available credit balance in the workspace.
 
@@ -255,9 +246,9 @@ class Geti:
 
     def get_project(
         self,
-        project_name: Optional[str] = None,
-        project_id: Optional[str] = None,
-        project: Optional[Project] = None,
+        project_name: str | None = None,
+        project_id: str | None = None,
+        project: Project | None = None,
     ) -> Project:
         """
         Return the Intel® Geti™ project by name or ID, if any.
@@ -274,20 +265,17 @@ class Geti:
         :raises: ValueError if there are several projects on the server named `project_name`
         :return: Project identified by one of the arguments.
         """
-        project = self.project_client.get_project(
-            project_name=project_name, project_id=project_id, project=project
-        )
+        project = self.project_client.get_project(project_name=project_name, project_id=project_id, project=project)
         if project is None:
             raise KeyError(
-                f"Project '{project_name}' was not found in the current workspace on "
-                f"the Intel® Geti™ server."
+                f"Project '{project_name}' was not found in the current workspace on the Intel® Geti™ server."
             )
         return project
 
     def download_project_data(
         self,
         project: Project,
-        target_folder: Optional[str] = None,
+        target_folder: str | None = None,
         include_predictions: bool = False,
         include_active_models: bool = False,
         include_deployment: bool = False,
@@ -377,7 +365,7 @@ class Geti:
     def upload_project_data(
         self,
         target_folder: str,
-        project_name: Optional[str] = None,
+        project_name: str | None = None,
         enable_auto_train: bool = True,
         max_threads: int = 5,
     ) -> Project:
@@ -423,9 +411,7 @@ class Geti:
             max_threads=max_threads,
         )
 
-    def download_all_projects(
-        self, target_folder: str, include_predictions: bool = True
-    ) -> List[Project]:
+    def download_all_projects(self, target_folder: str, include_predictions: bool = True) -> list[Project]:
         """
         Download all projects in the workspace from the Intel® Geti™ server.
 
@@ -443,7 +429,7 @@ class Geti:
             target_folder=target_folder, include_predictions=include_predictions
         )
 
-    def upload_all_projects(self, target_folder: str) -> List[Project]:
+    def upload_all_projects(self, target_folder: str) -> list[Project]:
         """
         Upload all projects found in the directory `target_folder` on local disk to
         the Intel® Geti™ server.
@@ -458,16 +444,14 @@ class Geti:
         :return: List of Project objects, each entry corresponding to one of the
             projects uploaded to the Intel® Geti™ server.
         """
-        return self.import_export_module.upload_all_projects(
-            target_folder=target_folder
-        )
+        return self.import_export_module.upload_all_projects(target_folder=target_folder)
 
     def export_project(
         self,
         filepath: os.PathLike,
-        project_id: Optional[str] = None,
-        project: Optional[Project] = None,
-        include_models: Union[str, IncludeModelsType] = IncludeModelsType.ALL,
+        project_id: str | None = None,
+        project: Project | None = None,
+        include_models: str | IncludeModelsType = IncludeModelsType.ALL,
     ) -> None:
         """
         Export a project with name `project_name` to the file specified by `filepath`.
@@ -482,11 +466,10 @@ class Geti:
         """
         if project_id is None:
             if project is None:
-                raise ValueError(
-                    "Either project_id or project [DEPRECATED] should be specified"
-                )
+                raise ValueError("Either project_id or project [DEPRECATED] should be specified")
             warnings.warn(
-                "'project' input parameter has been deprecated, use project_id instead, for example, 'project_id=project.id'",
+                "'project' input parameter has been deprecated, "
+                "use project_id instead, for example, 'project_id=project.id'",
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -501,9 +484,7 @@ class Geti:
             include_models=include_models,
         )
 
-    def import_project(
-        self, filepath: os.PathLike, project_name: Optional[str] = None
-    ) -> Project:
+    def import_project(self, filepath: os.PathLike, project_name: str | None = None) -> Project:
         """
         Import a project from the zip file specified by `filepath` to the Intel® Geti™ server.
         The project will be created on the server with the name `project_name`, if
@@ -516,16 +497,14 @@ class Geti:
         :return: Project object, holding information obtained from the cluster
             regarding the uploaded project.
         """
-        return self.import_export_module.import_project(
-            filepath=filepath, project_name=project_name
-        )
+        return self.import_export_module.import_project(filepath=filepath, project_name=project_name)
 
     def export_dataset(
         self,
         project: Project,
         dataset: Dataset,
         filepath: os.PathLike,
-        export_format: Union[str, DatasetFormat] = "DATUMARO",
+        export_format: str | DatasetFormat = "DATUMARO",
         include_unannotated_media: bool = False,
     ):
         """
@@ -551,9 +530,7 @@ class Geti:
             include_unannotated_media=include_unannotated_media,
         )
 
-    def import_dataset(
-        self, filepath: os.PathLike, project_name: str, project_type: str
-    ) -> Project:
+    def import_dataset(self, filepath: os.PathLike, project_name: str, project_type: str) -> Project:
         """
         Import a dataset from the zip archive specified by `filepath` to the Intel® Geti™ server.
         A new project will be created from the dataset on the server with the name `project_name`.
@@ -591,8 +568,8 @@ class Geti:
         project_type: str,
         path_to_images: str,
         annotation_reader: AnnotationReader,
-        labels: Optional[List[Union[str, dict]]] = None,
-        keypoint_structure: Optional[Dict[str, list]] = None,
+        labels: list[str | dict] | None = None,
+        keypoint_structure: dict[str, list] | None = None,
         number_of_images_to_upload: int = -1,
         number_of_images_to_annotate: int = -1,
         enable_auto_train: bool = True,
@@ -652,9 +629,7 @@ class Geti:
         if labels is None:
             labels = annotation_reader.get_all_label_names()
         else:
-            if project_type == "classification" and not all(
-                [isinstance(item, dict) for item in labels]
-            ):
+            if project_type == "classification" and not all(isinstance(item, dict) for item in labels):
                 # Handle label generation for classification case
                 filter_settings = annotation_reader.applied_filters
                 criterion = filter_settings[0]["criterion"]
@@ -666,13 +641,9 @@ class Geti:
                 labels = ["Normal", "Anomalous"]
 
         if keypoint_structure and not project_type == "keypoint_detection":
-            raise ValueError(
-                "The Keypoint structure is only supported for keypoint detection projects."
-            )
+            raise ValueError("The Keypoint structure is only supported for keypoint detection projects.")
         if not keypoint_structure and project_type == "keypoint_detection":
-            raise ValueError(
-                "Please provide a keypoint structure for the keypoint detection project."
-            )
+            raise ValueError("Please provide a keypoint structure for the keypoint detection project.")
 
         # Create project
         project = self.project_client.create_project(
@@ -685,25 +656,18 @@ class Geti:
         self._set_auto_train(project, auto_train=False)
 
         # Upload images
-        image_client = ImageClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
+        image_client = ImageClient(session=self.session, workspace_id=self.workspace_id, project=project)
         images = image_client.upload_folder(
             path_to_images,
             n_images=number_of_images_to_upload,
             max_threads=max_threads,
         )
 
-        if (
-            number_of_images_to_annotate < len(images)
-            and number_of_images_to_annotate != -1
-        ):
+        if number_of_images_to_annotate < len(images) and number_of_images_to_annotate != -1:
             images = images[:number_of_images_to_annotate]
 
         # Upload videos, if needed
-        video_client = VideoClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
+        video_client = VideoClient(session=self.session, workspace_id=self.workspace_id, project=project)
         videos: MediaList[Video] = MediaList([])
         if upload_videos:
             videos = video_client.upload_folder(
@@ -714,9 +678,7 @@ class Geti:
 
         # Set annotation reader task type
         annotation_reader.task_type = project.get_trainable_tasks()[0].type
-        annotation_reader.prepare_and_set_dataset(
-            task_type=project.get_trainable_tasks()[0].type
-        )
+        annotation_reader.prepare_and_set_dataset(task_type=project.get_trainable_tasks()[0].type)
         # Upload annotations
         annotation_client = AnnotationClient(
             session=self.session,
@@ -727,9 +689,7 @@ class Geti:
         annotation_client.upload_annotations_for_images(images, max_threads=max_threads)
 
         if len(videos) > 0:
-            annotation_client.upload_annotations_for_videos(
-                videos, max_threads=max_threads
-            )
+            annotation_client.upload_annotations_for_videos(videos, max_threads=max_threads)
 
         self._set_auto_train(project, auto_train=enable_auto_train)
         return project
@@ -739,7 +699,7 @@ class Geti:
         project_name: str,
         project_type: str,
         path_to_images: str,
-        label_source_per_task: List[Union[AnnotationReader, List[str]]],
+        label_source_per_task: list[AnnotationReader | list[str]],
         number_of_images_to_upload: int = -1,
         number_of_images_to_annotate: int = -1,
         enable_auto_train: bool = True,
@@ -795,16 +755,11 @@ class Geti:
             regarding the uploaded project
         """
         labels_per_task = [
-            (
-                entry.get_all_label_names()
-                if isinstance(entry, AnnotationReader)
-                else entry
-            )
+            (entry.get_all_label_names() if isinstance(entry, AnnotationReader) else entry)
             for entry in label_source_per_task
         ]
         annotation_readers_per_task = [
-            entry if isinstance(entry, AnnotationReader) else None
-            for entry in label_source_per_task
+            entry if isinstance(entry, AnnotationReader) else None for entry in label_source_per_task
         ]
 
         task_types = get_task_types_by_project_type(project_type)
@@ -822,19 +777,14 @@ class Geti:
         self._set_auto_train(project, auto_train=False)
 
         # Upload images
-        image_client = ImageClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
+        image_client = ImageClient(session=self.session, workspace_id=self.workspace_id, project=project)
         images = image_client.upload_folder(
             path_to_images,
             n_images=number_of_images_to_upload,
             max_threads=max_threads,
         )
 
-        if (
-            number_of_images_to_annotate < len(images)
-            and number_of_images_to_annotate != -1
-        ):
+        if number_of_images_to_annotate < len(images) and number_of_images_to_annotate != -1:
             images = images[:number_of_images_to_annotate]
 
         append_annotations = False
@@ -843,9 +793,7 @@ class Geti:
             if reader is not None:
                 # Set annotation reader task type
                 reader.task_type = task_type
-                reader.prepare_and_set_dataset(
-                    task_type=task_type, previous_task_type=previous_task_type
-                )
+                reader.prepare_and_set_dataset(task_type=task_type, previous_task_type=previous_task_type)
                 # Upload annotations
                 annotation_client = AnnotationClient(
                     session=self.session,
@@ -867,7 +815,7 @@ class Geti:
         self,
         project: Project,
         media_folder: str,
-        output_folder: Optional[str] = None,
+        output_folder: str | None = None,
         delete_after_prediction: bool = False,
         skip_if_filename_exists: bool = False,
         max_threads: int = 5,
@@ -900,9 +848,7 @@ class Geti:
             successfully downloaded. False otherwise
         """
         # Upload images
-        image_client = ImageClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
+        image_client = ImageClient(session=self.session, workspace_id=self.workspace_id, project=project)
         images = image_client.upload_folder(
             path_to_folder=media_folder,
             skip_if_filename_exists=skip_if_filename_exists,
@@ -910,18 +856,14 @@ class Geti:
         )
 
         # Upload videos
-        video_client = VideoClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
+        video_client = VideoClient(session=self.session, workspace_id=self.workspace_id, project=project)
         videos = video_client.upload_folder(
             path_to_folder=media_folder,
             skip_if_filename_exists=skip_if_filename_exists,
             max_threads=max_threads,
         )
 
-        prediction_client = PredictionClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
+        prediction_client = PredictionClient(session=self.session, workspace_id=self.workspace_id, project=project)
         if not prediction_client.ready_to_predict:
             logging.info(
                 f"Project '{project.name}' is not ready to make predictions, likely "
@@ -938,9 +880,7 @@ class Geti:
 
         # Request image predictions
         if len(images) > 0:
-            prediction_client.download_predictions_for_images(
-                images=images, path_to_folder=output_folder
-            )
+            prediction_client.download_predictions_for_images(images=images, path_to_folder=output_folder)
 
         # Request video predictions
         if len(videos) > 0:
@@ -963,11 +903,11 @@ class Geti:
     def upload_and_predict_image(
         self,
         project: Project,
-        image: Union[np.ndarray, Image, VideoFrame, str, os.PathLike],
+        image: np.ndarray | Image | VideoFrame | str | os.PathLike,
         visualise_output: bool = True,
         delete_after_prediction: bool = False,
-        dataset_name: Optional[str] = None,
-    ) -> Tuple[Image, Prediction]:
+        dataset_name: str | None = None,
+    ) -> tuple[Image, Prediction]:
         """
         Upload a single image to a project on the Intel® Geti™
         server, and return a prediction for it.
@@ -987,17 +927,13 @@ class Geti:
             - Prediction for the image
         """
         # Get the dataset to upload to
-        dataset: Optional[Dataset] = None
+        dataset: Dataset | None = None
         if dataset_name is not None:
-            dataset_client = DatasetClient(
-                session=self.session, workspace_id=self.workspace_id, project=project
-            )
+            dataset_client = DatasetClient(session=self.session, workspace_id=self.workspace_id, project=project)
             dataset = dataset_client.get_dataset_by_name(dataset_name=dataset_name)
 
         # Upload the image
-        image_client = ImageClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
+        image_client = ImageClient(session=self.session, workspace_id=self.workspace_id, project=project)
         needs_upload = True
         if isinstance(image, Image):
             if image.id in image_client.get_all_images().ids:
@@ -1010,19 +946,13 @@ class Geti:
             image_data = image
         if needs_upload:
             if image_data is None:
-                raise ValueError(
-                    f"Cannot upload entity {image}. No data available for upload."
-                )
-            uploaded_image = image_client.upload_image(
-                image=image_data, dataset=dataset
-            )
+                raise ValueError(f"Cannot upload entity {image}. No data available for upload.")
+            uploaded_image = image_client.upload_image(image=image_data, dataset=dataset)
         else:
             uploaded_image = image
 
         # Get prediction
-        prediction_client = PredictionClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
+        prediction_client = PredictionClient(session=self.session, workspace_id=self.workspace_id, project=project)
         if not prediction_client.ready_to_predict:
             raise ValueError(
                 f"Project '{project.name}' is not ready to make predictions. At least "
@@ -1035,20 +965,18 @@ class Geti:
             image_client.delete_images(images=MediaList([uploaded_image]))
 
         if visualise_output:
-            show_image_with_annotation_scene(
-                image=uploaded_image, annotation_scene=prediction
-            )
+            show_image_with_annotation_scene(image=uploaded_image, annotation_scene=prediction)
 
         return uploaded_image, prediction
 
     def upload_and_predict_video(
         self,
         project: Project,
-        video: Union[Video, str, os.PathLike, Union[Sequence[np.ndarray], np.ndarray]],
-        frame_stride: Optional[int] = None,
+        video: Video | str | os.PathLike | Sequence[np.ndarray] | np.ndarray,
+        frame_stride: int | None = None,
         visualise_output: bool = True,
         delete_after_prediction: bool = False,
-    ) -> Tuple[Video, MediaList[VideoFrame], List[Prediction]]:
+    ) -> tuple[Video, MediaList[VideoFrame], list[Prediction]]:
         """
         Upload a single video to a project on the Intel® Geti™
         server, and return a list of predictions for the frames in the video.
@@ -1077,9 +1005,7 @@ class Geti:
             - List of Predictions for the Video
         """
         # Upload the video
-        video_client = VideoClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
+        video_client = VideoClient(session=self.session, workspace_id=self.workspace_id, project=project)
         needs_upload = True
         if isinstance(video, Video):
             if video.id in video_client.get_all_videos().ids:
@@ -1088,13 +1014,10 @@ class Geti:
                 video_data = None
             else:
                 video_data = video.get_data(self.session)
-        elif isinstance(video, (str, os.PathLike)):
+        elif isinstance(video, str | os.PathLike):
             video_data = video
-        elif isinstance(video, (Sequence, np.ndarray)):
-            if not isinstance(video, np.ndarray):
-                video_data = np.array(video)
-            else:
-                video_data = video
+        elif isinstance(video, Sequence | np.ndarray):
+            video_data = np.array(video) if not isinstance(video, np.ndarray) else video
         else:
             video_data = video
         if needs_upload:
@@ -1104,9 +1027,7 @@ class Geti:
             uploaded_video = video
 
         # Get prediction for frames
-        prediction_client = PredictionClient(
-            session=self.session, workspace_id=self.workspace_id, project=project
-        )
+        prediction_client = PredictionClient(session=self.session, workspace_id=self.workspace_id, project=project)
         if not prediction_client.ready_to_predict:
             raise ValueError(
                 f"Project '{project.name}' is not ready to make predictions. At least "
@@ -1114,30 +1035,21 @@ class Geti:
             )
         if frame_stride is None:
             frame_stride = uploaded_video.media_information.frame_stride
-        frames = MediaList(
-            uploaded_video.to_frames(frame_stride=frame_stride, include_data=True)
-        )
-        logging.info(
-            f"Getting predictions for video '{uploaded_video.name}', using stride "
-            f"{frame_stride}"
-        )
-        predictions = [
-            prediction_client.get_video_frame_prediction(frame) for frame in frames
-        ]
+        frames = MediaList(uploaded_video.to_frames(frame_stride=frame_stride, include_data=True))
+        logging.info(f"Getting predictions for video '{uploaded_video.name}', using stride {frame_stride}")
+        predictions = [prediction_client.get_video_frame_prediction(frame) for frame in frames]
         if delete_after_prediction and needs_upload:
             video_client.delete_videos(videos=MediaList([uploaded_video]))
         if visualise_output:
-            show_video_frames_with_annotation_scenes(
-                video_frames=frames, annotation_scenes=predictions
-            )
+            show_video_frames_with_annotation_scenes(video_frames=frames, annotation_scenes=predictions)
         return uploaded_video, frames, predictions
 
     def deploy_project(
         self,
-        project: Optional[Project] = None,
-        project_name: Optional[str] = None,
-        output_folder: Optional[Union[str, os.PathLike]] = None,
-        models: Optional[Sequence[BaseModel]] = None,
+        project: Project | None = None,
+        project_name: str | None = None,
+        output_folder: str | os.PathLike | None = None,
+        models: Sequence[BaseModel] | None = None,
         enable_explainable_ai: bool = False,
         prepare_ovms_config: bool = False,
     ) -> Deployment:
@@ -1179,18 +1091,15 @@ class Geti:
         deployment_client = self._deployment_clients.get(project.id, None)
         if deployment_client is None:
             # Create deployment client and add to cache.
-            deployment_client = DeploymentClient(
-                workspace_id=self.workspace_id, session=self.session, project=project
-            )
+            deployment_client = DeploymentClient(workspace_id=self.workspace_id, session=self.session, project=project)
             self._deployment_clients.update({project.id: deployment_client})
 
-        deployment = deployment_client.deploy_project(
+        return deployment_client.deploy_project(
             output_folder=output_folder,
             models=models,
             enable_explainable_ai=enable_explainable_ai,
             prepare_for_ovms=prepare_ovms_config,
         )
-        return deployment
 
     def logout(self) -> None:
         """
@@ -1200,9 +1109,9 @@ class Geti:
 
     @staticmethod
     def _check_unique_label_names(
-        labels_per_task: List[List[str]],
-        task_types: List[TaskType],
-        annotation_readers_per_task: List[AnnotationReader],
+        labels_per_task: list[list[str]],
+        task_types: list[TaskType],
+        annotation_readers_per_task: list[AnnotationReader],
     ):
         """
         Check that the names of all labels passed in `labels_per_task` are unique. If
@@ -1228,13 +1137,9 @@ class Geti:
                 new_labels.extend(reader.get_all_label_names())
                 new_labels_per_task.append(reader.get_all_label_names())
             if len(set(new_labels)) != len(new_labels):
-                raise ValueError(
-                    "Unable to create project. Label names must be unique!"
-                )
-            else:
-                return new_labels_per_task
-        else:
-            return labels_per_task
+                raise ValueError("Unable to create project. Label names must be unique!")
+            return new_labels_per_task
+        return labels_per_task
 
     def _set_auto_train(self, project: Project, auto_train: bool) -> None:
         """

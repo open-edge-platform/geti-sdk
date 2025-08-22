@@ -12,19 +12,16 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import os
-from typing import Optional, Union
 
 from geti_sdk.demos.constants import DEFAULT_DATA_PATH
 
 from .download_helpers import download_file, validate_hash
 
-VIDEO_PERSON_CAR_BIKE_PATH = os.path.join(
-    DEFAULT_DATA_PATH, "person-bicycle-car-detection.mp4"
-)
+VIDEO_PERSON_CAR_BIKE_PATH = os.path.join(DEFAULT_DATA_PATH, "person-bicycle-car-detection.mp4")
 
 
 def get_person_car_bike_video(
-    video_path: Optional[Union[str, os.PathLike]] = None,
+    video_path: str | os.PathLike | None = None,
 ) -> str:
     """
     Get the path to the 'person-bicycle-car-detection.mp4' video file that is used for
@@ -45,6 +42,6 @@ def get_person_car_bike_video(
         )
 
     # Compare hashes
-    expected_hash = "7eafb94b3491e7554d92637596ddaaf1c69fdb8421c3d49eb09df4b7d05788c76391cb791cc2c8197e66d352306328d09c8d72e42733b1f1a311cd1e35ee1cce"
+    expected_hash = "7eafb94b3491e7554d92637596ddaaf1c69fdb8421c3d49eb09df4b7d05788c76391cb791cc2c8197e66d352306328d09c8d72e42733b1f1a311cd1e35ee1cce"  # noqa: E501
     validate_hash(file_path=video_file_path, expected_hash=expected_hash)
     return video_file_path

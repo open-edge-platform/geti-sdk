@@ -13,7 +13,7 @@
 # and limitations under the License.
 
 import copy
-from typing import ClassVar, List, Optional, Tuple
+from typing import ClassVar
 
 import attr
 
@@ -30,9 +30,9 @@ class LabelSource:
     :var model_storage_id: ID of the model storage to which the model belongs
     """
 
-    user_id: Optional[str] = None
-    model_id: Optional[str] = None
-    model_storage_id: Optional[str] = None
+    user_id: str | None = None
+    model_id: str | None = None
+    model_storage_id: str | None = None
 
 
 @attr.define
@@ -48,21 +48,21 @@ class Label:
     :var parent_id: Optional name of the parent label, if any
     """
 
-    _identifier_fields: ClassVar[List[str]] = ["id", "hotkey"]
-    _GET_only_fields: ClassVar[List[str]] = ["is_empty", "is_anomalous"]
+    _identifier_fields: ClassVar[list[str]] = ["id", "hotkey"]
+    _GET_only_fields: ClassVar[list[str]] = ["is_empty", "is_anomalous"]
 
     name: str
     color: str
     group: str
     is_empty: bool
     hotkey: str = ""
-    domain: Optional[Domain] = None
-    id: Optional[str] = None
-    parent_id: Optional[str] = None
-    is_anomalous: Optional[bool] = None
-    is_background: Optional[bool] = None
+    domain: Domain | None = None
+    id: str | None = None
+    parent_id: str | None = None
+    is_anomalous: bool | None = None
+    is_background: bool | None = None
 
-    def __key(self) -> Tuple[str, str]:
+    def __key(self) -> tuple[str, str]:
         """
         Return a tuple representing the key of the label.
 
@@ -91,7 +91,7 @@ class Label:
             setattr(self, field_name, None)
 
     @property
-    def color_tuple(self) -> Tuple[int, int, int]:
+    def color_tuple(self) -> tuple[int, int, int]:
         """
         Return the color of the label as an RGB tuple.
 
@@ -113,18 +113,18 @@ class ScoredLabel:
     :var source:
     """
 
-    _identifier_fields: ClassVar[List[str]] = ["id"]
+    _identifier_fields: ClassVar[list[str]] = ["id"]
 
     probability: float = attr.field(converter=float)  # float converter here to make
     # sure we're storing probability
     # as a float64 dtype
-    name: Optional[str] = None
-    color: Optional[str] = None
-    id: Optional[str] = None
-    source: Optional[LabelSource] = None
+    name: str | None = None
+    color: str | None = None
+    id: str | None = None
+    source: LabelSource | None = None
 
     @property
-    def color_tuple(self) -> Tuple[int, int, int]:
+    def color_tuple(self) -> tuple[int, int, int]:
         """
         Return the color of the label as an RGB tuple.
 
@@ -143,11 +143,9 @@ class ScoredLabel:
         :return: ScoredLabel instance corresponding to `label` and `probability`
         """
         probability = 0 if label.is_empty else probability
-        return ScoredLabel(
-            name=label.name, probability=probability, color=label.color, id=label.id
-        )
+        return ScoredLabel(name=label.name, probability=probability, color=label.color, id=label.id)
 
-    def __key(self) -> Tuple[str, str]:
+    def __key(self) -> tuple[str, str]:
         """
         Return a tuple representing the key of the ScoredLabel.
 

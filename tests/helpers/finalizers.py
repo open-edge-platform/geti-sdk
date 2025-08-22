@@ -31,10 +31,7 @@ def force_delete_project(project: Project, project_client: ProjectClient) -> Non
     try:
         project_client.delete_project(project=project, requires_confirmation=False)
     except TypeError:
-        logging.warning(
-            f"Project {project.name} was not found on the server, it was most "
-            f"likely already deleted."
-        )
+        logging.warning(f"Project {project.name} was not found on the server, it was most likely already deleted.")
     except ValueError:
         logging.error(
             f"Unable to delete project '{project.name}' from the server, it "
@@ -54,6 +51,4 @@ def force_delete_project(project: Project, project_client: ProjectClient) -> Non
         try:
             project_client.delete_project(project=project, requires_confirmation=False)
         except ValueError as error:
-            raise ValueError(
-                f"Unable to force delete project {project.name}, due to: {error} "
-            )
+            raise ValueError(f"Unable to force delete project {project.name}, due to: {error} ")

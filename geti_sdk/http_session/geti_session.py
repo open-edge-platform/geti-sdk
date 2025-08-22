@@ -17,7 +17,7 @@ import warnings
 from datetime import datetime
 from functools import cache
 from json import JSONDecodeError
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import requests
 import simplejson
@@ -56,20 +56,20 @@ class GetiSession(requests.Session):
 
     def __init__(
         self,
-        server_config: Union[ServerTokenConfig, ServerCredentialConfig],
+        server_config: ServerTokenConfig | ServerCredentialConfig,
     ):
         super().__init__()
         self.headers.update(INITIAL_HEADERS)
         self.allow_redirects = False
         self.token = None
-        self._cookies: Dict[str, Optional[str]] = {
+        self._cookies: dict[str, str | None] = {
             CSRF_COOKIE_NAME: None,
             PROXY_COOKIE_NAME: None,
         }
 
         # Configure proxies
         if server_config.proxies is None:
-            self._proxies: Dict[str, str] = {}
+            self._proxies: dict[str, str] = {}
         else:
             self._proxies = server_config.proxies
 
@@ -86,7 +86,7 @@ class GetiSession(requests.Session):
 
         self.config = server_config
         self.logged_in = False
-        self._auth_service: Optional[str] = None
+        self._auth_service: str | None = None
 
         # Determine authentication method
         if isinstance(server_config, ServerCredentialConfig):
@@ -95,11 +95,10 @@ class GetiSession(requests.Session):
                     "Authentication via username and password is not supported for "
                     "Intel® Geti™ SaaS instances. Please use a personal access token."
                 )
-            else:
-                logging.warning(
-                    "Authentication via username and password is deprecated and will be "
-                    "removed in a future version of the SDK. Please use a personal access token."
-                )
+            logging.warning(
+                "Authentication via username and password is deprecated and will be "
+                "removed in a future version of the SDK. Please use a personal access token."
+            )
             self.authenticate_with_password(verbose=True)
             self.use_token = False
         else:  # ServerTokenConfig
@@ -110,7 +109,7 @@ class GetiSession(requests.Session):
 
         # Get server version
         self._product_info = self._get_product_info_and_set_api_version()
-        self._organization_id: Optional[str] = self._get_organization_id()
+        self._organization_id: str | None = self._get_organization_id()
 
     @property
     @cache
@@ -129,12 +128,9 @@ class GetiSession(requests.Session):
             return ONPREM_MODE
         if serving_mode == "on-prem":
             return ONPREM_MODE
-        elif serving_mode == "saas":
+        if serving_mode == "saas":
             return SAAS_MODE
-        else:
-            raise ValueError(
-                f"Unexpected serving mode '{serving_mode}' received from the server."
-            )
+        raise ValueError(f"Unexpected serving mode '{serving_mode}' received from the server.")
 
     @property
     def version(self) -> GetiVersion:
@@ -143,7 +139,7 @@ class GetiSession(requests.Session):
 
         :return: Version object holding the Intel® Geti™ version number
         """
-        if "build-version" in self._product_info.keys():
+        if "build-version" in self._product_info:
             version_string = self._product_info.get("build-version")
         else:
             version_string = self._product_info.get("product-version")
@@ -175,11 +171,7 @@ class GetiSession(requests.Session):
         )
         url = f"{self.config.host}/dex/auth/regular_users?{params}"
         response = self.get(url, allow_redirects=False, proxies=self._proxies)
-        if response.status_code in [302, 303]:
-            login_page_url = response.next.url
-        else:
-            login_page_url = response.url
-        return login_page_url
+        return response.next.url if response.status_code in [302, 303] else response.url
 
     def authenticate_with_password(self, verbose: bool = True):
         """
@@ -234,12 +226,12 @@ class GetiSession(requests.Session):
         url: str,
         method: str,
         contenttype: str = "json",
-        data: Optional[Any] = None,
+        data: Any | None = None,
         allow_reauthentication: bool = True,
         include_organization_id: bool = True,
         allow_text_response: bool = False,
-        request_headers: Dict[str, str] = {},
-    ) -> Union[Response, dict, list]:
+        request_headers: dict[str, str] = {},
+    ) -> Response | dict | list:
         """
         Return the REST response from a request to `url` with `method`.
 
@@ -266,9 +258,7 @@ class GetiSession(requests.Session):
 
         self._update_headers_for_content_type(content_type=contenttype)
 
-        if not include_organization_id or url.startswith(
-            f"organizations/{self.organization_id}/"
-        ):
+        if not include_organization_id or url.startswith(f"organizations/{self.organization_id}/"):
             requesturl = f"{self.config.base_url}{url}"
         else:
             requesturl = f"{self.base_url}{url}"
@@ -278,11 +268,7 @@ class GetiSession(requests.Session):
                 kw_data_arg = {"json": data}
             elif contenttype == "multipart":
                 kw_data_arg = {"files": data}
-            elif (
-                contenttype == "jpeg"
-                or contenttype == "zip"
-                or contenttype == "offset+octet-stream"
-            ):
+            elif contenttype == "jpeg" or contenttype == "zip" or contenttype == "offset+octet-stream":
                 kw_data_arg = {"data": data}
             else:
                 raise ValueError(
@@ -310,12 +296,10 @@ class GetiSession(requests.Session):
 
         # Make the request, retrying a maximum of 5 times in case of connection errors
         retries = 5
-        last_conn_error: Optional[ConnectionError] = None
+        last_conn_error: ConnectionError | None = None
         while retries:
             try:
-                response = self.request(
-                    **request_params, proxies=self._proxies, headers=request_headers
-                )
+                response = self.request(**request_params, proxies=self._proxies, headers=request_headers)
                 break
             except requests.exceptions.SSLError as error:
                 raise requests.exceptions.SSLError(
@@ -340,10 +324,7 @@ class GetiSession(requests.Session):
                 allow_reauthentication=allow_reauthentication,
                 content_type=contenttype,
             )
-        if (
-            response.headers.get("Content-Type", "").startswith("application/json")
-            and response.status_code != 204
-        ):
+        if response.headers.get("Content-Type", "").startswith("application/json") and response.status_code != 204:
             result = response.json()
         else:
             result = response
@@ -365,14 +346,9 @@ class GetiSession(requests.Session):
             requires_sign_out = False
 
         if requires_sign_out:
-            sign_out_url = (
-                self.config.base_url[: -len(self.config.api_pattern)]
-                + "/oauth2/sign_out"
-            )
+            sign_out_url = self.config.base_url[: -len(self.config.api_pattern)] + "/oauth2/sign_out"
             try:
-                response = self.request(
-                    url=sign_out_url, method="GET", proxies=self._proxies
-                )
+                response = self.request(url=sign_out_url, method="GET", proxies=self._proxies)
 
                 if response.status_code in SUCCESS_STATUS_CODES:
                     if verbose:
@@ -407,7 +383,7 @@ class GetiSession(requests.Session):
                 # be deleted in that case anyway.
                 logging.debug(f"{error} encountered during GetiSession closure.")
 
-    def _get_product_info_and_set_api_version(self) -> Dict[str, str]:
+    def _get_product_info_and_set_api_version(self) -> dict[str, str]:
         """
         Return the product info as retrieved from the Intel® Geti™ server.
 
@@ -416,10 +392,7 @@ class GetiSession(requests.Session):
 
         :return: Dictionary containing the product info.
         """
-        product_info = self.get_rest_response(
-            "product_info", "GET", include_organization_id=False
-        )
-        return product_info
+        return self.get_rest_response("product_info", "GET", include_organization_id=False)
 
     def __exit__(self, exc_type, exc_value, traceback):
         """
@@ -448,8 +421,8 @@ class GetiSession(requests.Session):
     def _handle_error_response(
         self,
         response: Response,
-        request_params: Dict[str, Any],
-        request_data: Dict[str, Any],
+        request_params: dict[str, Any],
+        request_data: dict[str, Any],
         allow_reauthentication: bool = True,
         content_type: str = "json",
     ) -> Response:
@@ -530,9 +503,7 @@ class GetiSession(requests.Session):
             self.headers.update({"Content-Type": "application/json"})
         elif content_type == "jpeg":
             self.headers.update({"Content-Type": "image/jpeg"})
-        elif content_type == "multipart":
-            self.headers.pop("Content-Type", None)
-        elif content_type == "":
+        elif content_type == "multipart" or content_type == "":
             self.headers.pop("Content-Type", None)
         elif content_type == "zip":
             self.headers.update({"Content-Type": "application/zip"})
@@ -569,18 +540,15 @@ class GetiSession(requests.Session):
                 method="GET",
                 include_organization_id=False,
             )
-        if "organizationId" in result.keys():
+        if "organizationId" in result:
             # Geti < 2.5, return the id directly
             org_id = result.get("organizationId", None)
-        elif "organizations" in result.keys():
+        elif "organizations" in result:
             # Geti 2.5 and up: list of organizations, return the default one (the one
             # which was created at the earliest time)
             org_list = result["organizations"]
             creation_times = [
-                datetime.fromisoformat(
-                    x["organizationCreatedAt"].replace("Z", "+00:00")
-                )
-                for x in org_list
+                datetime.fromisoformat(x["organizationCreatedAt"].replace("Z", "+00:00")) for x in org_list
             ]
             ids = [x["organizationId"] for x in org_list]
             earliest_creation_time = min(creation_times)
@@ -591,8 +559,7 @@ class GetiSession(requests.Session):
 
         if org_id is None:
             raise ValueError(
-                f"Unable to retrieve organization ID from the Intel Geti server. "
-                f"Server responded with: `{result}`"
+                f"Unable to retrieve organization ID from the Intel Geti server. Server responded with: `{result}`"
             )
         return org_id
 

@@ -17,19 +17,19 @@
 import abc
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, NamedTuple
 
 import cv2
 import numpy as np
 from model_api.models import (
-    ImageModel,
-    SegmentationModel,
-    ClassificationResult,
-    DetectionResult,
-    InstanceSegmentationResult,
-    ImageResultWithSoftPrediction,
     AnomalyResult,
+    ClassificationResult,
     DetectedKeypoints,
+    DetectionResult,
+    ImageModel,
+    ImageResultWithSoftPrediction,
+    InstanceSegmentationResult,
+    SegmentationModel,
 )
 
 from geti_sdk.data_models.annotations import Annotation
@@ -53,7 +53,7 @@ from geti_sdk.deployment.predictions_postprocessing.utils.segmentation_utils imp
 class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
     """Interface for the converter"""
 
-    def __init__(self, labels: LabelList, configuration: Dict[str, Any]):
+    def __init__(self, labels: LabelList, configuration: dict[str, Any]):
         self.labels = labels.get_non_empty_labels()
         model_api_labels = configuration["labels"]
         label_ids = configuration.get("label_ids", [])  # default to empty list
@@ -95,26 +95,18 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
         # Assumes configuration['label_ids'] and configuration['labels'] have the same ordering
         for i, (label_id_str, label_str) in enumerate(zip(label_ids, model_api_labels)):
             try:
-                label = self.__get_label(
-                    label_str, pos_idx=self.model_api_label_map_counts[label_str]
-                )
+                label = self.__get_label(label_str, pos_idx=self.model_api_label_map_counts[label_str])
             except ValueError:
                 if label_id_str in self.label_map_ids:
                     # Get the label by its ID in case it has been renamed
                     label = self.label_map_ids[label_id_str]
-                    logging.warning(
-                        f"Label '{label_str}' has been renamed to '{label.name}'."
-                    )
+                    logging.warning(f"Label '{label_str}' has been renamed to '{label.name}'.")
                 else:
-                    logging.warning(
-                        f"Label '{label_str}' cannot be found. It may have been removed."
-                    )
+                    logging.warning(f"Label '{label_str}' cannot be found. It may have been removed.")
             self.idx_to_label[i] = label
             self.str_to_label[label_str] = label
             self.model_api_label_map_counts[label_str] += 1
-        logging.info(
-            f"Converter loaded labels with following indices: {self.idx_to_label}"
-        )
+        logging.info(f"Converter loaded labels with following indices: {self.idx_to_label}")
 
     def __get_label(self, label_str: str, pos_idx: int) -> Label:
         if label_str in self.label_map_ids:
@@ -122,9 +114,7 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
         matched_legacy_labels = self.legacy_label_map_names[label_str]
         if pos_idx < len(matched_legacy_labels):
             return matched_legacy_labels[pos_idx]
-        raise ValueError(
-            f"Label '{label_str}' (pos_idx={pos_idx}) not found in the label schema"
-        )
+        raise ValueError(f"Label '{label_str}' (pos_idx={pos_idx}) not found in the label schema")
 
     def get_label_by_idx(self, label_idx: int) -> Label:
         """
@@ -145,9 +135,7 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
         return self.str_to_label[label_str]
 
     @abc.abstractmethod
-    def convert_to_prediction(
-        self, inference_results: NamedTuple, **kwargs
-    ) -> Prediction:
+    def convert_to_prediction(self, inference_results: NamedTuple, **kwargs) -> Prediction:
         """
         Convert raw inference results to the Prediction format.
 
@@ -157,9 +145,7 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def convert_saliency_map(
-        self, inference_results: NamedTuple, **kwargs
-    ) -> Optional[Dict[str, np.ndarray]]:
+    def convert_saliency_map(self, inference_results: NamedTuple, **kwargs) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
 
@@ -178,28 +164,27 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
         parameters
     """
 
-    def __init__(self, labels: LabelList, configuration: Dict[str, Any]):
+    def __init__(self, labels: LabelList, configuration: dict[str, Any]):
         super().__init__(labels, configuration)
 
     def convert_to_prediction(
         self,
         inference_results: ClassificationResult,
-        image_shape: Tuple[int, int, int],
+        image_shape: tuple[int, int, int],
         **kwargs,
     ) -> Prediction:  # noqa: ARG003
         """
         Convert ModelAPI ClassificationResult inference results to Prediction object.
 
-        :param inference_results: classification labels represented in ModelAPI format (label_index, label_name, confidence)
+        :param inference_results: classification labels represented in ModelAPI format
+            (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
         labels = []
         for label in inference_results.top_labels:
             label_idx, label_name, label_prob = label
-            scored_label = ScoredLabel.from_label(
-                label=self.get_label_by_idx(label_idx), probability=label_prob
-            )
+            scored_label = ScoredLabel.from_label(label=self.get_label_by_idx(label_idx), probability=label_prob)
             labels.append(scored_label)
 
         if not labels and self.empty_label:
@@ -214,12 +199,13 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
     def convert_saliency_map(
         self,
         inference_results: NamedTuple,
-        image_shape: Tuple[int, int, int],
-    ) -> Optional[Dict[str, np.ndarray]]:
+        image_shape: tuple[int, int, int],
+    ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
 
-        :param inference_results: classification labels represented in ModelAPI format (label_index, label_name, confidence)
+        :param inference_results: classification labels represented in ModelAPI format
+            (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -234,10 +220,7 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
         if len(saliency_map.shape) == 2:
             saliency_map = np.expand_dims(saliency_map, axis=-1)
         saliency_map = np.transpose(saliency_map, (2, 0, 1))  # shape: (N classes, h, w)
-        return {
-            label.name: saliency_map[i]
-            for i, label in enumerate(self.labels.get_non_empty_labels())
-        }
+        return {label.name: saliency_map[i] for i, label in enumerate(self.labels.get_non_empty_labels())}
 
     def _get_label_by_prediction_name(self, name: str) -> Label:
         """
@@ -254,9 +237,7 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
             for label in self.labels:
                 legacy_name = label.name.replace(" ", "_")
                 if legacy_name == name:
-                    logging.warning(
-                        f"Found label `{label.name}` using its legacy name `{legacy_name}`."
-                    )
+                    logging.warning(f"Found label `{label.name}` using its legacy name `{legacy_name}`.")
                     return label
         raise KeyError(f"Label named `{name}` was not found in the LabelList")
 
@@ -269,7 +250,7 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
     :param configuration: optional model configuration setting
     """
 
-    def __init__(self, labels: LabelList, configuration: Dict[str, Any]):
+    def __init__(self, labels: LabelList, configuration: dict[str, Any]):
         super().__init__(labels, configuration)
         self.use_ellipse_shapes = False
         self.confidence_threshold = 0.0
@@ -288,9 +269,7 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
         # Filter valid detections first
         valid_detections = [
             (score, label, bbox)
-            for score, label, bbox in zip(
-                detection.scores, detection.labels, detection.bboxes
-            )
+            for score, label, bbox in zip(detection.scores, detection.labels, detection.bboxes)
             if (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) >= 1.0
         ]
 
@@ -306,9 +285,7 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
 
         return result
 
-    def convert_to_prediction(
-        self, inference_results: DetectionResult, **kwargs
-    ) -> Prediction:
+    def convert_to_prediction(self, inference_results: DetectionResult, **kwargs) -> Prediction:
         """
         Convert ModelAPI DetectionResult inference results to Prediction object.
 
@@ -323,11 +300,7 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
         detections = self._detection2array(inference_results)
 
         annotations = []
-        if (
-            len(detections)
-            and detections.shape[1:] < (6,)
-            or detections.shape[1:] > (7,)
-        ):
+        if len(detections) and detections.shape[1:] < (6,) or detections.shape[1:] > (7,):
             raise ValueError(
                 f"Shape of prediction is not expected, expected (n, 7) or (n, 6) but got {detections.shape}"
             )
@@ -339,11 +312,9 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
 
             label_index = int(_detection[0])
             confidence = _detection[1]
-            scored_label = ScoredLabel.from_label(
-                self.get_label_by_idx(label_index), confidence
-            )
+            scored_label = ScoredLabel.from_label(self.get_label_by_idx(label_index), confidence)
             coords = _detection[2:]
-            shape: Union[Ellipse, Rectangle]
+            shape: Ellipse | Rectangle
 
             if confidence < self.confidence_threshold:
                 continue
@@ -362,12 +333,13 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
     def convert_saliency_map(
         self,
         inference_results: NamedTuple,
-        image_shape: Tuple[int, int, int],
-    ) -> Optional[Dict[str, np.ndarray]]:
+        image_shape: tuple[int, int, int],
+    ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
 
-        :param inference_results: classification labels represented in ModelAPI format (label_index, label_name, confidence)
+        :param inference_results: classification labels represented in ModelAPI format
+            (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -376,17 +348,12 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
             return None
         if isinstance(saliency_map, list):
             saliency_map = np.array(
-                [
-                    smap if len(smap) > 0 else np.zeros(image_shape[:2], dtype=np.uint8)
-                    for smap in saliency_map
-                ]
+                [smap if len(smap) > 0 else np.zeros(image_shape[:2], dtype=np.uint8) for smap in saliency_map]
             )
         elif isinstance(saliency_map, np.ndarray):
             saliency_map = saliency_map.squeeze(0)
         else:
-            raise ValueError(
-                f"Unsupported saliency map type: {type(saliency_map)}. Expected list or numpy array."
-            )
+            raise ValueError(f"Unsupported saliency map type: {type(saliency_map)}. Expected list or numpy array.")
         saliency_map = cv2.resize(
             np.transpose(saliency_map, (1, 2, 0)),
             dsize=(image_shape[1], image_shape[0]),
@@ -403,9 +370,7 @@ class RotatedRectToPredictionConverter(DetectionToPredictionConverter):
     Converts ModelAPI Rotated Detection objects to Prediction.
     """
 
-    def convert_to_prediction(
-        self, inference_results: InstanceSegmentationResult, **kwargs
-    ) -> Prediction:
+    def convert_to_prediction(self, inference_results: InstanceSegmentationResult, **kwargs) -> Prediction:
         """
         Convert ModelAPI instance segmentation inference results to a rotated bounding box annotation format.
 
@@ -414,7 +379,7 @@ class RotatedRectToPredictionConverter(DetectionToPredictionConverter):
         :raises ValueError: if metadata is missing from the preprocess step
         """
         annotations = []
-        shape: Union[RotatedRectangle, Ellipse]
+        shape: RotatedRectangle | Ellipse
         for bbox, label, mask, score in zip(
             inference_results.bboxes,
             inference_results.labels,
@@ -434,9 +399,7 @@ class RotatedRectToPredictionConverter(DetectionToPredictionConverter):
                 )
             else:
                 mask = mask.astype(np.uint8)
-                contours, hierarchies = cv2.findContours(
-                    mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE
-                )
+                contours, hierarchies = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
                 if hierarchies is None:
                     continue
                 for contour, hierarchy in zip(contours, hierarchies[0]):
@@ -466,9 +429,7 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
     Converts DetectionBox Predictions ModelAPI to Prediction object.
     """
 
-    def convert_to_prediction(
-        self, inference_results: Any, **kwargs: Dict[str, Any]
-    ) -> Prediction:
+    def convert_to_prediction(self, inference_results: Any, **kwargs: dict[str, Any]) -> Prediction:
         """
         Convert inference results to Prediction object.
 
@@ -476,29 +437,21 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
         :return: Prediction object.
         """
         annotations = []
-        shape: Union[Polygon, Ellipse]
+        shape: Polygon | Ellipse
         for obj in inference_results.segmentedObjects:
             if obj.score < self.confidence_threshold:
                 continue
             if self.use_ellipse_shapes:
-                shape = Ellipse(
-                    obj.xmin, obj.ymin, obj.xmax - obj.xmin, obj.ymax - obj.ymin
-                )
+                shape = Ellipse(obj.xmin, obj.ymin, obj.xmax - obj.xmin, obj.ymax - obj.ymin)
                 annotations.append(
                     Annotation(
                         shape=shape,
-                        labels=[
-                            ScoredLabel.from_label(
-                                self.get_label_by_idx(obj.id), float(obj.score)
-                            )
-                        ],
+                        labels=[ScoredLabel.from_label(self.get_label_by_idx(obj.id), float(obj.score))],
                     )
                 )
             else:
                 mask = obj.mask.astype(np.uint8)
-                contours, hierarchies = cv2.findContours(
-                    mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE
-                )
+                contours, hierarchies = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
                 if hierarchies is None:
                     continue
                 for contour, hierarchy in zip(contours, hierarchies[0]):
@@ -518,11 +471,7 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
                     annotations.append(
                         Annotation(
                             shape=shape,
-                            labels=[
-                                ScoredLabel.from_label(
-                                    self.get_label_by_idx(obj.id), float(obj.score)
-                                )
-                            ],
+                            labels=[ScoredLabel.from_label(self.get_label_by_idx(obj.id), float(obj.score))],
                         )
                     )
         return Prediction(annotations)
@@ -530,12 +479,13 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
     def convert_saliency_map(
         self,
         inference_results: NamedTuple,
-        image_shape: Tuple[int, int, int],
-    ) -> Optional[Dict[str, np.ndarray]]:
+        image_shape: tuple[int, int, int],
+    ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
 
-        :param inference_results: classification labels represented in ModelAPI format (label_index, label_name, confidence)
+        :param inference_results: classification labels represented in ModelAPI format
+            (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -561,9 +511,7 @@ class SegmentationToPredictionConverter(InferenceResultsToPredictionConverter):
     :param model: SegmentationModel instance, needed for getting contours
     """
 
-    def __init__(
-        self, labels: LabelList, configuration: Dict[str, Any], model: SegmentationModel
-    ):
+    def __init__(self, labels: LabelList, configuration: dict[str, Any], model: SegmentationModel):
         super().__init__(labels, configuration)
         self.model = model
 
@@ -602,11 +550,7 @@ class SegmentationToPredictionConverter(InferenceResultsToPredictionConverter):
                     annotations.append(
                         Annotation(
                             shape=Polygon(points=points),
-                            labels=[
-                                ScoredLabel.from_label(
-                                    label=label, probability=contour.probability
-                                )
-                            ],
+                            labels=[ScoredLabel.from_label(label=label, probability=contour.probability)],
                         )
                     )
         return Prediction(annotations)
@@ -614,12 +558,13 @@ class SegmentationToPredictionConverter(InferenceResultsToPredictionConverter):
     def convert_saliency_map(
         self,
         inference_results: NamedTuple,
-        image_shape: Tuple[int, int, int],
-    ) -> Optional[Dict[str, np.ndarray]]:
+        image_shape: tuple[int, int, int],
+    ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
 
-        :param inference_results: classification labels represented in ModelAPI format (label_index, label_name, confidence)
+        :param inference_results: classification labels represented in ModelAPI format
+            (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -627,11 +572,7 @@ class SegmentationToPredictionConverter(InferenceResultsToPredictionConverter):
         if len(saliency_map) == 0:
             return None
         saliency_map = np.transpose(saliency_map, (2, 0, 1))  # shape: (N classes, h, w)
-        return {
-            label.name: saliency_map[i]
-            for i, label in self.idx_to_label.items()
-            if not label.is_empty
-        }
+        return {label.name: saliency_map[i] for i, label in self.idx_to_label.items() if not label.is_empty}
 
 
 class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
@@ -642,15 +583,13 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
     :param configuration: model configuration setting
     """
 
-    def __init__(self, labels: LabelList, configuration: Dict[str, Any]):
+    def __init__(self, labels: LabelList, configuration: dict[str, Any]):
         self.normal_label = next(label for label in labels if not label.is_anomalous)
         self.anomalous_label = next(label for label in labels if label.is_anomalous)
         if configuration is not None and "domain" in configuration:
             self.domain = configuration["domain"]
 
-    def convert_to_prediction(
-        self, inference_results: AnomalyResult, image_shape: Tuple[int], **kwargs
-    ) -> Prediction:  # noqa: ARG002
+    def convert_to_prediction(self, inference_results: AnomalyResult, image_shape: tuple[int], **kwargs) -> Prediction:  # noqa: ARG002
         """
         Convert ModelAPI AnomalyResult inferenceresults to sc_sdk annotations.
 
@@ -661,19 +600,10 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
             - Detection: predicted bounding boxes.
         """
         pred_label = inference_results.pred_label
-        label = (
-            self.anomalous_label
-            if pred_label.lower() in ("anomaly", "anomalous")
-            else self.normal_label
-        )
-        annotations: List[Annotation] = []
-        if (
-            self.domain == Domain.ANOMALY_CLASSIFICATION
-            or self.domain == Domain.ANOMALY
-        ):
-            scored_label = ScoredLabel.from_label(
-                label=label, probability=float(inference_results.pred_score)
-            )
+        label = self.anomalous_label if pred_label.lower() in ("anomaly", "anomalous") else self.normal_label
+        annotations: list[Annotation] = []
+        if self.domain == Domain.ANOMALY_CLASSIFICATION or self.domain == Domain.ANOMALY:
+            scored_label = ScoredLabel.from_label(label=label, probability=float(inference_results.pred_score))
             annotations = [
                 Annotation(
                     shape=Rectangle.generate_full_box(*image_shape[1::-1]),
@@ -690,9 +620,7 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
             for box in inference_results.pred_boxes:
                 annotations.append(
                     Annotation(
-                        shape=Rectangle(
-                            box[0], box[1], box[2] - box[0], box[3] - box[1]
-                        ),
+                        shape=Rectangle(box[0], box[1], box[2] - box[0], box[3] - box[1]),
                         labels=[
                             ScoredLabel.from_label(
                                 label=self.anomalous_label,
@@ -706,9 +634,7 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
                 f"Cannot convert inference results for task '{self.domain.name}'. Only Anomaly tasks are supported."
             )
         if not annotations:
-            scored_label = ScoredLabel.from_label(
-                label=self.normal_label, probability=0
-            )
+            scored_label = ScoredLabel.from_label(label=self.normal_label, probability=0)
             annotations = [
                 Annotation(
                     labels=[scored_label],
@@ -720,12 +646,13 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
     def convert_saliency_map(
         self,
         inference_results: NamedTuple,
-        image_shape: Tuple[int, int, int],
-    ) -> Optional[Dict[str, np.ndarray]]:
+        image_shape: tuple[int, int, int],
+    ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
 
-        :param inference_results: classification labels represented in ModelAPI format (label_index, label_name, confidence)
+        :param inference_results: classification labels represented in ModelAPI format
+            (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -745,12 +672,10 @@ class KeypointDetectionToPredictionConverter(InferenceResultsToPredictionConvert
     :param configuration: optional model configuration setting
     """
 
-    def __init__(self, labels: LabelList, configuration: Dict[str, Any]):
+    def __init__(self, labels: LabelList, configuration: dict[str, Any]):
         super().__init__(labels, configuration)
 
-    def convert_to_prediction(
-        self, inference_results: DetectedKeypoints, **kwargs
-    ) -> Prediction:
+    def convert_to_prediction(self, inference_results: DetectedKeypoints, **kwargs) -> Prediction:
         """
         Convert ModelAPI KeypointDetectionResult inference results to Prediction object.
 
@@ -762,16 +687,10 @@ class KeypointDetectionToPredictionConverter(InferenceResultsToPredictionConvert
         :return: Prediction object containing the keypoints obtained from the prediction
         """
         annotations = []
-        for label_idx, keypoint_score in enumerate(
-            zip(inference_results.keypoints, inference_results.scores)
-        ):
-            shape = Keypoint(
-                x=keypoint_score[0][0], y=keypoint_score[0][1], is_visible=True
-            )
+        for label_idx, keypoint_score in enumerate(zip(inference_results.keypoints, inference_results.scores)):
+            shape = Keypoint(x=keypoint_score[0][0], y=keypoint_score[0][1], is_visible=True)
             label = self.get_label_by_idx(label_idx=label_idx)
-            scored_label = ScoredLabel.from_label(
-                label=label, probability=keypoint_score[1]
-            )
+            scored_label = ScoredLabel.from_label(label=label, probability=keypoint_score[1])
             annotation = Annotation(shape=shape, labels=[scored_label])
             annotations.append(annotation)
         return Prediction(annotations)
@@ -779,8 +698,8 @@ class KeypointDetectionToPredictionConverter(InferenceResultsToPredictionConvert
     def convert_saliency_map(
         self,
         inference_results: NamedTuple,
-        image_shape: Tuple[int, int, int],
-    ) -> Optional[Dict[str, np.ndarray]]:
+        image_shape: tuple[int, int, int],
+    ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
 
@@ -800,7 +719,7 @@ class ConverterFactory:
     def create_converter(
         labels: LabelList,
         domain: Domain,
-        configuration: Dict[str, Any],
+        configuration: dict[str, Any],
         model: ImageModel,
     ) -> InferenceResultsToPredictionConverter:
         """

@@ -17,7 +17,6 @@ import logging
 import os
 import shutil
 import tempfile
-from typing import Union
 
 import pytest
 from _pytest.main import Session
@@ -74,15 +73,11 @@ GETI_HTTPS_PROXY = os.environ.get("GETI_HTTPS_PROXY_URL", None)
 # NOTE: PROXIES can only be used in ONLINE mode, they cannot be used in RECORD mode
 # (will raise an error) and have no effect in OFFLINE mode.
 
-CLEAR_EXISTING_TEST_PROJECTS = os.environ.get(
-    "CLEAR_EXISTING_TEST_PROJECTS", "0"
-).lower() in ["true", "1"]
+CLEAR_EXISTING_TEST_PROJECTS = os.environ.get("CLEAR_EXISTING_TEST_PROJECTS", "0").lower() in ["true", "1"]
 # CLEAR_EXISTING_TEST_PROJECTS is a boolean that determines whether existing test
 # projects are deleted before a test run
 
-NIGHTLY_TEST_LEARNING_PARAMETER_SETTINGS = os.environ.get(
-    "LEARNING_PARAMETER_SETTINGS", "default"
-)
+NIGHTLY_TEST_LEARNING_PARAMETER_SETTINGS = os.environ.get("LEARNING_PARAMETER_SETTINGS", "default")
 # NIGHTLY_TEST_LEARNING_PARAMETER_SETTINGS determines how the learning parameters are
 # set for the nightly tests. Possible values are:
 #   - "default"     : The default settings
@@ -95,24 +90,20 @@ NIGHTLY_TEST_LEARNING_PARAMETER_SETTINGS = os.environ.get(
 
 
 @pytest.fixture(scope="session")
-def fxt_server_config() -> Union[ServerTokenConfig, ServerCredentialConfig]:
+def fxt_server_config() -> ServerTokenConfig | ServerCredentialConfig:
     """
     This fixture holds the login configuration to access the Geti server
     """
     # Configure proxies for OFFLINE, ONLINE and RECORD mode
     if TEST_MODE == SdkTestMode.OFFLINE:
         proxies = {"https": "", "http": ""}
-    elif TEST_MODE == SdkTestMode.ONLINE and (
-        GETI_HTTP_PROXY is not None or GETI_HTTPS_PROXY is not None
-    ):
+    elif TEST_MODE == SdkTestMode.ONLINE and (GETI_HTTP_PROXY is not None or GETI_HTTPS_PROXY is not None):
         proxies = {"https": GETI_HTTPS_PROXY, "http": GETI_HTTP_PROXY}
     else:
         # In RECORD mode or when both proxies are None, the `proxies` argument for the
         # ServerConfig should be set to None
         proxies = None
-        if TEST_MODE == SdkTestMode.RECORD and (
-            GETI_HTTPS_PROXY is not None or GETI_HTTP_PROXY is not None
-        ):
+        if TEST_MODE == SdkTestMode.RECORD and (GETI_HTTPS_PROXY is not None or GETI_HTTP_PROXY is not None):
             raise ValueError(
                 "Unable to use proxy servers in RECORD mode! Please clear the "
                 "GETI_HTTPS_PROXY and GETI_HTTP_PROXY environment variables before "
@@ -121,9 +112,7 @@ def fxt_server_config() -> Union[ServerTokenConfig, ServerCredentialConfig]:
 
     # Use token if available
     if TOKEN is None:
-        test_config = ServerCredentialConfig(
-            host=HOST, username=USERNAME, password=PASSWORD, proxies=proxies
-        )
+        test_config = ServerCredentialConfig(host=HOST, username=USERNAME, password=PASSWORD, proxies=proxies)
     else:
         test_config = ServerTokenConfig(host=HOST, token=TOKEN, proxies=proxies)
     yield test_config
@@ -179,10 +168,7 @@ def _get_geti_instance() -> Geti:
     This function returns a Geti instance with the correct authentication parameters
     """
     # Handle authentication via token or credentials
-    if TOKEN is None:
-        auth_params = {"username": USERNAME, "password": PASSWORD}
-    else:
-        auth_params = {"token": TOKEN}
+    auth_params = {"username": USERNAME, "password": PASSWORD} if TOKEN is None else {"token": TOKEN}
     # Handle proxies
     if GETI_HTTP_PROXY is not None or GETI_HTTPS_PROXY is not None:
         proxies = {"http": GETI_HTTP_PROXY, "https": GETI_HTTPS_PROXY}
@@ -247,8 +233,7 @@ def pytest_sessionfinish(session: Session, exitstatus: int) -> None:
             )
             # Copy recorded cassettes to fixtures/cassettes
             logging.info(
-                f"Copying newly recorded cassettes from `{record_cassette_path}` to "
-                f"`{versioned_cassette_path}`."
+                f"Copying newly recorded cassettes from `{record_cassette_path}` to `{versioned_cassette_path}`."
             )
             for root, dirs, files in os.walk(record_cassette_path):
                 for file in files:

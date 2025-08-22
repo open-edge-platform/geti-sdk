@@ -55,6 +55,4 @@ if __name__ == "__main__":
     preserve_audio = not args.drop_audio
 
     # Reconstruct video with overlaid predictions on local machine.
-    predict_video_from_deployment(
-        video_path, deployment_path, device=device, preserve_audio=preserve_audio
-    )
+    predict_video_from_deployment(video_path, deployment_path, device=device, preserve_audio=preserve_audio)

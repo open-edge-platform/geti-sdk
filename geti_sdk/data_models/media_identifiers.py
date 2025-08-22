@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import ClassVar, Dict, Optional
+from typing import ClassVar
 
 import attr
 
@@ -30,7 +30,7 @@ class MediaIdentifier:
 
     type: str = attr.field(converter=str_to_media_type)
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         """
         Return a dictionary form of the MediaIdentifier instance.
 
@@ -69,7 +69,7 @@ class VideoFrameIdentifier(MediaIdentifier):
 
     frame_index: int
     video_id: str
-    key_index: Optional[int] = None  # Added in Geti 2.5
+    key_index: int | None = None  # Added in Geti 2.5
 
 
 @attr.define

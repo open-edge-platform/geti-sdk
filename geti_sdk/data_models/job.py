@@ -13,7 +13,7 @@
 # and limitations under the License.
 import logging
 from pprint import pformat
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import attr
 
@@ -41,7 +41,7 @@ class JobStatus(StatusSummary):
     state: str = attr.field(converter=str_to_enum_converter(JobState), kw_only=True)
 
     @classmethod
-    def from_dict(cls, status_dict: Dict[str, Any]) -> "JobStatus":
+    def from_dict(cls, status_dict: dict[str, Any]) -> "JobStatus":
         """
         Create a JobStatus object from a dictionary.
 
@@ -66,12 +66,12 @@ class TaskMetadata:
         Geti v1.1 and up
     """
 
-    model_architecture: Optional[str] = None
-    model_template_id: Optional[str] = None
-    model_version: Optional[int] = None
-    name: Optional[str] = None
-    dataset_storage_id: Optional[str] = None
-    task_id: Optional[str] = None  # Added in Geti v1.1
+    model_architecture: str | None = None
+    model_template_id: str | None = None
+    model_version: int | None = None
+    name: str | None = None
+    dataset_storage_id: str | None = None
+    task_id: str | None = None  # Added in Geti v1.1
 
 
 @attr.define
@@ -87,8 +87,8 @@ class TestMetadata:
 
     model_architecture: str
     model_template_id: str
-    datasets: List[Dataset]
-    model: Optional[dict] = None  # Added in Geti v1.7
+    datasets: list[Dataset]
+    model: dict | None = None  # Added in Geti v1.7
 
 
 @attr.define
@@ -100,9 +100,9 @@ class ProjectMetadata:
     :var id: ID of the project
     """
 
-    name: Optional[str] = None
-    id: Optional[str] = None
-    type: Optional[str] = None
+    name: str | None = None
+    id: str | None = None
+    type: str | None = None
 
 
 @attr.define
@@ -114,10 +114,10 @@ class DatasetMetadata:
     :var id: ID of the dataset
     """
 
-    name: Optional[str] = None
-    id: Optional[str] = None
-    use_for_training: Optional[bool] = None
-    creation_time: Optional[str] = attr.field(converter=str_to_datetime, default=None)
+    name: str | None = None
+    id: str | None = None
+    use_for_training: bool | None = None
+    creation_time: str | None = attr.field(converter=str_to_datetime, default=None)
 
 
 @attr.define
@@ -128,7 +128,7 @@ class ParametersMetadata:
     :var file_id: ID of the uploaded file
     """
 
-    file_id: Optional[str] = None
+    file_id: str | None = None
 
 
 @attr.define
@@ -144,7 +144,7 @@ class ModelMetadata:
 
     model_storage_id: str
     model_id: str
-    model_activated: Optional[bool] = None  # Added in Geti v1.14
+    model_activated: bool | None = None  # Added in Geti v1.14
 
 
 @attr.define
@@ -178,25 +178,23 @@ class JobMetadata:
     :var scores: List of scores for the job. Added in Geti v1.1
     """
 
-    task: Optional[TaskMetadata] = None
-    project: Optional[ProjectMetadata] = None
-    dataset: Optional[DatasetMetadata] = None
-    parameters: Optional[ParametersMetadata] = None
-    test: Optional[TestMetadata] = None
-    base_model_id: Optional[str] = None
-    model_storage_id: Optional[str] = None
-    optimization_type: Optional[str] = None
-    optimized_model_id: Optional[str] = None
-    download_url: Optional[str] = None
-    export_format: Optional[str] = None
-    file_id: Optional[str] = None
-    scores: Optional[List[ScoreMetadata]] = None
-    trained_model: Optional[ModelMetadata] = None  # Added in Geti v1.7
-    warnings: Optional[List[dict]] = None  # Added in Geti v1.13 for dataset import jobs
-    supported_project_types: Optional[List[dict]] = (
-        None  # Added in Geti v1.13 for dataset import jobs
-    )
-    project_id: Optional[str] = None  # Added in Geti v1.13 for dataset import jobs
+    task: TaskMetadata | None = None
+    project: ProjectMetadata | None = None
+    dataset: DatasetMetadata | None = None
+    parameters: ParametersMetadata | None = None
+    test: TestMetadata | None = None
+    base_model_id: str | None = None
+    model_storage_id: str | None = None
+    optimization_type: str | None = None
+    optimized_model_id: str | None = None
+    download_url: str | None = None
+    export_format: str | None = None
+    file_id: str | None = None
+    scores: list[ScoreMetadata] | None = None
+    trained_model: ModelMetadata | None = None  # Added in Geti v1.7
+    warnings: list[dict] | None = None  # Added in Geti v1.13 for dataset import jobs
+    supported_project_types: list[dict] | None = None  # Added in Geti v1.13 for dataset import jobs
+    project_id: str | None = None  # Added in Geti v1.13 for dataset import jobs
 
 
 @attr.define
@@ -211,8 +209,8 @@ class JobCancellationInfo:
 
     cancellable: bool = True
     is_cancelled: bool = False
-    user_uid: Optional[str] = None
-    cancel_time: Optional[str] = attr.field(converter=str_to_datetime, default=None)
+    user_uid: str | None = None
+    cancel_time: str | None = attr.field(converter=str_to_datetime, default=None)
 
 
 @attr.define
@@ -221,8 +219,8 @@ class JobCost:
     Information relating to the cost of a Job in Intel Geti.
     """
 
-    requests: List
-    consumed: List
+    requests: list
+    consumed: list
 
 
 @attr.define(slots=False)
@@ -246,28 +244,24 @@ class Job:
     id: str
     type: str = attr.field(converter=str_to_enum_converter(JobType))
     metadata: JobMetadata
-    description: Optional[str] = None
-    creation_time: Optional[str] = attr.field(converter=str_to_datetime, default=None)
-    start_time: Optional[str] = attr.field(
-        converter=str_to_datetime, default=None
-    )  # Added in Geti v1.7
-    end_time: Optional[str] = attr.field(
-        converter=str_to_datetime, default=None
-    )  # Added in Geti v1.7
-    author: Optional[str] = None  # Added in Geti v1.7
-    cancellation_info: Optional[JobCancellationInfo] = None  # Added in Geti v1.7
-    state: Optional[str] = attr.field(
+    description: str | None = None
+    creation_time: str | None = attr.field(converter=str_to_datetime, default=None)
+    start_time: str | None = attr.field(converter=str_to_datetime, default=None)  # Added in Geti v1.7
+    end_time: str | None = attr.field(converter=str_to_datetime, default=None)  # Added in Geti v1.7
+    author: str | None = None  # Added in Geti v1.7
+    cancellation_info: JobCancellationInfo | None = None  # Added in Geti v1.7
+    state: str | None = attr.field(
         converter=str_to_optional_enum_converter(JobState), default=None
     )  # Added in Geti v1.7
-    steps: Optional[List[dict]] = None  # Added in Geti v1.7
-    cost: Optional[JobCost] = None  # Added in Geti v2.2
+    steps: list[dict] | None = None  # Added in Geti v1.7
+    cost: JobCost | None = None  # Added in Geti v2.2
 
     def __attrs_post_init__(self):
         """
         Initialize private attributes.
         """
-        self._workspace_id: Optional[str] = None
-        self._geti_version: Optional[GetiVersion]
+        self._workspace_id: str | None = None
+        self._geti_version: GetiVersion | None
 
     @property
     def workspace_id(self) -> str:
@@ -277,9 +271,7 @@ class Job:
         :return: Unique database ID of the workspace to which the job belongs
         """
         if self._workspace_id is None:
-            raise ValueError(
-                f"Workspace ID for job {self} is unknown, it was never set."
-            )
+            raise ValueError(f"Workspace ID for job {self} is unknown, it was never set.")
         return self._workspace_id
 
     @workspace_id.setter
@@ -326,17 +318,14 @@ class Job:
                         "error_code": "job_not_found",
                     },
                 )
-            else:
-                raise job_error
+            raise job_error
 
         self.steps = response.get("steps", None)
         self.state = JobState(response["state"])
         self.metadata.project_id = response["metadata"].get("project_id", None)
         self.metadata.download_url = response["metadata"].get("download_url", None)
         self.metadata.warnings = response["metadata"].get("warnings", None)
-        self.metadata.supported_project_types = response["metadata"].get(
-            "supported_project_types", None
-        )
+        self.metadata.supported_project_types = response["metadata"].get("supported_project_types", None)
 
         if self._geti_version is None:
             self.geti_version = session.version
@@ -351,15 +340,11 @@ class Job:
         :return: Job with updated status
         """
         try:
-            session.get_rest_response(
-                url=self.relative_url, method="DELETE", allow_text_response=True
-            )
+            session.get_rest_response(url=self.relative_url, method="DELETE", allow_text_response=True)
             self.state = JobState.CANCELLED
         except GetiRequestException as error:
             if error.status_code == 404:
-                logging.info(
-                    f"Job '{self.name}' is not active anymore, unable to delete."
-                )
+                logging.info(f"Job '{self.name}' is not active anymore, unable to delete.")
                 self.state = JobState.INACTIVE
             else:
                 raise error
@@ -374,7 +359,7 @@ class Job:
         """
         return pformat(self.to_dict())
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return the dictionary representation of the job.
 
@@ -396,7 +381,7 @@ class Job:
         """
         return self.state == JobState.RUNNING
 
-    def _get_step_information(self) -> Tuple[int, int]:
+    def _get_step_information(self) -> tuple[int, int]:
         """
         Return the current step and the total number of steps in the job
         """
@@ -440,8 +425,7 @@ class Job:
         if current_step_index < 0 or current_step_index >= len(self.steps):
             if self.state != JobState.SCHEDULED:
                 return ""
-            else:
-                return "Awaiting job execution"
+            return "Awaiting job execution"
         return self.steps[current_step_index].get("step_name", "")
 
     @property
@@ -464,9 +448,7 @@ class Job:
         :return: Version of the Intel Geti instance from which the job originates
         """
         if self._geti_version is None:
-            raise ValueError(
-                f"Geti version for job {self} is unknown, it was never set."
-            )
+            raise ValueError(f"Geti version for job {self} is unknown, it was never set.")
         return self._geti_version
 
     @geti_version.setter

@@ -15,7 +15,7 @@ import glob
 import logging
 import os
 import time
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from collections.abc import Sequence
 
 import numpy as np
 from datumaro.components.annotation import (
@@ -36,7 +36,7 @@ from geti_sdk.utils import deprecate, get_dict_key_from_value
     use="geti_sdk.import_export.GetiIE",
     reason="Dataset and annotations can be imported using Geti's native Dataset Import/Export functionality.",
 )
-class DatumaroDataset(object):
+class DatumaroDataset:
     """
     Wrapper for interacting with the datumaro dataset, contains some example
     functions for dataset operations that can be carried out prior to importing the
@@ -57,13 +57,9 @@ class DatumaroDataset(object):
         self._subset_names = self.dataset.subsets().keys()
         self._filtered_categories = [self.dataset.categories()[AnnotationType.label]]
         if self.dataset.categories().get(AnnotationType.points):
-            self._filtered_categories.append(
-                self.dataset.categories()[AnnotationType.points]
-            )
+            self._filtered_categories.append(self.dataset.categories()[AnnotationType.points])
 
-    def prepare_dataset(
-        self, task_type: TaskType, previous_task_type: Optional[TaskType] = None
-    ) -> Dataset:
+    def prepare_dataset(self, task_type: TaskType, previous_task_type: TaskType | None = None) -> Dataset:
         """
         Prepare the dataset for uploading to Intel Geti.
 
@@ -72,36 +68,23 @@ class DatumaroDataset(object):
             the current task in the pipeline. This is only used for global tasks
         """
         if task_type.is_detection and task_type != TaskType.ROTATED_DETECTION:
-            new_dataset = self.dataset.transform(
-                self.dataset.env.transforms.get("shapes_to_boxes")
-            )
+            new_dataset = self.dataset.transform(self.dataset.env.transforms.get("shapes_to_boxes"))
             logging.info("Annotations have been converted to boxes")
         elif task_type.is_segmentation or task_type == TaskType.ROTATED_DETECTION:
-            converted_dataset = self.dataset.transform(
-                self.dataset.env.transforms.get("masks_to_polygons")
-            )
-            new_dataset = converted_dataset.filter(
-                '/item/annotation[type="polygon"]', filter_annotations=True
-            )
+            converted_dataset = self.dataset.transform(self.dataset.env.transforms.get("masks_to_polygons"))
+            new_dataset = converted_dataset.filter('/item/annotation[type="polygon"]', filter_annotations=True)
             logging.info("Annotations have been converted to polygons")
         elif task_type.is_keypoint_detection:
             new_dataset = self.dataset
             logging.info("Keypoint detection dataset prepared.")
         elif task_type.is_global:
             if previous_task_type is not None and (
-                previous_task_type.is_segmentation
-                or previous_task_type == TaskType.ROTATED_DETECTION
+                previous_task_type.is_segmentation or previous_task_type == TaskType.ROTATED_DETECTION
             ):
-                converted_dataset = self.dataset.transform(
-                    self.dataset.env.transforms.get("masks_to_polygons")
-                )
-                new_dataset = converted_dataset.filter(
-                    '/item/annotation[type="polygon"]', filter_annotations=True
-                )
+                converted_dataset = self.dataset.transform(self.dataset.env.transforms.get("masks_to_polygons"))
+                new_dataset = converted_dataset.filter('/item/annotation[type="polygon"]', filter_annotations=True)
             else:
-                new_dataset = self.dataset.transform(
-                    self.dataset.env.transforms.get("shapes_to_boxes")
-                )
+                new_dataset = self.dataset.transform(self.dataset.env.transforms.get("shapes_to_boxes"))
             logging.info(f"{str(task_type).capitalize()} dataset prepared.")
         else:
             raise ValueError(f"Unsupported task type {task_type}")
@@ -126,14 +109,14 @@ class DatumaroDataset(object):
         return self._filtered_categories[0]
 
     @property
-    def label_names(self) -> List[str]:
+    def label_names(self) -> list[str]:
         """
         Return a list of all label names in the dataset.
         """
         return [item.name for item in self.label_categories]
 
     @property
-    def label_mapping(self) -> Dict[int, str]:
+    def label_mapping(self) -> dict[int, str]:
         """
         Return the mapping of label index to label name.
         """
@@ -143,7 +126,7 @@ class DatumaroDataset(object):
         return {value: key for key, value in self.label_categories._indices.items()}
 
     @property
-    def points_categories(self) -> Union[PointsCategories, None]:
+    def points_categories(self) -> PointsCategories | None:
         """
         Return the PointCategories in the dataset.
         """
@@ -157,7 +140,7 @@ class DatumaroDataset(object):
             return None
 
     @property
-    def points_names(self) -> Union[List[str], None]:
+    def points_names(self) -> list[str] | None:
         """
         Return a list of all point names in the dataset.
         """
@@ -166,18 +149,13 @@ class DatumaroDataset(object):
         return None
 
     @property
-    def points_mapping(self) -> Union[Dict[int, str], None]:
+    def points_mapping(self) -> dict[int, str] | None:
         """
         Return the mapping of point index to label name.
         """
         if self.points_categories:
-            return {
-                idx: name
-                for idx, name in enumerate(self.points_categories.items[0].labels)
-            }
-        logging.info(
-            "No points categories found in the dataset. Please check the dataset "
-        )
+            return dict(enumerate(self.points_categories.items[0].labels))
+        logging.info("No points categories found in the dataset. Please check the dataset ")
         return None
 
     @property
@@ -188,27 +166,23 @@ class DatumaroDataset(object):
         return self.points_categories.items[0].joints
 
     @property
-    def image_names(self) -> List[str]:
+    def image_names(self) -> list[str]:
         """
         Return the list of media names included in the dataset.
         """
         return [item.id for item in self.dataset]
 
-    def create_datumaro_dataset(self) -> Tuple[Dataset, Environment]:
+    def create_datumaro_dataset(self) -> tuple[Dataset, Environment]:
         """
         Initialize a datumaro dataset.
         """
         t_start = time.time()
-        dataset = Dataset.import_from(
-            path=self.dataset_path, format=self.dataset_format
-        )
+        dataset = Dataset.import_from(path=self.dataset_path, format=self.dataset_format)
         logging.info(
             f"Datumaro dataset consisting of {len(dataset)} items in "
             f"{self.dataset_format} format was loaded from {self.dataset_path}"
         )
-        logging.info(
-            f"Datumaro dataset was created in {time.time() - t_start:.1f} seconds"
-        )
+        logging.info(f"Datumaro dataset was created in {time.time() - t_start:.1f} seconds")
         return dataset, dataset.env
 
     def remove_unannotated_items(self):
@@ -229,14 +203,11 @@ class DatumaroDataset(object):
         # Sanity check for filtering
         for label in labels:
             if label not in list(label_map.values()):
-                raise ValueError(
-                    f"Cannot filter on label {label} because this is not in the "
-                    f"dataset."
-                )
+                raise ValueError(f"Cannot filter on label {label} because this is not in the dataset.")
 
         if labels:
 
-            def select_function(dataset_item: DatasetItem, labels: List[str]):
+            def select_function(dataset_item: DatasetItem, labels: list[str]):
                 # Filter function to apply to each item in the dataset
                 item_labels = [label_map[x.label] for x in dataset_item.annotations]
                 matches = []
@@ -244,21 +215,19 @@ class DatumaroDataset(object):
                     if label in item_labels:
                         if criterion == "OR":
                             return True
-                        elif criterion in ["AND", "NOT", "XOR"]:
+                        if criterion in ["AND", "NOT", "XOR"]:
                             matches.append(True)
                         else:
-                            raise ValueError(
-                                'Invalid filter criterion, please select "OR", "NOT", '
-                                '"XOR", or "AND".'
-                            )
+                            raise ValueError('Invalid filter criterion, please select "OR", "NOT", "XOR", or "AND".')
                     else:
                         matches.append(False)
                 if criterion == "AND":
                     return all(matches)
-                elif criterion == "NOT":
+                if criterion == "NOT":
                     return not any(matches)
-                elif criterion == "XOR":
+                if criterion == "XOR":
                     return np.sum(matches) == 1
+                return None
 
             # Messy way to manually keep track of labels and indices, must be a
             # better way in Datumaro but haven't found it yet
@@ -274,19 +243,12 @@ class DatumaroDataset(object):
                 categories=self.dataset.categories(),
                 env=self.dataset.env,
             )
-            logging.info(
-                f"After filtering, dataset with labels {labels} contains "
-                f"{len(self.dataset)} items."
-            )
+            logging.info(f"After filtering, dataset with labels {labels} contains {len(self.dataset)} items.")
             self._filtered_categories = [label_categories]
             if self.dataset.categories().get(AnnotationType.points):
-                self._filtered_categories.append(
-                    self.dataset.categories()[AnnotationType.points]
-                )
+                self._filtered_categories.append(self.dataset.categories()[AnnotationType.points])
 
-    def __get_item_by_id_from_subsets(
-        self, datum_id: str, search_by_name: bool = False
-    ) -> Optional[DatasetItem]:
+    def __get_item_by_id_from_subsets(self, datum_id: str, search_by_name: bool = False) -> DatasetItem | None:
         """
         Search all subsets for the item with id `datum_id`
 
@@ -295,23 +257,17 @@ class DatumaroDataset(object):
             addition to searching within the datumaro dataset
         :return: Dataset item with the given id, or None if the item was not found
         """
-        ds_item: Optional[DatasetItem] = None
+        ds_item: DatasetItem | None = None
         for subset_name in self._subset_names:
             ds_item = self.dataset.get(id=datum_id, subset=subset_name)
         if search_by_name and ds_item is None:
             for subset_name in self._subset_names:
-                image_relative_path = self.__search_image_by_filename(
-                    image_filename=datum_id, subset_name=subset_name
-                )
+                image_relative_path = self.__search_image_by_filename(image_filename=datum_id, subset_name=subset_name)
                 if image_relative_path is not None:
-                    ds_item = self.dataset.get(
-                        id=image_relative_path, subset=subset_name
-                    )
+                    ds_item = self.dataset.get(id=image_relative_path, subset=subset_name)
         return ds_item
 
-    def __search_image_by_filename(
-        self, image_filename: str, subset_name: str
-    ) -> Optional[str]:
+    def __search_image_by_filename(self, image_filename: str, subset_name: str) -> str | None:
         """
         Search for an image with name `image_filename` inside the directory tree in
         the data path.
@@ -339,7 +295,7 @@ class DatumaroDataset(object):
                 f"subset '{subset_name}', unable to uniquely identify dataset item"
             )
             return None
-        elif len(matches) == 0:
+        if len(matches) == 0:
             return None
         relative_path = matches[0].split(f"{subset_name}{os.path.sep}")[-1]
         path = os.path.normpath(relative_path)
@@ -355,9 +311,7 @@ class DatumaroDataset(object):
         :raises: ValueError if no item by that id was found.
         :return: DatasetItem with the given id
         """
-        ds_item = self.__get_item_by_id_from_subsets(
-            datum_id=datum_id, search_by_name=True
-        )
+        ds_item = self.__get_item_by_id_from_subsets(datum_id=datum_id, search_by_name=True)
         if ds_item is None:
             raise ValueError(
                 f"Unable to identify dataset item with id {datum_id} in the dataset. "

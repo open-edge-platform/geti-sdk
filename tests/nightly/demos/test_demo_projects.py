@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import time
-from typing import Tuple
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -81,7 +80,7 @@ class TestDemoProjects:
         demo_project_fixture_name: str,
         fxt_geti_no_vcr: Geti,
         fxt_project_client_no_vcr: ProjectClient,
-        fxt_demo_images_and_annotations: Tuple[int, int],
+        fxt_demo_images_and_annotations: tuple[int, int],
     ):
         project = request.getfixturevalue(demo_project_fixture_name)
         project_on_server = fxt_project_client_no_vcr.get_project_by_name(project.name)
@@ -101,9 +100,7 @@ class TestDemoProjects:
         assert len(images) == fxt_demo_images_and_annotations[0]
         assert len(annotations) == fxt_demo_images_and_annotations[1]
         for attribute_name in ["name", "pipeline", "creation_time", "id", "creator_id"]:
-            assert getattr(project_on_server, attribute_name) == getattr(
-                project, attribute_name
-            )
+            assert getattr(project_on_server, attribute_name) == getattr(project, attribute_name)
 
     def test_ensure_project_is_trained(
         self,
@@ -121,9 +118,7 @@ class TestDemoProjects:
         )
         assert not prediction_client.ready_to_predict
 
-        ensure_project_is_trained(
-            geti=fxt_geti_no_vcr, project=fxt_detection_demo_project
-        )
+        ensure_project_is_trained(geti=fxt_geti_no_vcr, project=fxt_detection_demo_project)
 
         assert prediction_client.ready_to_predict
 
@@ -147,17 +142,13 @@ class TestDemoProjects:
 
         # Case 1: Project exists and is already trained
         t_start = time.time()
-        ensure_trained_example_project(
-            geti=fxt_geti_no_vcr, project_name=fxt_detection_demo_project.name
-        )
+        ensure_trained_example_project(geti=fxt_geti_no_vcr, project_name=fxt_detection_demo_project.name)
         assert time.time() - t_start < 10
 
         # Case 2: Project does not exist and name does not not match the default
         # example project name. ValueError should be raised
         non_existing_project_name = f"{PROJECT_PREFIX}_this_project_does_not_exist"
-        any_project = fxt_project_client_no_vcr.get_project_by_name(
-            non_existing_project_name
-        )
+        any_project = fxt_project_client_no_vcr.get_project_by_name(non_existing_project_name)
         if any_project is not None:
             force_delete_project(
                 project=any_project,
@@ -167,20 +158,14 @@ class TestDemoProjects:
             project.name for project in fxt_project_client_no_vcr.get_all_projects()
         ]
         with pytest.raises(ValueError):
-            ensure_trained_example_project(
-                geti=fxt_geti_no_vcr, project_name=non_existing_project_name
-            )
+            ensure_trained_example_project(geti=fxt_geti_no_vcr, project_name=non_existing_project_name)
 
         # Case 3: Project does not exist and name matches default example project name.
         # Project will be created.
-        project = ensure_trained_example_project(
-            geti=fxt_geti_no_vcr, project_name=DEMO_PROJECT_NAME
-        )
+        project = ensure_trained_example_project(geti=fxt_geti_no_vcr, project_name=DEMO_PROJECT_NAME)
 
         request.addfinalizer(
-            lambda proj=project: fxt_project_client_no_vcr.delete_project(
-                project=proj, requires_confirmation=False
-            )
+            lambda proj=project: fxt_project_client_no_vcr.delete_project(project=proj, requires_confirmation=False)
         )
         prediction_client = PredictionClient(
             session=fxt_geti_no_vcr.session,

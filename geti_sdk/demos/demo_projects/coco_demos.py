@@ -14,7 +14,6 @@
 
 import logging
 import time
-from typing import Optional
 
 from geti_sdk import Geti
 from geti_sdk.data_models import Project
@@ -35,7 +34,7 @@ def create_segmentation_demo_project(
     n_images: int,
     n_annotations: int = -1,
     auto_train: bool = False,
-    dataset_path: Optional[str] = None,
+    dataset_path: str | None = None,
     project_name: str = "Segmentation demo",
 ) -> Project:
     """
@@ -68,9 +67,7 @@ def create_segmentation_demo_project(
     project_type = "segmentation"
 
     # Create annotation reader
-    annotation_reader = DatumAnnotationReader(
-        base_data_folder=coco_path, annotation_format="coco"
-    )
+    annotation_reader = DatumAnnotationReader(base_data_folder=coco_path, annotation_format="coco")
     annotation_reader.filter_dataset(labels=labels_of_interest, criterion="OR")
     # Create project and upload data
     return geti.create_single_task_project_from_dataset(
@@ -90,7 +87,7 @@ def create_detection_demo_project(
     n_images: int,
     n_annotations: int = -1,
     auto_train: bool = False,
-    dataset_path: Optional[str] = None,
+    dataset_path: str | None = None,
     project_name: str = "Detection demo",
 ) -> Project:
     """
@@ -123,9 +120,7 @@ def create_detection_demo_project(
     project_type = "detection"
 
     # Create annotation reader
-    annotation_reader = DatumAnnotationReader(
-        base_data_folder=coco_path, annotation_format="coco"
-    )
+    annotation_reader = DatumAnnotationReader(base_data_folder=coco_path, annotation_format="coco")
     annotation_reader.filter_dataset(labels=labels_of_interest, criterion="AND")
     # Create project and upload data
     return geti.create_single_task_project_from_dataset(
@@ -145,7 +140,7 @@ def create_classification_demo_project(
     n_images: int,
     n_annotations: int = -1,
     auto_train: bool = False,
-    dataset_path: Optional[str] = None,
+    dataset_path: str | None = None,
     project_name: str = "Classification demo",
 ) -> Project:
     """
@@ -179,9 +174,7 @@ def create_classification_demo_project(
     project_type = "classification"
 
     # Create annotation reader
-    annotation_reader = DatumAnnotationReader(
-        base_data_folder=coco_path, annotation_format="coco"
-    )
+    annotation_reader = DatumAnnotationReader(base_data_folder=coco_path, annotation_format="coco")
     annotation_reader.filter_dataset(labels=labels_of_interest, criterion="XOR")
     # Create project and upload data
     return geti.create_single_task_project_from_dataset(
@@ -201,7 +194,7 @@ def create_detection_to_segmentation_demo_project(
     n_images: int,
     n_annotations: int = -1,
     auto_train: bool = False,
-    dataset_path: Optional[str] = None,
+    dataset_path: str | None = None,
     project_name: str = "Animal detection to segmentation demo",
 ) -> Project:
     """
@@ -246,9 +239,7 @@ def create_detection_to_segmentation_demo_project(
 
     # Group the labels for the first annotation reader, so that the detection task
     # will only see a single label
-    label_source_per_task[0].group_labels(
-        labels_to_group=animal_labels, group_name="animal"
-    )
+    label_source_per_task[0].group_labels(labels_to_group=animal_labels, group_name="animal")
 
     # Create project and upload data
     return geti.create_task_chain_project_from_dataset(
@@ -267,7 +258,7 @@ def create_detection_to_classification_demo_project(
     n_images: int,
     n_annotations: int = -1,
     auto_train: bool = False,
-    dataset_path: Optional[str] = None,
+    dataset_path: str | None = None,
     project_name: str = "Animal detection to classification demo",
 ) -> Project:
     """
@@ -296,9 +287,7 @@ def create_detection_to_classification_demo_project(
         created on the Intel® Geti™ server.
     """
     coco_path = get_coco_dataset(dataset_path)
-    logging.info(
-        " ------- Creating detection -> classification project --------------- "
-    )
+    logging.info(" ------- Creating detection -> classification project --------------- ")
     domestic_labels = ["dog", "cat", "horse", "cow", "sheep"]
     wild_labels = ["elephant", "giraffe", "zebra", "bear"]
     animal_labels = domestic_labels + wild_labels
@@ -315,16 +304,10 @@ def create_detection_to_classification_demo_project(
 
     # Group the labels for the first annotation reader, so that the detection task
     # will only see a single label
-    label_source_per_task[0].group_labels(
-        labels_to_group=animal_labels, group_name="animal"
-    )
+    label_source_per_task[0].group_labels(labels_to_group=animal_labels, group_name="animal")
     # Group the labels for the second annotation reader
-    label_source_per_task[1].group_labels(
-        labels_to_group=domestic_labels, group_name="domestic"
-    )
-    label_source_per_task[1].group_labels(
-        labels_to_group=wild_labels, group_name="wild"
-    )
+    label_source_per_task[1].group_labels(labels_to_group=domestic_labels, group_name="domestic")
+    label_source_per_task[1].group_labels(labels_to_group=wild_labels, group_name="wild")
     # Create project and upload data
     return geti.create_task_chain_project_from_dataset(
         project_name=project_name,
@@ -337,9 +320,7 @@ def create_detection_to_classification_demo_project(
     )
 
 
-def ensure_trained_example_project(
-    geti: Geti, project_name: str = DEMO_PROJECT_NAME
-) -> Project:
+def ensure_trained_example_project(geti: Geti, project_name: str = DEMO_PROJECT_NAME) -> Project:
     """
     Ensure that the project specified by `project_name` exists on the GETi
     instance addressed by `geti`.
@@ -361,16 +342,11 @@ def ensure_trained_example_project(
         # In the second case, we raise an error stating that the project doesn't exist
         # and should be created first
         if project_name == DEMO_PROJECT_NAME:
-            print(
-                f"\nThe project `{project_name}` does not exist on the server yet, "
-                f"creating it now.... \n"
-            )
+            print(f"\nThe project `{project_name}` does not exist on the server yet, creating it now.... \n")
             coco_path = get_coco_dataset()
 
             # Create annotation reader
-            annotation_reader = DatumAnnotationReader(
-                base_data_folder=coco_path, annotation_format="coco"
-            )
+            annotation_reader = DatumAnnotationReader(base_data_folder=coco_path, annotation_format="coco")
             annotation_reader.filter_dataset(labels=DEMO_LABELS, criterion="OR")
             # Create project and upload data
             project = geti.create_single_task_project_from_dataset(
@@ -385,9 +361,7 @@ def ensure_trained_example_project(
             )
             # Should wait for some time for the job to appear as scheduled before checking if
             # the project is trained. Auto training is triggered after around 5 seconds.
-            print(
-                "Project created. Waiting for training job to be scheduled. This may take a few seconds."
-            )
+            print("Project created. Waiting for training job to be scheduled. This may take a few seconds.")
             time.sleep(5)
         else:
             raise ValueError(

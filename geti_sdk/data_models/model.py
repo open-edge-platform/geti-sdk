@@ -16,7 +16,7 @@ import copy
 import json
 import logging
 from pprint import pformat
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar
 
 import attr
 
@@ -41,8 +41,8 @@ class OptimizationCapabilities:
     """
 
     is_nncf_supported: bool
-    is_filter_pruning_supported: Optional[bool] = None
-    is_filter_pruning_enabled: Optional[bool] = None
+    is_filter_pruning_supported: bool | None = None
+    is_filter_pruning_enabled: bool | None = None
 
 
 @attr.define
@@ -54,8 +54,8 @@ class ModelPurgeInfo:
     """
 
     is_purged: bool
-    purge_time: Optional[str] = None
-    user_uid: Optional[str] = None
+    purge_time: str | None = None
+    user_uid: str | None = None
 
 
 @attr.define
@@ -91,34 +91,32 @@ class BaseModel:
     ]
 
     name: str
-    precision: List[str]
+    precision: list[str]
     creation_date: str = attr.field(converter=str_to_datetime)
-    latency: Optional[str] = None  # Deprecated in Geti 2.6
-    fps_throughput: Optional[float] = None  # Deprecated in Geti 2.6
-    purge_info: Optional[ModelPurgeInfo] = None
-    size: Optional[int] = None
-    target_device: Optional[str] = None  # Deprecated in Geti 2.6
-    target_device_type: Optional[str] = None  # Deprecated in Geti 2.6
-    previous_revision_id: Optional[str] = None
-    previous_trained_revision_id: Optional[str] = None
-    performance: Optional[Performance] = None
-    id: Optional[str] = attr.field(default=None)
-    label_schema_in_sync: Optional[bool] = attr.field(
-        default=None
-    )  # Added in Intel Geti 1.1
-    total_disk_size: Optional[int] = None  # Added in Intel Geti 2.3
-    training_framework: Optional[TrainingFramework] = None  # Added in Intel Geti 2.5
-    learning_approach: Optional[str] = None  # Added in Intel Geti v2.6
+    latency: str | None = None  # Deprecated in Geti 2.6
+    fps_throughput: float | None = None  # Deprecated in Geti 2.6
+    purge_info: ModelPurgeInfo | None = None
+    size: int | None = None
+    target_device: str | None = None  # Deprecated in Geti 2.6
+    target_device_type: str | None = None  # Deprecated in Geti 2.6
+    previous_revision_id: str | None = None
+    previous_trained_revision_id: str | None = None
+    performance: Performance | None = None
+    id: str | None = attr.field(default=None)
+    label_schema_in_sync: bool | None = attr.field(default=None)  # Added in Intel Geti 1.1
+    total_disk_size: int | None = None  # Added in Intel Geti 2.3
+    training_framework: TrainingFramework | None = None  # Added in Intel Geti 2.5
+    learning_approach: str | None = None  # Added in Intel Geti v2.6
 
     def __attrs_post_init__(self):
         """
         Initialize private attributes.
         """
-        self._model_group_id: Optional[str] = None
-        self._base_url: Optional[str] = None
+        self._model_group_id: str | None = None
+        self._base_url: str | None = None
 
     @property
-    def model_group_id(self) -> Optional[str]:
+    def model_group_id(self) -> str | None:
         """
         Return the unique database ID of the model group to which the model belongs,
         if available.
@@ -137,7 +135,7 @@ class BaseModel:
         self._model_group_id = id_
 
     @property
-    def base_url(self) -> Optional[str]:
+    def base_url(self) -> str | None:
         """
         Return the base url that can be used to get the model details, download the
         model, etc., if available.
@@ -147,11 +145,10 @@ class BaseModel:
         """
         if self._base_url is not None:
             return self._base_url
-        else:
-            raise ValueError(
-                f"Insufficient data to determine base url for model {self}. Please "
-                f"make sure that property `base_url` is set first."
-            )
+        raise ValueError(
+            f"Insufficient data to determine base url for model {self}. Please "
+            f"make sure that property `base_url` is set first."
+        )
 
     @base_url.setter
     def base_url(self, base_url: str):
@@ -177,15 +174,13 @@ class BaseModel:
                 model._base_url = base_url + f"/optimized_models/{model.id}"
         self._base_url = base_url
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return the dictionary representation of the model.
 
         :return:
         """
-        base_dict = attr.asdict(
-            self, recurse=True, value_serializer=attr_value_serializer
-        )
+        base_dict = attr.asdict(self, recurse=True, value_serializer=attr_value_serializer)
         base_dict["model_group_id"] = self.model_group_id
         return base_dict
 
@@ -218,19 +213,15 @@ class OptimizedModel(BaseModel):
     OpenVINO.
     """
 
-    model_status: str = attr.field(
-        kw_only=True, converter=str_to_enum_converter(ModelStatus)
-    )
-    optimization_methods: List[str] = attr.field(kw_only=True)
-    optimization_objectives: Dict[str, Any] = attr.field(kw_only=True)
-    optimization_type: str = attr.field(
-        kw_only=True, converter=str_to_enum_converter(OptimizationType)
-    )
-    version: Optional[int] = attr.field(kw_only=True, default=None)
-    configurations: Optional[List[OptimizationConfigurationParameter]] = attr.field(
+    model_status: str = attr.field(kw_only=True, converter=str_to_enum_converter(ModelStatus))
+    optimization_methods: list[str] = attr.field(kw_only=True)
+    optimization_objectives: dict[str, Any] = attr.field(kw_only=True)
+    optimization_type: str = attr.field(kw_only=True, converter=str_to_enum_converter(OptimizationType))
+    version: int | None = attr.field(kw_only=True, default=None)
+    configurations: list[OptimizationConfigurationParameter] | None = attr.field(
         kw_only=True, default=None
     )  # Added in Intel Geti v1.4
-    model_format: Optional[str] = None  # Added in Intel Geti v1.5
+    model_format: str | None = None  # Added in Intel Geti v1.5
     has_xai_head: bool = False  # Added in Intel Geti v1.5
 
 
@@ -241,21 +232,17 @@ class Model(BaseModel):
     """
 
     architecture: str = attr.field(kw_only=True)
-    score_up_to_date: Optional[bool] = attr.field(
-        default=None, kw_only=True
-    )  # Deprecated in Geti 2.6
-    optimized_models: List[OptimizedModel] = attr.field(kw_only=True)
+    score_up_to_date: bool | None = attr.field(default=None, kw_only=True)  # Deprecated in Geti 2.6
+    optimized_models: list[OptimizedModel] = attr.field(kw_only=True)
     # Removed in Geti 2.2
-    optimization_capabilities: Optional[OptimizationCapabilities] = attr.field(
-        default=None, kw_only=True
-    )
-    labels: Optional[List[Label]] = None
-    version: Optional[int] = attr.field(default=None, kw_only=True)
+    optimization_capabilities: OptimizationCapabilities | None = attr.field(default=None, kw_only=True)
+    labels: list[Label] | None = None
+    version: int | None = attr.field(default=None, kw_only=True)
     # 'version' is deprecated in v1.1 -- IS IT?
-    training_dataset_info: Optional[Dict[str, str]] = None
+    training_dataset_info: dict[str, str] | None = None
 
     @property
-    def model_group_id(self) -> Optional[str]:
+    def model_group_id(self) -> str | None:
         """
         Return the unique database ID of the model group to which the model belongs,
         if available.
@@ -276,7 +263,7 @@ class Model(BaseModel):
             model.model_group_id = id_
 
     @classmethod
-    def from_dict(cls, model_dict: Dict[str, Any]) -> "Model":
+    def from_dict(cls, model_dict: dict[str, Any]) -> "Model":
         """
         Create a Model instance from a dictionary holding the model data.
 
@@ -293,16 +280,16 @@ class Model(BaseModel):
         :param filepath: Path to a json file holding the model data
         :return:
         """
-        with open(filepath, "r") as file:
+        with open(filepath) as file:
             model_dict = json.load(file)
         return cls.from_dict(model_dict=model_dict)
 
     def get_optimized_model(
         self,
-        optimization_type: Optional[str] = None,
-        precision: Optional[str] = None,
+        optimization_type: str | None = None,
+        precision: str | None = None,
         require_xai: bool = False,
-    ) -> Optional[OptimizedModel]:
+    ) -> OptimizedModel | None:
         """
         Return the OptimizedModel of the specified `optimization_type` or `precision`.
         The following optimization types are supported: 'nncf', 'pot', 'onnx', 'mo',
@@ -319,65 +306,48 @@ class Model(BaseModel):
         """
         if optimization_type is None and precision is None:
             raise ValueError("Please specify optimization_type or precision, or both")
-        optimized_models: List[OptimizedModel] = []
+        optimized_models: list[OptimizedModel] = []
         if optimization_type is not None:
             capitalized_ot = optimization_type.upper()
             if capitalized_ot == "OPENVINO":
-                optimized_models = [
-                    model for model in self.optimized_models if "ONNX" not in model.name
-                ]
+                optimized_models = [model for model in self.optimized_models if "ONNX" not in model.name]
             else:
                 allowed_types = [item.name for item in OptimizationType]
                 if capitalized_ot not in allowed_types:
                     raise ValueError(
-                        f"Invalid optimization type passed, supported values are "
-                        f"{allowed_types} or `openvino`"
+                        f"Invalid optimization type passed, supported values are {allowed_types} or `openvino`"
                     )
                 optimization_type = OptimizationType(capitalized_ot)
                 optimized_models = [
-                    model
-                    for model in self.optimized_models
-                    if model.optimization_type == optimization_type
+                    model for model in self.optimized_models if model.optimization_type == optimization_type
                 ]
 
         if precision is not None:
-            if len(optimized_models) == 0:
-                models_to_search = self.optimized_models
-            else:
-                models_to_search = optimized_models
-            optimized_models = [
-                model for model in models_to_search if precision in model.name
-            ]
+            models_to_search = self.optimized_models if len(optimized_models) == 0 else optimized_models
+            optimized_models = [model for model in models_to_search if precision in model.name]
 
         if len(optimized_models) == 0:
-            logging.info(
-                "No optimized model meeting the optimization criteria was found."
-            )
+            logging.info("No optimized model meeting the optimization criteria was found.")
             return None
-        elif len(optimized_models) == 1:
+        if len(optimized_models) == 1:
             if not require_xai:
                 return optimized_models[0]
-            else:
-                if optimized_models[0].has_xai_head:
-                    return optimized_models[0]
-                logging.info(
-                    f"An optimized model of type {optimization_type} was found, but it does "
-                    f"not include an XAI head. Method `get_optimized_model` returned "
-                    f"None."
-                )
-                return None
-        else:
-            if not require_xai:
-                models_to_check = optimized_models
-            else:
-                models_to_check = [m for m in optimized_models if m.has_xai_head]
-            if len(models_to_check) == 0:
-                logging.info(
-                    f"An optimized model of type {optimization_type} was found, but it does "
-                    f"not include an XAI head. Method `get_optimized_model` returned "
-                    f"None."
-                )
-                return None
-            creation_dates = [om.creation_date for om in models_to_check]
-            max_index = creation_dates.index(max(creation_dates))
-            return models_to_check[max_index]
+            if optimized_models[0].has_xai_head:
+                return optimized_models[0]
+            logging.info(
+                f"An optimized model of type {optimization_type} was found, but it does "
+                f"not include an XAI head. Method `get_optimized_model` returned "
+                f"None."
+            )
+            return None
+        models_to_check = optimized_models if not require_xai else [m for m in optimized_models if m.has_xai_head]
+        if len(models_to_check) == 0:
+            logging.info(
+                f"An optimized model of type {optimization_type} was found, but it does "
+                f"not include an XAI head. Method `get_optimized_model` returned "
+                f"None."
+            )
+            return None
+        creation_dates = [om.creation_date for om in models_to_check]
+        max_index = creation_dates.index(max(creation_dates))
+        return models_to_check[max_index]

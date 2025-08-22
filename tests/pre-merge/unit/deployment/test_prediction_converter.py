@@ -11,19 +11,18 @@
 # This software and the related documents are provided as is,
 # with no express or implied warranties, other than those that are expressly stated
 # in the License.
-from typing import Tuple
 from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 from model_api.models import (
-    ClassificationResult,
-    DetectionResult,
-    InstanceSegmentationResult,
-    ImageResultWithSoftPrediction,
-    Contour,
     AnomalyResult,
+    ClassificationResult,
+    Contour,
     DetectedKeypoints,
+    DetectionResult,
+    ImageResultWithSoftPrediction,
+    InstanceSegmentationResult,
 )
 
 from geti_sdk.data_models.containers import LabelList
@@ -48,8 +47,8 @@ from geti_sdk.deployment.predictions_postprocessing.results_converter.results_to
 
 
 def coords_to_xmin_xmax_width_height(
-    coords: Tuple[int, int, int, int],
-) -> Tuple[int, int, int, int]:
+    coords: tuple[int, int, int, int],
+) -> tuple[int, int, int, int]:
     "Convert bbox to xmin, ymin, width, height format"
     x1, y1, x2, y2 = coords
     return x1, y1, x2 - x1, y2 - y1
@@ -69,12 +68,8 @@ class TestInferenceResultsToPredictionConverter:
         model_api_labels = [label.name for label in labels]
 
         # Act
-        converter = ClassificationToPredictionConverter(
-            labels, configuration={"labels": model_api_labels}
-        )
-        prediction = converter.convert_to_prediction(
-            raw_prediction, image_shape=(10, 10)
-        )
+        converter = ClassificationToPredictionConverter(labels, configuration={"labels": model_api_labels})
+        prediction = converter.convert_to_prediction(raw_prediction, image_shape=(10, 10))
 
         # Assert
         assert [converter.get_label_by_idx(i) for i in range(len(labels))] == labels
@@ -85,9 +80,7 @@ class TestInferenceResultsToPredictionConverter:
         assert predicted_label.probability == 0.81
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
-    def test_detection_to_prediction_converter(
-        self, use_ellipse_shapes, fxt_label_list_factory
-    ):
+    def test_detection_to_prediction_converter(self, use_ellipse_shapes, fxt_label_list_factory):
         # Arrange
         labels = fxt_label_list_factory(Domain.DETECTION)
         coords = [12.0, 41.0, 12.5, 45.5]
@@ -113,20 +106,14 @@ class TestInferenceResultsToPredictionConverter:
         assert [converter.get_label_by_str(label.name) for label in labels] == labels
         assert len(prediction.annotations) == 1
         if use_ellipse_shapes:
-            assert prediction.annotations[0].shape == Ellipse(
-                *coords_to_xmin_xmax_width_height(coords)
-            )
+            assert prediction.annotations[0].shape == Ellipse(*coords_to_xmin_xmax_width_height(coords))
         else:
-            assert prediction.annotations[0].shape == Rectangle(
-                *coords_to_xmin_xmax_width_height(coords)
-            )
+            assert prediction.annotations[0].shape == Rectangle(*coords_to_xmin_xmax_width_height(coords))
         assert prediction.annotations[0].labels[0].probability == pytest.approx(0.51)
         assert prediction.annotations[0].labels[0].name == labels[0].name
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
-    def test_rotated_rect_to_prediction_converter(
-        self, use_ellipse_shapes, fxt_label_list_factory
-    ):
+    def test_rotated_rect_to_prediction_converter(self, use_ellipse_shapes, fxt_label_list_factory):
         # Arrange
         labels = fxt_label_list_factory(Domain.ROTATED_DETECTION)
         coords = [1, 1, 4, 4]
@@ -168,9 +155,7 @@ class TestInferenceResultsToPredictionConverter:
         assert [converter.get_label_by_str(label.name) for label in labels] == labels
         assert len(prediction.annotations) == 1
         if use_ellipse_shapes:
-            assert prediction.annotations[0].shape == Ellipse(
-                *coords_to_xmin_xmax_width_height(coords)
-            )
+            assert prediction.annotations[0].shape == Ellipse(*coords_to_xmin_xmax_width_height(coords))
         else:
             assert prediction.annotations[0].shape == RotatedRectangle.from_polygon(
                 Polygon(
@@ -182,9 +167,7 @@ class TestInferenceResultsToPredictionConverter:
                     ]
                 )
             )
-        assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(
-            label=labels[1], probability=score
-        )
+        assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(label=labels[1], probability=score)
 
     def test_segmentation_to_prediction_converter(self, fxt_label_list_factory):
         # Arrange
@@ -210,9 +193,7 @@ class TestInferenceResultsToPredictionConverter:
             saliency_map=np.zeros_like(result_image),
             feature_vector=np.zeros((result_image.shape[0], result_image.shape[1], 2)),
         )
-        expected_shape = Polygon(
-            points=[Point(1, 1), Point(0, 3), Point(1, 3), Point(3, 3)]
-        )
+        expected_shape = Polygon(points=[Point(1, 1), Point(0, 3), Point(1, 3), Point(3, 3)])
         seg_model = MagicMock()
         seg_model.labels = labels_str
         model_api_labels = [label.name for label in labels]
@@ -238,13 +219,9 @@ class TestInferenceResultsToPredictionConverter:
         assert [converter.get_label_by_idx(i + 1) for i in range(len(labels))] == labels
         assert [converter.get_label_by_str(label.name) for label in labels] == labels
         assert len(prediction.annotations) == 1
-        assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(
-            labels[0], probability=0.8
-        )
+        assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(labels[0], probability=0.8)
         assert isinstance(prediction.annotations[0].shape, Polygon)
-        for p1, p2 in zip(
-            prediction.annotations[0].shape.points, expected_shape.points
-        ):
+        for p1, p2 in zip(prediction.annotations[0].shape.points, expected_shape.points):
             assert p1.x == pytest.approx(p2.x, 0.01)
             assert p1.y == pytest.approx(p2.y, 0.01)
 
@@ -276,9 +253,7 @@ class TestInferenceResultsToPredictionConverter:
         converter = AnomalyToPredictionConverter(
             labels, configuration={"domain": domain, "labels": ["Anomalous", "Normal"]}
         )
-        prediction = converter.convert_to_prediction(
-            raw_prediction, image_shape=anomaly_map.shape
-        )
+        prediction = converter.convert_to_prediction(raw_prediction, image_shape=anomaly_map.shape)
 
         # Assert
         assert converter.normal_label == normal_label
@@ -297,9 +272,7 @@ class TestInferenceResultsToPredictionConverter:
                 ]
             )
         elif domain == Domain.ANOMALY_DETECTION:
-            assert prediction.annotations[0].shape == Rectangle(
-                *coords_to_xmin_xmax_width_height(pred_boxes[0])
-            )
+            assert prediction.annotations[0].shape == Rectangle(*coords_to_xmin_xmax_width_height(pred_boxes[0]))
 
     def test_keypoint_to_prediction_converter(self, fxt_label_list_factory):
         # Arrange
@@ -329,9 +302,7 @@ class TestInferenceResultsToPredictionConverter:
             assert annotation.shape.is_visible
             assert annotation.shape.x == predicted_keypoints[idx][0]
             assert annotation.shape.y == predicted_keypoints[idx][1]
-            assert annotation.labels[0] == ScoredLabel.from_label(
-                labels[idx], probability=scores[idx]
-            )
+            assert annotation.labels[0] == ScoredLabel.from_label(labels[idx], probability=scores[idx])
 
     @pytest.mark.parametrize(
         "label_ids, label_names, predicted_labels, configuration",
@@ -358,9 +329,7 @@ class TestInferenceResultsToPredictionConverter:
             (["1"], ["1"], ["1"], {"labels": [1]}),
         ],
     )
-    def test_legacy_label_conversion(
-        self, label_ids, label_names, predicted_labels, configuration
-    ):
+    def test_legacy_label_conversion(self, label_ids, label_names, predicted_labels, configuration):
         # Arrange
         labels = LabelList(
             [
@@ -376,18 +345,14 @@ class TestInferenceResultsToPredictionConverter:
             ]
         )
         raw_prediction = ClassificationResult(
-            top_labels=[
-                (i, p_label, 0.7) for i, p_label in enumerate(predicted_labels)
-            ],
+            top_labels=[(i, p_label, 0.7) for i, p_label in enumerate(predicted_labels)],
             raw_scores=[0.7] * len(predicted_labels),
             saliency_map=None,
             feature_vector=None,
         )
 
         # Act
-        converter = ClassificationToPredictionConverter(
-            labels=labels, configuration=configuration
-        )
+        converter = ClassificationToPredictionConverter(labels=labels, configuration=configuration)
         pred = converter.convert_to_prediction(
             inference_results=raw_prediction,
             image_shape=(10, 10, 10),
@@ -395,6 +360,4 @@ class TestInferenceResultsToPredictionConverter:
 
         # Assert
         assert len(pred.annotations[0].labels) == len(predicted_labels)
-        assert {label.name for label in converter.labels} == {
-            p_label.name for p_label in pred.annotations[0].labels
-        }
+        assert {label.name for label in converter.labels} == {p_label.name for p_label in pred.annotations[0].labels}

@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import List
 
 import numpy as np
 
@@ -34,7 +33,7 @@ class LabelTrigger(PostInferenceTrigger):
             predicted within the image, the trigger activates
     """
 
-    def __init__(self, label_names: List[str], mode: str = "OR"):
+    def __init__(self, label_names: list[str], mode: str = "OR"):
         self.label_names = set(label_names)
         self.mode = mode
 
@@ -58,5 +57,5 @@ class LabelTrigger(PostInferenceTrigger):
             predicted_labels.add(label.name)
         if self.mode == "AND":
             return float(self.label_names.issubset(predicted_labels))
-        else:  # mode == "OR"
-            return float(not self.label_names.isdisjoint(predicted_labels))
+        # mode == "OR"
+        return float(not self.label_names.isdisjoint(predicted_labels))

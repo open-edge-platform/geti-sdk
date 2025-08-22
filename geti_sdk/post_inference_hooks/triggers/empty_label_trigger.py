@@ -40,9 +40,7 @@ class EmptyLabelTrigger(PostInferenceTrigger):
         for predicted_object in prediction.annotations:
             if len(predicted_object.labels) > 1:
                 return 0
-            if not predicted_object.shape.is_full_box(
-                image_width=image.shape[1], image_height=image.shape[0]
-            ):
+            if not predicted_object.shape.is_full_box(image_width=image.shape[1], image_height=image.shape[0]):
                 return 0
             for label in predicted_object.labels:
                 if label.name.lower() == "no object":

@@ -13,11 +13,11 @@
 # and limitations under the License.
 
 from enum import Enum
-from pydantic import BaseModel, Field
 from pprint import pformat
-from typing import Any, Dict, Optional
+from typing import Any
 
 import attr
+from pydantic import BaseModel, Field
 
 from geti_sdk.data_models.enums import TaskType
 from geti_sdk.data_models.utils import str_to_optional_enum_converter
@@ -34,24 +34,21 @@ class LegacyAlgorithm:
     model_size: str
     model_template_id: str
     gigaflops: float
-    name: Optional[str] = None
-    summary: Optional[str] = None
-    task_type: Optional[str] = attr.field(
-        default=None, converter=str_to_optional_enum_converter(TaskType)
-    )
-    supports_auto_hpo: Optional[bool] = None  # Deprecated in Geti v2.7
-    default_algorithm: Optional[bool] = None  # Added in Geti v1.16
-    performance_category: Optional[str] = None  # Added in Geti v1.9
-    lifecycle_stage: Optional[str] = None  # Added in Geti v1.9
+    name: str | None = None
+    summary: str | None = None
+    task_type: str | None = attr.field(default=None, converter=str_to_optional_enum_converter(TaskType))
+    supports_auto_hpo: bool | None = None  # Deprecated in Geti v2.7
+    default_algorithm: bool | None = None  # Added in Geti v1.16
+    performance_category: str | None = None  # Added in Geti v1.9
+    lifecycle_stage: str | None = None  # Added in Geti v1.9
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the Algorithm to a dictionary representation.
 
         :return: Dictionary holding the algorithm data
         """
-        output_dict = attr.asdict(self, value_serializer=attr_value_serializer)
-        return output_dict
+        return attr.asdict(self, value_serializer=attr_value_serializer)
 
     @property
     def overview(self) -> str:

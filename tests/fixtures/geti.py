@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import Union
 
 import pytest
 
@@ -21,9 +20,7 @@ from tests.helpers.constants import CASSETTE_EXTENSION, DUMMY_PASSWORD, DUMMY_US
 
 
 @pytest.fixture(scope="module")
-def fxt_geti_session(
-    fxt_vcr, fxt_server_config: Union[ServerTokenConfig, ServerCredentialConfig]
-) -> GetiSession:
+def fxt_geti_session(fxt_vcr, fxt_server_config: ServerTokenConfig | ServerCredentialConfig) -> GetiSession:
     """
     This fixture returns a GetiSession instance which has already performed
     authentication
@@ -40,9 +37,7 @@ def fxt_geti_session(
 
 
 @pytest.fixture(scope="module")
-def fxt_geti(
-    fxt_vcr, fxt_server_config: Union[ServerTokenConfig, ServerCredentialConfig]
-) -> Geti:
+def fxt_geti(fxt_vcr, fxt_server_config: ServerTokenConfig | ServerCredentialConfig) -> Geti:
     """
     This fixture returns a Geti instance which has already performed
     authentication and retrieved a default workspace id
@@ -71,7 +66,7 @@ def fxt_geti(
 
 @pytest.fixture(scope="module")
 def fxt_geti_no_vcr(
-    fxt_server_config: Union[ServerTokenConfig, ServerCredentialConfig],
+    fxt_server_config: ServerTokenConfig | ServerCredentialConfig,
 ) -> Geti:
     if isinstance(fxt_server_config, ServerCredentialConfig):
         auth_params = {

@@ -16,7 +16,6 @@ import logging
 import os
 import queue
 import threading
-from typing import Union
 
 import numpy as np
 
@@ -44,7 +43,7 @@ class Uploader:
             t.start()
             self.threads.append(t)
 
-    def upload_image(self, image: Union[np.ndarray, str, os.PathLike]):
+    def upload_image(self, image: np.ndarray | str | os.PathLike):
         """
         Upload image to the Intel Geti project
 
@@ -69,7 +68,7 @@ class Uploader:
                     self.upload_image(item)
                     self.q.task_done()
 
-    def add_data(self, data: Union[np.ndarray, str, os.PathLike]):
+    def add_data(self, data: np.ndarray | str | os.PathLike):
         """
         Add image data to upload to the queue
 

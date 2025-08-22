@@ -59,7 +59,7 @@ dev = [
     "pytest-html~=4.1",
     "pytest-mock~=3.10",
     "pytest-recording~=0.13",  # pinned due to https://github.com/kiwicom/pytest-recording/issues/174
-    "ruff~=0.12",
+    "ruff==0.12.10",  # pinned to match the rev in pre-commit
     "snowballstemmer~=2.2",  # pinned because pytest-recording subdeps are loose
     "vcrpy~=7.0",
     "datumaro~=1.11",
@@ -120,3 +120,70 @@ skip = "pp*"
 exclude_dirs = ["tests"]
 tests = ["B301","B302","B303","B304","B305","B306","B308","B310","B311","B312","B313","B314","B315","B316","B317","B318","B319","B321","B323","B324","B401","B402","B403","B404","B405","B406","B407","B408","B409","B411","B412","B413"]
 skips = ["B101","B102","B103","B104","B105","B106","B107","B108","B110","B112","B201","B501","B502","B503","B504","B505","B506","B507","B601","B602","B603","B604","B605","B606","B607","B608","B609","B610","B611","B701","B702","B703"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+extend-select = [
+    "F",        # pyflakes
+    "W",        # pycodestyle warnings
+    "E",        # pycodestyle errors
+    "I",        # isort
+    "UP",       # pyupgrade
+    "A",        # flake8-builtins
+    "C4",       # flake8-comprehensions
+    "FA",       # flake8-future-annotations
+    "ISC",      # flake8-implicit-str-concat
+    "ICN",      # flake8-import-conventions
+    "RET",      # flake8-import-return
+    "SIM",      # flake8-simplify
+    "TID",      # flake8-tidy-imports
+    "TC",       # flake8-types-checking
+    "NPY",      # numpy
+]
+
+ignore = [
+    # pydocstyle
+    "D417",     # Missing argument descriptions in the docstring
+    "D107",     # Missing docstring in `__init__`
+    "D105",     # Missing docstring in magic method
+
+    # flake8-annotations
+    "ANN002",   # Missing type annotation for *args
+    "ANN003",   # Missing type annotation for **kwargs
+    "ANN204",   # Missing return type annotation for special method `__init__`
+    "ARG002",   # Unused method argument -> some function cannot use argument
+    "COM812",   # Missing trailing comma -> conflicts with ISC001
+
+    # flake8-type-checking
+    "TC001",   # typing-only-first-party-import, Sometimes this causes an incorrect error.
+
+    # flake8-fixme
+    "FIX002",   # line-contains-todo
+
+    "E731",     # Do not assign a `lambda` expression, use a `def`
+    "SIM108",   # Use ternary operator instead of `if`-`else`-block
+]
+
+fixable = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+# Declare an additional exclude rule for test code
+"tests/**/*.py" = [
+    "S101",     # pytest-style allows `assert` statements in tests.
+    "SLF001",   # We sometimes need to inspect private functions for testing.
+    "TCH003",   # It doesn't seem necessary to use TYPE_CHECKING in tests.
+    "PT004",    # fixture ignore type returning.
+    "E501",     # Test skips lines that are too long.
+    "ANN001",   # Skip annotation type hint in test codes
+    "ANN201",   # Skip return type hint in test codes
+    "D",     # Test skips missing docstring argument with magic (fixture) methods.
+    "ARG001",   # Some arguments are passed for executing fixture
+]
+
+"notebooks/**/*.ipynb" = [
+    "A004",     # Allow shadowing built-in functions in notebooks.
+    "E501",     # Notebooks skips lines that are too long.
+]

@@ -35,25 +35,16 @@ def ensure_project_is_trained(geti: Geti, project: Project) -> bool:
     :return: True if the project is trained and ready to make predictions, False
         otherwise
     """
-    prediction_client = PredictionClient(
-        session=geti.session, workspace_id=geti.workspace_id, project=project
-    )
+    prediction_client = PredictionClient(session=geti.session, workspace_id=geti.workspace_id, project=project)
     if prediction_client.ready_to_predict:
         print(f"\nProject '{project.name}' is ready to predict.\n")
         return True
 
-    print(
-        f"\nProject '{project.name}' is not ready for prediction yet, awaiting model "
-        f"training completion.\n"
-    )
-    training_client = TrainingClient(
-        session=geti.session, workspace_id=geti.workspace_id, project=project
-    )
+    print(f"\nProject '{project.name}' is not ready for prediction yet, awaiting model training completion.\n")
+    training_client = TrainingClient(session=geti.session, workspace_id=geti.workspace_id, project=project)
     # If there are no jobs running for the project, we launch them
     jobs = training_client.get_jobs(project_only=True)
-    running_jobs = [
-        job for job in jobs if job.state in [JobState.RUNNING, JobState.SCHEDULED]
-    ]
+    running_jobs = [job for job in jobs if job.state in [JobState.RUNNING, JobState.SCHEDULED]]
     tasks = project.get_trainable_tasks()
 
     new_jobs = []

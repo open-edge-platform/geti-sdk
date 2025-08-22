@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, ClassVar, Dict, Optional
+from typing import Any, ClassVar
 
 import attr
 
@@ -34,9 +34,9 @@ class EntityIdentifier:
     _identifier_fields: ClassVar[str] = ["workspace_id"]
 
     type: str = attr.field(converter=str_to_enum_converter(ConfigurationEntityType))
-    workspace_id: Optional[str] = None
+    workspace_id: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return the dictionary representation of the EntityIdentifier.
 
@@ -59,10 +59,10 @@ class HyperParameterGroupIdentifier(EntityIdentifier):
     _identifier_fields: ClassVar[str] = ["model_storage_id", "workspace_id"]
 
     group_name: str = attr.field(kw_only=True)
-    model_storage_id: Optional[str] = None
-    project_id: Optional[str] = None
-    algorithm_name: Optional[str] = attr.field(repr=False, default=None)
-    model_template_id: Optional[str] = attr.field(repr=False, default=None)
+    model_storage_id: str | None = None
+    project_id: str | None = None
+    algorithm_name: str | None = attr.field(repr=False, default=None)
+    model_template_id: str | None = attr.field(repr=False, default=None)
 
     def resolve_algorithm(self, algorithm: Algorithm):
         """
@@ -90,5 +90,5 @@ class ComponentEntityIdentifier(EntityIdentifier):
     _identifier_fields: ClassVar[str] = ["project_id", "task_id", "workspace_id"]
 
     component: str = attr.field(kw_only=True)
-    project_id: Optional[str] = None
-    task_id: Optional[str] = None
+    project_id: str | None = None
+    task_id: str | None = None

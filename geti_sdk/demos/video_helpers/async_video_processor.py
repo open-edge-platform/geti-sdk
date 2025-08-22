@@ -14,10 +14,11 @@
 import logging
 import os
 import time
+from collections.abc import Callable
 from multiprocessing import Value
 from queue import Empty
 from threading import Thread
-from typing import Any, Callable, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -36,8 +37,8 @@ class AsyncVideoProcessor:
         self,
         deployment: Deployment,
         processing_function: Callable[[np.ndarray, Prediction, Any], None],
-        min_buffer_size: Optional[int] = None,
-        max_buffer_size: Optional[int] = None,
+        min_buffer_size: int | None = None,
+        max_buffer_size: int | None = None,
     ):
         """
         Run efficient and optimized frame-by-frame inference on videos. The
@@ -66,8 +67,7 @@ class AsyncVideoProcessor:
         if min_buffer_size is None and os.cpu_count() is not None:
             min_buffer_size = 2 * os.cpu_count()
             logging.debug(
-                f"Minimum buffer size set to `{min_buffer_size}`, twice the "
-                f"number of available cpu's on the system."
+                f"Minimum buffer size set to `{min_buffer_size}`, twice the number of available cpu's on the system."
             )
         elif min_buffer_size is not None and os.cpu_count() is not None:
             if min_buffer_size < os.cpu_count():
@@ -91,10 +91,8 @@ class AsyncVideoProcessor:
             logging.info("Setting minimum buffer size to 2")
             min_buffer_size = 2
 
-        self.buffer = OrderedResultBuffer(
-            maxsize=max_buffer_size, minsize=min_buffer_size
-        )
-        self._worker: Optional[Thread] = None
+        self.buffer = OrderedResultBuffer(maxsize=max_buffer_size, minsize=min_buffer_size)
+        self._worker: Thread | None = None
         self._should_stop: bool = False
         self._should_stop_now: bool = False
         self._is_running: bool = False
@@ -110,8 +108,7 @@ class AsyncVideoProcessor:
 
         if not deployment.are_models_loaded:
             logging.info(
-                "Inference models are not loaded, configuring them for maximal "
-                "throughput and loading to CPU now."
+                "Inference models are not loaded, configuring them for maximal throughput and loading to CPU now."
             )
             deployment.load_inference_models(
                 device="CPU",
@@ -119,9 +116,7 @@ class AsyncVideoProcessor:
                 openvino_configuration={"PERFORMANCE_HINT": "THROUGHPUT"},
             )
 
-        def infer_callback(
-            image: np.ndarray, prediction: Prediction, runtime_data: Tuple[int, Any]
-        ):
+        def infer_callback(image: np.ndarray, prediction: Prediction, runtime_data: tuple[int, Any]):
             """
             Infer callback to put the image, prediction and runtime data into the
             ordered buffer.
@@ -136,7 +131,7 @@ class AsyncVideoProcessor:
 
         self.deployment.set_asynchronous_callback(infer_callback)
 
-    def start(self, num_frames: Optional[int] = None):
+    def start(self, num_frames: int | None = None):
         """
         Start the processing thread.
 
@@ -160,17 +155,13 @@ class AsyncVideoProcessor:
             """
             while True:
                 if self._should_stop_now:
-                    logging.debug(
-                        "AsyncVideoProcessor: Stopping processing thread immediately"
-                    )
+                    logging.debug("AsyncVideoProcessor: Stopping processing thread immediately")
                     return
 
                 # Check if all frames have been inferred and put to the buffer already
                 all_frames_inferred = False
                 if num_frames is not None:
-                    all_frames_inferred = (
-                        self.buffer.total_items_buffered == num_frames - 1
-                    )
+                    all_frames_inferred = self.buffer.total_items_buffered == num_frames - 1
 
                 empty_buffer = self._should_stop or all_frames_inferred
                 # Get the item from the buffer
@@ -181,10 +172,7 @@ class AsyncVideoProcessor:
                         self._processed_count.get_lock(),
                         self._current_index.get_lock(),
                     ):
-                        if (
-                            self._processed_count.value == self._current_index.value
-                            and self._should_stop
-                        ):
+                        if self._processed_count.value == self._current_index.value and self._should_stop:
                             # Buffer is empty, all items have been processed.
                             # Stop thread
                             return
@@ -211,7 +199,7 @@ class AsyncVideoProcessor:
         self._should_stop_now = False
         logging.debug("AsyncVideoProcessor: Processing thread stopped")
 
-    def process(self, frame: np.ndarray, runtime_data: Optional[Any] = None):
+    def process(self, frame: np.ndarray, runtime_data: Any | None = None):
         """
         Run inference for the frame and process the results according to the
         `processing_function` defined in the AsyncVideoProcessor initialization.
@@ -221,14 +209,9 @@ class AsyncVideoProcessor:
             should be passed to the processing_function
         """
         if not self._is_running:
-            raise ValueError(
-                "The processing thread is not running, please start it using the "
-                "`.start()` method first."
-            )
+            raise ValueError("The processing thread is not running, please start it using the `.start()` method first.")
         with self._current_index.get_lock():
-            self.deployment.infer_async(
-                image=frame, runtime_data=(self._current_index.value, runtime_data)
-            )
+            self.deployment.infer_async(image=frame, runtime_data=(self._current_index.value, runtime_data))
             self._current_index.value += 1
 
     def await_all(self):
@@ -243,6 +226,4 @@ class AsyncVideoProcessor:
         self._worker.join()
         self._is_running = False
         self._should_stop = False
-        logging.info(
-            "AsyncVideoProcessor: All frames processed. Processing thread stopped"
-        )
+        logging.info("AsyncVideoProcessor: All frames processed. Processing thread stopped")

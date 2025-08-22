@@ -13,7 +13,6 @@
 # and limitations under the License.
 
 import os
-from typing import List
 from unittest.mock import patch
 
 import numpy as np
@@ -39,12 +38,8 @@ class TestPlotHelpers:
 
         # Act
         with patch("geti_sdk.utils.plot_helpers.PILImage.Image.show") as mock_imshow:
-            result = show_image_with_annotation_scene(
-                image=fxt_numpy_image, annotation_scene=fxt_annotation_scene
-            )
-            result_geti = show_image_with_annotation_scene(
-                image=fxt_geti_image, annotation_scene=fxt_annotation_scene
-            )
+            result = show_image_with_annotation_scene(image=fxt_numpy_image, annotation_scene=fxt_annotation_scene)
+            result_geti = show_image_with_annotation_scene(image=fxt_geti_image, annotation_scene=fxt_annotation_scene)
             results_no_show = show_image_with_annotation_scene(
                 image=fxt_geti_image,
                 annotation_scene=fxt_annotation_scene,
@@ -66,7 +61,7 @@ class TestPlotHelpers:
 
     def test_show_video_frames_with_annotation_scenes(
         self,
-        fxt_video_annotation_scenes: List[AnnotationScene],
+        fxt_video_annotation_scenes: list[AnnotationScene],
         fxt_video_frames: MediaList[VideoFrame],
     ):
         # Act

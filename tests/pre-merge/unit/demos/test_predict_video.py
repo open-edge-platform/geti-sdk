@@ -41,28 +41,16 @@ class TestPredictVideo:
         )
 
         # file extenstion should be preserved.
-        assert (
-            os.path.splitext(fxt_video_path_dice)[1]
-            == os.path.splitext(result_filepath)[1]
-        )
+        assert os.path.splitext(fxt_video_path_dice)[1] == os.path.splitext(result_filepath)[1]
 
         # frame width, height, count, and fps should be preserved.
         cap_src = cv2.VideoCapture(fxt_video_path_dice)
         cap_dst = cv2.VideoCapture(result_filepath)
         assert cap_src.isOpened() and cap_dst.isOpened()
-        assert int(cap_src.get(cv2.CAP_PROP_FRAME_WIDTH)) == int(
-            cap_dst.get(cv2.CAP_PROP_FRAME_WIDTH)
-        )
-        assert int(cap_src.get(cv2.CAP_PROP_FRAME_HEIGHT)) == int(
-            cap_dst.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        )
-        assert int(cap_src.get(cv2.CAP_PROP_FRAME_COUNT)) == int(
-            cap_dst.get(cv2.CAP_PROP_FRAME_COUNT)
-        )
-        assert (
-            abs(cap_src.get(cv2.CAP_PROP_FPS) - cap_dst.get(cv2.CAP_PROP_FPS))
-            < sys.float_info.epsilon
-        )
+        assert int(cap_src.get(cv2.CAP_PROP_FRAME_WIDTH)) == int(cap_dst.get(cv2.CAP_PROP_FRAME_WIDTH))
+        assert int(cap_src.get(cv2.CAP_PROP_FRAME_HEIGHT)) == int(cap_dst.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        assert int(cap_src.get(cv2.CAP_PROP_FRAME_COUNT)) == int(cap_dst.get(cv2.CAP_PROP_FRAME_COUNT))
+        assert abs(cap_src.get(cv2.CAP_PROP_FPS) - cap_dst.get(cv2.CAP_PROP_FPS)) < sys.float_info.epsilon
         cap_src.release()
         cap_dst.release()
 

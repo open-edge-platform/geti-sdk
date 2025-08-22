@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import logging
-from typing import Generic, List, Optional, Sequence, Union
+from collections.abc import Sequence
+from typing import Generic
 
 from requests import Response
 
@@ -27,7 +28,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
     Class to up- or download annotations for images or videos to an existing project.
     """
 
-    def get_latest_annotations_for_video(self, video: Video) -> List[AnnotationScene]:
+    def get_latest_annotations_for_video(self, video: Video) -> list[AnnotationScene]:
         """
         Retrieve all latest annotations for a video from the cluster.
 
@@ -47,9 +48,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
             return []
         annotations = response["video_annotations"]
         annotation_scenes = [
-            self.annotation_scene_from_rest_response(
-                annotation_scene, media_information=video.media_information
-            )
+            self.annotation_scene_from_rest_response(annotation_scene, media_information=video.media_information)
             for annotation_scene in annotations
             if annotation_scene["annotations"]
         ]
@@ -57,9 +56,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
             scene.resolve_label_names_and_colors(labels=self._project.get_all_labels())
         return annotation_scenes
 
-    def upload_annotations_for_video(
-        self, video: Video, append_annotations: bool = False, max_threads: int = 5
-    ):
+    def upload_annotations_for_video(self, video: Video, append_annotations: bool = False, max_threads: int = 5):
         """
         Upload annotations for a video. If append_annotations is set to True,
         annotations will be appended to the existing annotations for the video in the
@@ -75,23 +72,17 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
         """
         annotation_filenames = self.annotation_reader.get_data_filenames()
         video_annotation_names = [
-            filename
-            for filename in annotation_filenames
-            if filename.startswith(f"{video.name}_frame_")
+            filename for filename in annotation_filenames if filename.startswith(f"{video.name}_frame_")
         ]
         frame_indices = [int(name.split("_")[-1]) for name in video_annotation_names]
         video_frames = MediaList(
-            [
-                VideoFrame.from_video(video=video, frame_index=frame_index)
-                for frame_index in frame_indices
-            ]
+            [VideoFrame.from_video(video=video, frame_index=frame_index) for frame_index in frame_indices]
         )
-        upload_count = self._upload_annotations_for_2d_media_list(
+        return self._upload_annotations_for_2d_media_list(
             media_list=video_frames,
             append_annotations=append_annotations,
             max_threads=max_threads,
         )
-        return upload_count
 
     def upload_annotations_for_videos(
         self,
@@ -121,9 +112,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
                 max_threads=max_threads,
             )
         if upload_count > 0:
-            logging.info(
-                f"Upload complete. Uploaded {upload_count} new video frame annotations"
-            )
+            logging.info(f"Upload complete. Uploaded {upload_count} new video frame annotations")
         else:
             logging.info("No new video frame annotations were found.")
 
@@ -153,9 +142,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
             max_threads=max_threads,
         )
         if upload_count > 0:
-            logging.info(
-                f"Upload complete. Uploaded {upload_count} new image annotations"
-            )
+            logging.info(f"Upload complete. Uploaded {upload_count} new image annotations")
         else:
             logging.info("No new image annotations were found.")
 
@@ -184,9 +171,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
         annotations = self.get_latest_annotations_for_video(video=video)
         frame_list = MediaList[VideoFrame](
             [
-                VideoFrame.from_video(
-                    video=video, frame_index=annotation.media_identifier.frame_index
-                )
+                VideoFrame.from_video(video=video, frame_index=annotation.media_identifier.frame_index)
                 for annotation in annotations
             ]
         )
@@ -198,8 +183,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
                 append_media_uid=append_video_uid,
                 max_threads=max_threads,
             )
-        else:
-            return 0
+        return 0
 
     def download_annotations_for_images(
         self,
@@ -268,9 +252,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
         logging.info(f"Video annotation download finished in {t_total:.1f} seconds.")
         return t_total
 
-    def download_all_annotations(
-        self, path_to_folder: str, max_threads: int = 10
-    ) -> None:
+    def download_all_annotations(self, path_to_folder: str, max_threads: int = 10) -> None:
         """
         Download all annotations for the project to a target folder on disk.
 
@@ -295,9 +277,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
                 max_threads=max_threads,
             )
 
-    def upload_annotations_for_all_media(
-        self, append_annotations: bool = False, max_threads: int = 5
-    ):
+    def upload_annotations_for_all_media(self, append_annotations: bool = False, max_threads: int = 5):
         """
         Upload annotations for all media in the project, If append_annotations is set
         to True, annotations will be appended to the existing annotations for the
@@ -324,9 +304,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
                 max_threads=max_threads,
             )
 
-    def upload_annotation(
-        self, media_item: Union[Image, VideoFrame], annotation_scene: AnnotationScene
-    ) -> AnnotationScene:
+    def upload_annotation(self, media_item: Image | VideoFrame, annotation_scene: AnnotationScene) -> AnnotationScene:
         """
         Upload an annotation for an image or video frame to the Intel® Geti™ server.
 
@@ -334,20 +312,16 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
         :param annotation_scene: AnnotationScene to upload
         :return: The uploaded annotation
         """
-        if not isinstance(media_item, (Image, VideoFrame)):
+        if not isinstance(media_item, Image | VideoFrame):
             raise ValueError(
                 f"Cannot upload annotation for media item {media_item.name}. This "
                 f"method only supports uploading annotations for single images and "
                 f"video frames. Please use the method `upload_annotations_for_video` "
                 f"to upload video annotations"
             )
-        return self._upload_annotation_for_2d_media_item(
-            media_item=media_item, annotation_scene=annotation_scene
-        )
+        return self._upload_annotation_for_2d_media_item(media_item=media_item, annotation_scene=annotation_scene)
 
-    def get_annotation(
-        self, media_item: Union[Image, VideoFrame]
-    ) -> Optional[AnnotationScene]:
+    def get_annotation(self, media_item: Image | VideoFrame) -> AnnotationScene | None:
         """
         Retrieve the latest annotations for an image or video frame from the
         Intel® Geti™ platform.
@@ -356,7 +330,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
         :param media_item: Image or VideoFrame to retrieve the annotations for
         :return: AnnotationScene instance containing the latest annotation data
         """
-        if not isinstance(media_item, (Image, VideoFrame)):
+        if not isinstance(media_item, Image | VideoFrame):
             raise ValueError(
                 f"Cannot get annotation for media item {media_item.name}. This method "
                 f"only supports getting annotations for images and video frames. "

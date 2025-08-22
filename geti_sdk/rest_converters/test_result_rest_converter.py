@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, Dict
+from typing import Any
 
 from geti_sdk.data_models import TestResult
 from geti_sdk.utils import deserialize_dictionary
@@ -25,7 +25,7 @@ class TestResultRESTConverter:
     """
 
     @staticmethod
-    def from_dict(result_dict: Dict[str, Any]) -> TestResult:
+    def from_dict(result_dict: dict[str, Any]) -> TestResult:
         """
         Create a TestResult instance from the input dictionary passed in `result_dict`.
 

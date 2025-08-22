@@ -13,8 +13,9 @@
 # and limitations under the License.
 import logging
 import time
+from collections.abc import Sequence
 from contextlib import nullcontext
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any
 
 from vcr import VCR
 
@@ -52,7 +53,7 @@ class ProjectService:
         VCR cassettes
     """
 
-    def __init__(self, geti: Geti, vcr: Optional[VCR] = None, is_offline: bool = False):
+    def __init__(self, geti: Geti, vcr: VCR | None = None, is_offline: bool = False):
         if vcr is None:
             self.vcr_context = nullcontext
         else:
@@ -60,23 +61,21 @@ class ProjectService:
         self.session = geti.session
         self.workspace_id = geti.workspace_id
         self.geti = geti
-        self.project_client = ProjectClient(
-            session=geti.session, workspace_id=geti.workspace_id
-        )
+        self.project_client = ProjectClient(session=geti.session, workspace_id=geti.workspace_id)
 
-        self._project: Optional[Project] = None
-        self._project_creation_timestamp: Optional[float] = None
+        self._project: Project | None = None
+        self._project_creation_timestamp: float | None = None
         self._is_offline: bool = is_offline
-        self._configuration_client: Optional[ConfigurationClient] = None
-        self._project_configuration_client: Optional[ConfigurationClient] = None
-        self._training_configuration_client: Optional[ConfigurationClient] = None
-        self._image_client: Optional[ImageClient] = None
-        self._annotation_client: Optional[AnnotationClient] = None
-        self._training_client: Optional[TrainingClient] = None
-        self._video_client: Optional[VideoClient] = None
-        self._model_client: Optional[ModelClient] = None
-        self._prediction_client: Optional[PredictionClient] = None
-        self._dataset_client: Optional[DatasetClient] = None
+        self._configuration_client: ConfigurationClient | None = None
+        self._project_configuration_client: ConfigurationClient | None = None
+        self._training_configuration_client: ConfigurationClient | None = None
+        self._image_client: ImageClient | None = None
+        self._annotation_client: AnnotationClient | None = None
+        self._training_client: TrainingClient | None = None
+        self._video_client: VideoClient | None = None
+        self._model_client: ModelClient | None = None
+        self._prediction_client: PredictionClient | None = None
+        self._dataset_client: DatasetClient | None = None
         self._client_names = [
             "_configuration_client",
             "_image_client",
@@ -91,10 +90,10 @@ class ProjectService:
 
     def create_project(
         self,
-        project_name: Optional[str] = None,
+        project_name: str | None = None,
         project_type: str = "classification",
-        labels: Optional[List[Union[List[str], List[Dict[str, Any]]]]] = None,
-        keypoint_structure: Optional[Dict[str, list]] = None,
+        labels: list[list[str] | list[dict[str, Any]]] | None = None,
+        keypoint_structure: dict[str, list] | None = None,
     ) -> Project:
         """
         Create a project according to the `name`, `project_type` and `labels` specified.
@@ -131,8 +130,8 @@ class ProjectService:
         self,
         project_name: str = "sdk_test_project_simple",
         project_type: str = "classification",
-        labels: Optional[List[Union[List[str], List[Dict[str, Any]]]]] = None,
-        keypoint_structure: Optional[Dict[str, list]] = None,
+        labels: list[list[str] | list[dict[str, Any]]] | None = None,
+        keypoint_structure: dict[str, list] | None = None,
     ) -> Project:
         """
         This method will always return a project. It will either create a new one, or
@@ -156,7 +155,7 @@ class ProjectService:
 
     def create_project_from_dataset(
         self,
-        annotation_readers: List[AnnotationReader],
+        annotation_readers: list[AnnotationReader],
         project_name: str = "sdk_test_project_simple",
         project_type: str = "classification",
         path_to_dataset: str = "",
@@ -226,7 +225,7 @@ class ProjectService:
         return self._project
 
     @project.setter
-    def project(self, value: Optional[Project]) -> None:
+    def project(self, value: Project | None) -> None:
         """
         Set the project for the ProjectService.
         """
@@ -258,9 +257,7 @@ class ProjectService:
     def image_client(self) -> ImageClient:
         """Returns the ImageClient instance for the project"""
         if self._image_client is None:
-            with self.vcr_context(
-                f"{self.project.name}_image_client.{CASSETTE_EXTENSION}"
-            ):
+            with self.vcr_context(f"{self.project.name}_image_client.{CASSETTE_EXTENSION}"):
                 self._image_client = ImageClient(
                     session=self.session,
                     workspace_id=self.workspace_id,
@@ -272,9 +269,7 @@ class ProjectService:
     def video_client(self) -> VideoClient:
         """Returns the VideoClient instance for the project"""
         if self._video_client is None:
-            with self.vcr_context(
-                f"{self.project.name}_video_client.{CASSETTE_EXTENSION}"
-            ):
+            with self.vcr_context(f"{self.project.name}_video_client.{CASSETTE_EXTENSION}"):
                 self._video_client = VideoClient(
                     session=self.session,
                     workspace_id=self.workspace_id,
@@ -286,9 +281,7 @@ class ProjectService:
     def annotation_client(self) -> AnnotationClient:
         """Returns the AnnotationClient instance for the project"""
         if self._annotation_client is None:
-            with self.vcr_context(
-                f"{self.project.name}_annotation_client.{CASSETTE_EXTENSION}"
-            ):
+            with self.vcr_context(f"{self.project.name}_annotation_client.{CASSETTE_EXTENSION}"):
                 self._annotation_client = AnnotationClient(
                     session=self.session,
                     workspace_id=self.workspace_id,
@@ -300,9 +293,7 @@ class ProjectService:
     def dataset_client(self) -> DatasetClient:
         """Returns the DatasetClient instance for the project"""
         if self._dataset_client is None:
-            with self.vcr_context(
-                f"{self.project.name}_dataset_client.{CASSETTE_EXTENSION}"
-            ):
+            with self.vcr_context(f"{self.project.name}_dataset_client.{CASSETTE_EXTENSION}"):
                 self._dataset_client = DatasetClient(
                     session=self.session,
                     workspace_id=self.workspace_id,
@@ -314,9 +305,7 @@ class ProjectService:
     def configuration_client(self) -> ConfigurationClient:
         """Returns the ConfigurationClient instance for the project"""
         if self._configuration_client is None:
-            with self.vcr_context(
-                f"../LEGACY/{self.project.name}_configuration_client.{CASSETTE_EXTENSION}"
-            ):
+            with self.vcr_context(f"../LEGACY/{self.project.name}_configuration_client.{CASSETTE_EXTENSION}"):
                 self._configuration_client = ConfigurationClient(
                     session=self.session,
                     workspace_id=self.workspace_id,
@@ -328,9 +317,7 @@ class ProjectService:
     def project_configuration_client(self) -> ProjectConfigurationClient:
         """Returns the ConfigurationClient instance for the project"""
         if self._project_configuration_client is None:
-            with self.vcr_context(
-                f"{self.project.name}_project_configuration_client.{CASSETTE_EXTENSION}"
-            ):
+            with self.vcr_context(f"{self.project.name}_project_configuration_client.{CASSETTE_EXTENSION}"):
                 self._project_configuration_client = ProjectConfigurationClient(
                     session=self.session,
                     workspace_id=self.workspace_id,
@@ -342,9 +329,7 @@ class ProjectService:
     def training_configuration_client(self) -> TrainingConfigurationClient:
         """Returns the ConfigurationClient instance for the project"""
         if self._training_configuration_client is None:
-            with self.vcr_context(
-                f"{self.project.name}_training_configuration_client.{CASSETTE_EXTENSION}"
-            ):
+            with self.vcr_context(f"{self.project.name}_training_configuration_client.{CASSETTE_EXTENSION}"):
                 self._training_configuration_client = TrainingConfigurationClient(
                     session=self.session,
                     workspace_id=self.workspace_id,
@@ -356,9 +341,7 @@ class ProjectService:
     def training_client(self) -> TrainingClient:
         """Returns the TrainingClient instance for the project"""
         if self._training_client is None:
-            with self.vcr_context(
-                f"{self.project.name}_training_client.{CASSETTE_EXTENSION}"
-            ):
+            with self.vcr_context(f"{self.project.name}_training_client.{CASSETTE_EXTENSION}"):
                 self._training_client = TrainingClient(
                     session=self.session,
                     workspace_id=self.workspace_id,
@@ -370,9 +353,7 @@ class ProjectService:
     def prediction_client(self) -> PredictionClient:
         """Returns the PredictionClient instance for the project"""
         if self._prediction_client is None:
-            with self.vcr_context(
-                f"{self.project.name}_prediction_client.{CASSETTE_EXTENSION}"
-            ):
+            with self.vcr_context(f"{self.project.name}_prediction_client.{CASSETTE_EXTENSION}"):
                 self._prediction_client = PredictionClient(
                     session=self.session,
                     workspace_id=self.workspace_id,
@@ -384,9 +365,7 @@ class ProjectService:
     def model_client(self) -> ModelClient:
         """Returns the ModelClient instance for the project"""
         if self._model_client is None:
-            with self.vcr_context(
-                f"{self.project.name}_model_client.{CASSETTE_EXTENSION}"
-            ):
+            with self.vcr_context(f"{self.project.name}_model_client.{CASSETTE_EXTENSION}"):
                 self._model_client = ModelClient(
                     session=self.session,
                     workspace_id=self.workspace_id,
@@ -415,8 +394,7 @@ class ProjectService:
                 # Server needs a moment to process the project before deletion
                 if (
                     not self._is_offline
-                    and (lifetime := time.time() - self._project_creation_timestamp)
-                    < self._project_removal_delay
+                    and (lifetime := time.time() - self._project_creation_timestamp) < self._project_removal_delay
                 ):
                     time.sleep(self._project_removal_delay - lifetime)
                 force_delete_project(self.project, self.project_client)
@@ -431,9 +409,7 @@ class ProjectService:
         for client_name in self._client_names:
             setattr(self, client_name, None)
 
-    def add_annotated_media(
-        self, annotation_readers: Sequence[AnnotationReader], n_images: int = 12
-    ) -> None:
+    def add_annotated_media(self, annotation_readers: Sequence[AnnotationReader], n_images: int = 12) -> None:
         """
         Adds annotated media to the project
 
@@ -451,9 +427,7 @@ class ProjectService:
                 "Number of annotation readers received does not match the number of "
                 "trainable tasks in the project: Unable to upload annotated media"
             )
-        with self.vcr_context(
-            f"{self.project.name}_add_annotated_media.{CASSETTE_EXTENSION}"
-        ):
+        with self.vcr_context(f"{self.project.name}_add_annotated_media.{CASSETTE_EXTENSION}"):
             if isinstance(annotation_reader_1, DatumAnnotationReader):
                 images = self.image_client.upload_from_list(
                     path_to_folder=data_path,
@@ -462,9 +436,7 @@ class ProjectService:
                     max_threads=1,
                 )
             else:
-                images = self.image_client.upload_folder(
-                    data_path, n_images=n_images, max_threads=1
-                )
+                images = self.image_client.upload_folder(data_path, n_images=n_images, max_threads=1)
 
             if n_images < len(images) and n_images != -1:
                 images = images[:n_images]
@@ -472,12 +444,8 @@ class ProjectService:
             for task_index, task in enumerate(self.project.get_trainable_tasks()):
                 # Set annotation reader task type
                 annotation_readers[task_index].task_type = task.type
-                annotation_readers[task_index].prepare_and_set_dataset(
-                    task_type=task.type
-                )
-                self.annotation_client.annotation_reader = annotation_readers[
-                    task_index
-                ]
+                annotation_readers[task_index].prepare_and_set_dataset(task_type=task.type)
+                self.annotation_client.annotation_reader = annotation_readers[task_index]
                 # Upload annotations
                 self.annotation_client.upload_annotations_for_images(
                     images=images, append_annotations=task_index > 0, max_threads=1
@@ -489,13 +457,9 @@ class ProjectService:
 
         :param auto_train: True to turn auto_training on, False to turn it off
         """
-        with self.vcr_context(
-            f"{self.project.name}_set_auto_train.{CASSETTE_EXTENSION}"
-        ):
+        with self.vcr_context(f"{self.project.name}_set_auto_train.{CASSETTE_EXTENSION}"):
             if self.session.version.is_configuration_revamped:
-                self.project_configuration_client.set_project_auto_train(
-                    auto_train=auto_train
-                )
+                self.project_configuration_client.set_project_auto_train(auto_train=auto_train)
             else:
                 self.configuration_client.set_project_auto_train(auto_train=auto_train)
 
@@ -505,9 +469,7 @@ class ProjectService:
         epochs to perform a minimal training round
 
         """
-        with self.vcr_context(
-            f"{self.project.name}_set_minimal_hypers.{CASSETTE_EXTENSION}"
-        ):
+        with self.vcr_context(f"{self.project.name}_set_minimal_hypers.{CASSETTE_EXTENSION}"):
             self.configuration_client.set_project_num_iterations(1)
             for task in self.project.get_trainable_tasks():
                 task_config = self.configuration_client.get_task_configuration(task.id)
@@ -525,24 +487,18 @@ class ProjectService:
         Reduce batch size in memory intensive tasks to avoid OOM errors in pods. Use
         default hypers for other tasks
         """
-        with self.vcr_context(
-            f"{self.project.name}_set_reduced_memory_hypers.{CASSETTE_EXTENSION}"
-        ):
+        with self.vcr_context(f"{self.project.name}_set_reduced_memory_hypers.{CASSETTE_EXTENSION}"):
             for task in self.project.get_trainable_tasks():
                 if task.type in [
                     TaskType.DETECTION,
                     TaskType.ROTATED_DETECTION,
                     TaskType.INSTANCE_SEGMENTATION,
                 ]:
-                    task_hypers = self.configuration_client.get_task_configuration(
-                        task_id=task.id
-                    )
+                    task_hypers = self.configuration_client.get_task_configuration(task_id=task.id)
                     task_hypers.batch_size.value = 1
                     self.configuration_client.set_configuration(task_hypers)
 
-    def set_auto_training_annotation_requirement(
-        self, required_images: int = 6
-    ) -> None:
+    def set_auto_training_annotation_requirement(self, required_images: int = 6) -> None:
         """
         Sets the 'Number of images required for auto-training' parameter for all
         tasks in the project to `required_images`
@@ -550,9 +506,7 @@ class ProjectService:
         :param required_images: Number of images required before starting a new round
             of auto training for the task
         """
-        with self.vcr_context(
-            f"{self.project.name}_set_auto_training_annotation_requirement.{CASSETTE_EXTENSION}"
-        ):
+        with self.vcr_context(f"{self.project.name}_set_auto_training_annotation_requirement.{CASSETTE_EXTENSION}"):
             self.configuration_client.set_project_parameter(
                 parameter_name="required_images_auto_training", value=required_images
             )

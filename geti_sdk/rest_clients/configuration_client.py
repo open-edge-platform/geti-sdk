@@ -16,7 +16,6 @@ import json
 import logging
 import os
 import time
-from typing import Dict, List, Optional, Union
 
 from geti_sdk.data_models import (
     Algorithm,
@@ -29,7 +28,7 @@ from geti_sdk.data_models import (
 from geti_sdk.data_models.configurable_parameter_group import PARAMETER_TYPES
 from geti_sdk.http_session import GetiRequestException, GetiSession
 from geti_sdk.rest_converters import ConfigurationRESTConverter
-from geti_sdk.utils import get_supported_algorithms, deprecate
+from geti_sdk.utils import deprecate, get_supported_algorithms
 
 
 @deprecate(
@@ -59,16 +58,12 @@ class ConfigurationClient:
 
         # Query the project status to make sure that the project is loaded. Then we
         # can safely fetch the configuration later on, even for newly created projects
-        self.session.get_rest_response(
-            url=f"workspaces/{workspace_id}/projects/{project_id}/status", method="GET"
-        )
+        self.session.get_rest_response(url=f"workspaces/{workspace_id}/projects/{project_id}/status", method="GET")
         # Hack: Wait for some time to make sure that the configurations are
         # initialized properly
         time.sleep(1)
 
-    def get_task_configuration(
-        self, task_id: str, algorithm_name: Optional[str] = None
-    ) -> TaskConfiguration:
+    def get_task_configuration(self, task_id: str, algorithm_name: str | None = None) -> TaskConfiguration:
         """
         Get the configuration for the task with id `task_id`.
 
@@ -93,9 +88,7 @@ class ConfigurationClient:
         :return: GlobalConfiguration instance holding the configurable parameters for
             all project-wide components
         """
-        config_data = self.session.get_rest_response(
-            url=f"{self.base_url}/global", method="GET"
-        )
+        config_data = self.session.get_rest_response(url=f"{self.base_url}/global", method="GET")
         return ConfigurationRESTConverter.global_configuration_from_rest(config_data)
 
     def _set_task_configuration(self, task_id: str, config: dict):
@@ -106,10 +99,7 @@ class ConfigurationClient:
         :param config: Dictionary containing the updated configuration values
         :return: Response of the configuration POST endpoint.
         """
-        response = self.session.get_rest_response(
-            url=f"{self.base_url}/task_chain/{task_id}", method="POST", data=config
-        )
-        return response
+        return self.session.get_rest_response(url=f"{self.base_url}/task_chain/{task_id}", method="POST", data=config)
 
     def set_project_auto_train(self, auto_train: bool = False) -> None:
         """
@@ -131,7 +121,7 @@ class ConfigurationClient:
         iteration_names = ["num_iters", "max_num_epochs"]
         for task_id in self.task_ids:
             config = self.get_task_configuration(task_id=task_id)
-            parameter: Optional[PARAMETER_TYPES] = None
+            parameter: PARAMETER_TYPES | None = None
             for parameter_name in iteration_names:
                 parameter = config.get_parameter_by_name(parameter_name)
                 if parameter is not None:
@@ -149,8 +139,8 @@ class ConfigurationClient:
     def set_project_parameter(
         self,
         parameter_name: str,
-        value: Union[bool, str, float, int],
-        parameter_group_name: Optional[str] = None,
+        value: bool | str | float | int,
+        parameter_group_name: str | None = None,
     ):
         """
         Set the value for a parameter with `parameter_name` that lives in the
@@ -199,9 +189,7 @@ class ConfigurationClient:
                 f"supported for a task of type '{task.type}'. Unable to retrieve "
                 f"configuration."
             )
-        return self.get_task_configuration(
-            task_id=task.id, algorithm_name=algorithm.model_manifest_id
-        )
+        return self.get_task_configuration(task_id=task.id, algorithm_name=algorithm.model_manifest_id)
 
     def download_configuration(self, path_to_folder: str) -> FullConfiguration:
         """
@@ -217,15 +205,10 @@ class ConfigurationClient:
         configuration_path = os.path.join(path_to_folder, "configuration.json")
         with open(configuration_path, "w") as file:
             json.dump(config_data, file, indent=4)
-        logging.info(
-            f"Project parameters for project '{self.project.name}' were saved to file "
-            f"{configuration_path}."
-        )
+        logging.info(f"Project parameters for project '{self.project.name}' were saved to file {configuration_path}.")
         return config
 
-    def apply_from_object(
-        self, configuration: FullConfiguration
-    ) -> Optional[FullConfiguration]:
+    def apply_from_object(self, configuration: FullConfiguration) -> FullConfiguration | None:
         """
         Attempt to apply the configuration values passed in as `configuration` to
         the project managed by this instance of the ConfigurationClient.
@@ -245,8 +228,7 @@ class ConfigurationClient:
         for task, task_config in zip(project_tasks, configuration.task_chain):
             current_task_config = self.get_task_configuration(task_id=task.id)
             model_storage_ids = [
-                config.entity_identifier.model_storage_id
-                for config in current_task_config.model_configurations
+                config.entity_identifier.model_storage_id for config in current_task_config.model_configurations
             ]
 
             task_config.apply_identifiers(
@@ -255,40 +237,26 @@ class ConfigurationClient:
                 task_id=task.id,
                 model_storage_id=model_storage_ids[0],
             )
-        data = ConfigurationRESTConverter.configuration_to_minimal_dict(
-            configuration=configuration, deidentify=False
-        )
+        data = ConfigurationRESTConverter.configuration_to_minimal_dict(configuration=configuration, deidentify=False)
         try:
-            result = self.session.get_rest_response(
-                url=self.base_url, method="POST", data=data
-            )
+            result = self.session.get_rest_response(url=self.base_url, method="POST", data=data)
         except GetiRequestException:
-            failed_parameters: List[Dict[str, str]] = []
+            failed_parameters: list[dict[str, str]] = []
             global_config = configuration.global_
             task_chain_config = configuration.task_chain
             for parameter in global_config:
-                config_data = global_config.set_parameter_value(
-                    parameter.name, parameter.value
-                )
+                config_data = global_config.set_parameter_value(parameter.name, parameter.value)
                 try:
-                    self.session.get_rest_response(
-                        url=f"{self.base_url}/global", method="POST", data=config_data
-                    )
+                    self.session.get_rest_response(url=f"{self.base_url}/global", method="POST", data=config_data)
                 except GetiRequestException:
                     failed_parameters.append({"global": parameter.name})
             for task_config in task_chain_config:
                 for parameter in task_config:
-                    config_data = task_config.set_parameter_value(
-                        parameter.name, parameter.value
-                    )
+                    config_data = task_config.set_parameter_value(parameter.name, parameter.value)
                     try:
-                        self._set_task_configuration(
-                            task_id=task_config.task_id, config=config_data
-                        )
+                        self._set_task_configuration(task_id=task_config.task_id, config=config_data)
                     except GetiRequestException:
-                        failed_parameters.append(
-                            {task_config.task_title: parameter.name}
-                        )
+                        failed_parameters.append({task_config.task_title: parameter.name})
             logging.warning(
                 f"Setting configuration failed for the following parameters: "
                 f"{failed_parameters}. All other parameters were set successfully."
@@ -296,12 +264,9 @@ class ConfigurationClient:
             result = None
         if result:
             return configuration
-        else:
-            return None
+        return None
 
-    def apply_from_file(
-        self, path_to_folder: str, filename: Optional[str] = None
-    ) -> Optional[FullConfiguration]:
+    def apply_from_file(self, path_to_folder: str, filename: str | None = None) -> FullConfiguration | None:
         """
         Attempt to apply a configuration from a file on disk. The
         parameter `path_to_folder` is mandatory and should point to the folder in which
@@ -322,14 +287,14 @@ class ConfigurationClient:
                 f"Unable to find configuration file at {path_to_config}. Please "
                 f"provide a valid path to the folder holding the configuration data."
             )
-        with open(path_to_config, "r") as file:
+        with open(path_to_config) as file:
             data = json.load(file)
         config = ConfigurationRESTConverter.full_configuration_from_rest(data)
         return self.apply_from_object(config)
 
     def set_configuration(
         self,
-        configuration: Union[FullConfiguration, GlobalConfiguration, TaskConfiguration],
+        configuration: FullConfiguration | GlobalConfiguration | TaskConfiguration,
     ):
         """
         Set the configuration for the project. This method accepts either a
@@ -344,11 +309,10 @@ class ConfigurationClient:
             full_configuration = self.get_full_configuration()
             if configuration.task_id is None:
                 raise ValueError(
-                    "Cannot set a TaskConfiguration without a task_id. Please make "
-                    "sure to set a valid task_id."
+                    "Cannot set a TaskConfiguration without a task_id. Please make sure to set a valid task_id."
                 )
             # Find index of configuration in the task chain
-            task_index: Optional[int] = None
+            task_index: int | None = None
             for ti, task_configuration in enumerate(full_configuration.task_chain):
                 if task_configuration.task_id == configuration.task_id:
                     task_index = ti
@@ -365,8 +329,7 @@ class ConfigurationClient:
             full_configuration.global_ = configuration
         else:
             raise TypeError(
-                f"Invalid configuration of type '{type(configuration)}' received. "
-                f"Unable to set configuration."
+                f"Invalid configuration of type '{type(configuration)}' received. Unable to set configuration."
             )
         self.apply_from_object(full_configuration)
 

@@ -15,7 +15,6 @@
 """The package provides the Visualizer class for models predictions visualization."""
 
 from os import PathLike
-from typing import List, Optional, Union
 
 import cv2
 import numpy as np
@@ -42,7 +41,7 @@ class Visualizer:
 
     def __init__(
         self,
-        window_name: Optional[str] = None,
+        window_name: str | None = None,
         show_labels: bool = True,
         show_confidence: bool = True,
         show_count: bool = False,
@@ -58,17 +57,15 @@ class Visualizer:
         :param is_one_label: Show only one label on the output image
         """
         self.window_name = "Window" if window_name is None else window_name
-        self.shape_drawer = ShapeDrawer(
-            show_count, is_one_label, show_labels, show_confidence
-        )
+        self.shape_drawer = ShapeDrawer(show_count, is_one_label, show_labels, show_confidence)
 
     def draw(
         self,
         image: np.ndarray,
         annotation: AnnotationScene,
         fill_shapes: bool = True,
-        confidence_threshold: Optional[float] = None,
-        meta: Optional[dict] = None,
+        confidence_threshold: float | None = None,
+        meta: dict | None = None,
     ) -> np.ndarray:
         """
         Draw annotations on the image.
@@ -83,10 +80,7 @@ class Visualizer:
         """
         if confidence_threshold is not None:
             annotation = annotation.filter_by_confidence(confidence_threshold)
-        result = self.shape_drawer.draw(
-            image.copy(), annotation, labels=[], fill_shapes=fill_shapes
-        )
-        return result
+        return self.shape_drawer.draw(image.copy(), annotation, labels=[], fill_shapes=fill_shapes)
 
     def explain_label(
         self,
@@ -114,9 +108,7 @@ class Visualizer:
         if saliency_map is None:
             raise ValueError("Prediction does not contain saliency maps")
         if label_name not in saliency_map:
-            raise ValueError(
-                f"Saliency map for label {label_name} is not found in the prediction."
-            )
+            raise ValueError(f"Saliency map for label {label_name} is not found in the prediction.")
         # Accessing the saliency map for the label
         saliency_map = saliency_map[label_name]
         if saliency_map.shape[:2] != image.shape[:2]:
@@ -148,7 +140,7 @@ class Visualizer:
     @staticmethod
     def save_video(
         video_frames: MediaList[VideoFrame],
-        annotation_scenes: List[Union[AnnotationScene, Prediction]],
+        annotation_scenes: list[AnnotationScene | Prediction],
         output_path: PathLike,
         fps: float = 1,
     ) -> None:

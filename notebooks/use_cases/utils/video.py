@@ -13,7 +13,6 @@
 # and limitations under the License.
 import threading
 import time
-from typing import Optional, Tuple
 
 import cv2
 
@@ -33,16 +32,14 @@ class VideoPlayer:
     def __init__(
         self,
         source,
-        size: Optional[Tuple[int, int]] = None,
+        size: tuple[int, int] | None = None,
         flip: bool = False,
-        fps: Optional[int] = None,
+        fps: int | None = None,
         skip_first_frames: int = 0,
     ):
         self.__cap = cv2.VideoCapture(source)
         if not self.__cap.isOpened():
-            raise RuntimeError(
-                f"Cannot open {'camera' if isinstance(source, int) else ''} {source}"
-            )
+            raise RuntimeError(f"Cannot open {'camera' if isinstance(source, int) else ''} {source}")
         # skip first N frames
         self.__cap.set(cv2.CAP_PROP_POS_FRAMES, skip_first_frames)
         # fps of input file
@@ -57,14 +54,12 @@ class VideoPlayer:
         if size is not None:
             # AREA better for shrinking, LINEAR better for enlarging
             self.__interpolation = (
-                cv2.INTER_AREA
-                if size[0] < self.__cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-                else cv2.INTER_LINEAR
+                cv2.INTER_AREA if size[0] < self.__cap.get(cv2.CAP_PROP_FRAME_WIDTH) else cv2.INTER_LINEAR
             )
         # first frame
         _, self.__frame = self.__cap.read()
         self.__lock = threading.Lock()
-        self.__thread: Optional[threading.Thread] = None
+        self.__thread: threading.Thread | None = None
         self.__stop: bool = False
 
     def start(self):

@@ -1,7 +1,6 @@
 import os
 import time
 from io import BufferedReader
-from typing import Optional
 
 from tqdm.auto import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
@@ -20,8 +19,8 @@ class TUSUploader:
         self,
         session: GetiSession,
         base_url: str,
-        file_path: Optional[os.PathLike] = None,
-        file_stream: Optional[BufferedReader] = None,
+        file_path: os.PathLike | None = None,
+        file_stream: BufferedReader | None = None,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
         retries: int = 0,
         retry_delay: int = 30,
@@ -104,10 +103,9 @@ class TUSUploader:
         if self.file_stream:
             self.file_stream.seek(0)
             return self.file_stream
-        elif self.file_path is not None and os.path.isfile(self.file_path):
+        if self.file_path is not None and os.path.isfile(self.file_path):
             return open(self.file_path, "rb")
-        else:
-            raise ValueError("invalid file {}".format(self.file_path))
+        raise ValueError(f"invalid file {self.file_path}")
 
     def get_file_size(self):
         """
@@ -117,7 +115,7 @@ class TUSUploader:
         stream.seek(0, os.SEEK_END)
         return stream.tell()
 
-    def upload(self, stop_at: Optional[int] = None):
+    def upload(self, stop_at: int | None = None):
         """
         Perform file upload.
 
@@ -134,15 +132,17 @@ class TUSUploader:
             self.offset = 0
 
         self.file_stream = self.get_file_stream()
-        with logging_redirect_tqdm(tqdm_class=tqdm):
-            with tqdm(
+        with (
+            logging_redirect_tqdm(tqdm_class=tqdm),
+            tqdm(
                 total=self.stop_at >> 20,
                 desc="Uploading file",
                 unit="MB",
-            ) as tbar:
-                while self.offset < self.stop_at:
-                    self.upload_chunk()
-                    tbar.update((self.offset >> 20) - tbar.n)
+            ) as tbar,
+        ):
+            while self.offset < self.stop_at:
+                self.upload_chunk()
+                tbar.update((self.offset >> 20) - tbar.n)
 
     def create_upload_url(self):
         """
@@ -163,19 +163,16 @@ class TUSUploader:
             raise ValueError("Upload url not returned by server")
         return upload_url
 
-    def get_file_id(self) -> Optional[str]:
+    def get_file_id(self) -> str | None:
         """
         Return file id from upload url.
 
         :return: File id.
         """
-        if (
-            self.upload_url is None
-            or len(file_id := self.upload_url.split("/")[-1]) < 2
-        ):
+        if self.upload_url is None or len(file_id := self.upload_url.split("/")[-1]) < 2:
             # We get the file_id from the upload url. If the url is not set or the file_id
             # is not valid (may be an empty string if the url is not valid), we return None.
-            return
+            return None
         return file_id
 
     def upload_chunk(self):

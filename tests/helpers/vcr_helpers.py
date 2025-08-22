@@ -16,7 +16,6 @@ import logging
 import os
 import shutil
 import time
-from typing import Tuple
 
 from tqdm.auto import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
@@ -32,14 +31,10 @@ def are_cassettes_available(cassette_path) -> bool:
     """
     if not os.path.isdir(cassette_path):
         return False
-    if len(os.listdir(cassette_path)) > 0:
-        return True
-    return False
+    return len(os.listdir(cassette_path)) > 0
 
 
-def replace_unique_entries_in_cassettes(
-    entry_pairs: Tuple[Tuple[str, str]], cassette_dir: str
-) -> None:
+def replace_unique_entries_in_cassettes(entry_pairs: tuple[tuple[str, str]], cassette_dir: str) -> None:
     """
     This function searches for the unique_entry in a target cassette file and
     replaces all occurrences of that address by a dummy value. The cassette file is
@@ -58,18 +53,13 @@ def replace_unique_entries_in_cassettes(
 
     with logging_redirect_tqdm(tqdm_class=tqdm):
         for cassette_path in tqdm(cassette_paths, desc=tqdm_prefix):
-            replace_unique_entries_in_cassette(
-                entry_pairs=entry_pairs, path_to_cassette_file=cassette_path
-            )
+            replace_unique_entries_in_cassette(entry_pairs=entry_pairs, path_to_cassette_file=cassette_path)
     logging.info(
-        f"Entries scrubbed from {len(cassette_paths)} cassette files in "
-        f"{1000 * (time.time() - t_start)} seconds"
+        f"Entries scrubbed from {len(cassette_paths)} cassette files in {1000 * (time.time() - t_start)} seconds"
     )
 
 
-def replace_unique_entries_in_cassette(
-    entry_pairs: Tuple[Tuple[str, str]], path_to_cassette_file: str
-) -> None:
+def replace_unique_entries_in_cassette(entry_pairs: tuple[tuple[str, str]], path_to_cassette_file: str) -> None:
     """
     This function searches for the unique_entry in a target cassette file and
     replaces all occurrences of that address by a dummy value. The cassette file is
@@ -81,8 +71,8 @@ def replace_unique_entries_in_cassette(
     path_to_scrubbed_cassette_file = path_to_cassette_file + "_new"
 
     with (
-        open(path_to_cassette_file, "rt") as read_file,
-        open(path_to_scrubbed_cassette_file, "wt") as write_file,
+        open(path_to_cassette_file) as read_file,
+        open(path_to_scrubbed_cassette_file, "w") as write_file,
     ):
         for line in read_file.readlines():
             for unique_entry, dummy_value in entry_pairs:

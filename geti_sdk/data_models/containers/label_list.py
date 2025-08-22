@@ -13,7 +13,8 @@
 # and limitations under the License.
 
 from collections import UserList
-from typing import Any, Dict, List, Optional, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from geti_sdk.data_models.label import Label, ScoredLabel
 from geti_sdk.data_models.project import Project
@@ -25,13 +26,13 @@ class LabelList(UserList):
     A list containing labels for an Intel® Geti™ inference model.
     """
 
-    def __init__(self, data: Optional[Sequence[Label]] = None):
-        self.data: List[Label] = []
+    def __init__(self, data: Sequence[Label] | None = None):
+        self.data: list[Label] = []
         if data is not None:
             super().__init__(list(data))
 
-        self._id_mapping: Dict[str, Label] = {}
-        self._name_mapping: Dict[str, Label] = {}
+        self._id_mapping: dict[str, Label] = {}
+        self._name_mapping: dict[str, Label] = {}
         self._generate_indices()
         self._empty_label = next((x for x in self.data if x.is_empty), None)
 
@@ -49,7 +50,7 @@ class LabelList(UserList):
         self._id_mapping = {x.id: x for x in self.data}
         self._name_mapping = {x.name: x for x in self.data}
 
-    def get_by_id(self, id: str) -> Label:
+    def get_by_id(self, id: str) -> Label:  # noqa: A002
         """
         Return the Label object with ID corresponding to `id`
         """
@@ -68,12 +69,12 @@ class LabelList(UserList):
         return label
 
     @classmethod
-    def from_json(cls, input_json: List[Dict[str, Any]]) -> "LabelList":
+    def from_json(cls, input_json: list[dict[str, Any]]) -> "LabelList":
         """
         Create a LabelList object from json input. Input should be formatted as a list
         of dictionaries, each representing a single Label
         """
-        label_list: List[Label] = []
+        label_list: list[Label] = []
         for item in input_json:
             label_list.append(deserialize_dictionary(item, Label))
         return cls(label_list)
@@ -92,7 +93,7 @@ class LabelList(UserList):
             label = self.get_by_name(id_or_name)
         return ScoredLabel.from_label(label, probability=score)
 
-    def get_empty_label(self) -> Optional[Label]:
+    def get_empty_label(self) -> Label | None:
         """
         Return the empty label, if the LabelList contains one. If not, return None
         """
@@ -117,12 +118,12 @@ class LabelList(UserList):
         task = project.pipeline.trainable_tasks[task_index]
         return cls(task.labels)
 
-    def sort_by_ids(self, label_ids: List[str]):
+    def sort_by_ids(self, label_ids: list[str]):
         """
         Sort the labels in the LabelList by their ID, according to the order defined
         in `label_ids`
         """
-        new_data: List[Label] = []
+        new_data: list[Label] = []
         for label_id in label_ids:
             if label_id is None:
                 # Certain models have the label id as 'None' to signal an empty label

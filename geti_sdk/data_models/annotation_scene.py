@@ -14,8 +14,9 @@
 
 import copy
 import logging
+from collections.abc import Sequence
 from pprint import pformat
-from typing import Any, ClassVar, Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import Any, ClassVar
 
 import attr
 import cv2
@@ -67,18 +68,16 @@ class AnnotationScene:
         for this AnnotationScene for each task in the project pipeline.
     """
 
-    _identifier_fields: ClassVar[List[str]] = ["id", "modified"]
-    _GET_only_fields: ClassVar[List[str]] = ["annotation_state_per_task"]
+    _identifier_fields: ClassVar[list[str]] = ["id", "modified"]
+    _GET_only_fields: ClassVar[list[str]] = ["annotation_state_per_task"]
 
-    annotations: List[Annotation]
-    kind: str = attr.field(
-        converter=str_to_annotation_kind, default=AnnotationKind.ANNOTATION
-    )
-    media_identifier: Optional[Union[ImageIdentifier, VideoFrameIdentifier]] = None
-    id: Optional[str] = None
-    modified: Optional[str] = attr.field(converter=str_to_datetime, default=None)
-    labels_to_revisit_full_scene: Optional[List[str]] = None
-    annotation_state_per_task: Optional[List[TaskAnnotationState]] = None
+    annotations: list[Annotation]
+    kind: str = attr.field(converter=str_to_annotation_kind, default=AnnotationKind.ANNOTATION)
+    media_identifier: ImageIdentifier | VideoFrameIdentifier | None = None
+    id: str | None = None
+    modified: str | None = attr.field(converter=str_to_datetime, default=None)
+    labels_to_revisit_full_scene: list[str] | None = None
+    annotation_state_per_task: list[TaskAnnotationState] | None = None
 
     @property
     def has_data(self) -> bool:
@@ -115,7 +114,7 @@ class AnnotationScene:
         """
         self.annotations.append(annotation)
 
-    def get_by_shape(self, shape: Shape) -> Optional[Annotation]:
+    def get_by_shape(self, shape: Shape) -> Annotation | None:
         """
         Return the annotation belonging to a specific shape. Returns None if no
         Annotation is found for the shape.
@@ -124,15 +123,11 @@ class AnnotationScene:
         :return:
         """
         return next(
-            (
-                annotation
-                for annotation in self.annotations
-                if annotation.shape == shape
-            ),
+            (annotation for annotation in self.annotations if annotation.shape == shape),
             None,
         )
 
-    def extend(self, annotations: List[Annotation]):
+    def extend(self, annotations: list[Annotation]):
         """
         Extend the list of annotations in the AnnotationScene with additional entries
         in the `annotations` list.
@@ -147,14 +142,13 @@ class AnnotationScene:
             else:
                 self.annotations.append(annotation)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the AnnotationScene to a dictionary representation.
 
         :return: Dictionary holding the annotation scene data
         """
-        output_dict = attr.asdict(self, value_serializer=attr_value_serializer)
-        return output_dict
+        return attr.asdict(self, value_serializer=attr_value_serializer)
 
     @property
     def overview(self) -> str:
@@ -176,8 +170,8 @@ class AnnotationScene:
     def _add_shape_to_mask(
         shape: Shape,
         mask: np.ndarray,
-        labels: List[ScoredLabel],
-        color: Tuple[int, int, int],
+        labels: list[ScoredLabel],
+        color: tuple[int, int, int],
         line_thickness: int,
     ) -> np.ndarray:
         """
@@ -199,7 +193,7 @@ class AnnotationScene:
         :return: Mask with the shape drawn on it
         """
         image_height, image_width = mask.shape[0:-1]
-        if isinstance(shape, (Ellipse, Rectangle)):
+        if isinstance(shape, Ellipse | Rectangle):
             x, y = int(shape.x), int(shape.y)
             width, height = int(shape.width), int(shape.height)
             if isinstance(shape, Ellipse):
@@ -224,9 +218,7 @@ class AnnotationScene:
                     thickness=1,
                 )
             elif isinstance(shape, Rectangle):
-                if not shape.is_full_box(
-                    image_width=image_width, image_height=image_height
-                ):
+                if not shape.is_full_box(image_width=image_width, image_height=image_height):
                     cv2.rectangle(
                         mask,
                         pt1=(x, y),
@@ -255,9 +247,7 @@ class AnnotationScene:
                             color=label.color_tuple,
                             thickness=1,
                         )
-                        text_width, text_height = cv2.getTextSize(
-                            label.name, font, font_scale, line_thickness
-                        )[0]
+                        text_width, text_height = cv2.getTextSize(label.name, font, font_scale, line_thickness)[0]
                         origin[0] += text_width + 2
         elif isinstance(shape, Keypoint):
             x, y = int(shape.x), int(shape.y)
@@ -286,9 +276,7 @@ class AnnotationScene:
                 thickness=line_thickness,
                 contourIdx=-1,
             )
-            cv2.drawContours(
-                mask, contours=[contour], color=(1, 1, 1), thickness=1, contourIdx=-1
-            )
+            cv2.drawContours(mask, contours=[contour], color=(1, 1, 1), thickness=1, contourIdx=-1)
         return mask
 
     def as_mask(self, media_information: MediaInformation) -> np.ndarray:
@@ -317,7 +305,7 @@ class AnnotationScene:
             )
         return mask
 
-    def get_labels(self) -> List[Label]:
+    def get_labels(self) -> list[Label]:
         """
         Return a list of all labels present in the annotation scene.
 
@@ -328,20 +316,18 @@ class AnnotationScene:
             labels.update(annotation.labels)
         return list(labels)
 
-    def get_label_names(self) -> List[str]:
+    def get_label_names(self) -> list[str]:
         """
         Return a list with the unique label names in the annotation scene.
 
         :return: List of label names
         """
-        label_names: Set[str] = set()
+        label_names: set[str] = set()
         for label in self.get_labels():
             label_names.update([label.name])
         return list(label_names)
 
-    def apply_identifier(
-        self, media_identifier: Union[ImageIdentifier, VideoFrameIdentifier]
-    ) -> "AnnotationScene":
+    def apply_identifier(self, media_identifier: ImageIdentifier | VideoFrameIdentifier) -> "AnnotationScene":
         """
         Apply a `media_identifier` to the current AnnotationScene instance, such
         that the GETi cluster will recognize this AnnotationScene as belonging to the
@@ -363,9 +349,7 @@ class AnnotationScene:
             annotation.modified = ""
         return new_annotation
 
-    def map_labels(
-        self, labels: Sequence[Union[Label, ScoredLabel]]
-    ) -> "AnnotationScene":
+    def map_labels(self, labels: Sequence[Label | ScoredLabel]) -> "AnnotationScene":
         """
         Attempt to map the labels found in `labels` to those in the AnnotationScene
         instance. Labels are matched by name. This method will return a new
@@ -375,7 +359,7 @@ class AnnotationScene:
         :return: AnnotationScene with updated labels, corresponding to those found in
             the `project` (if matching labels were found)
         """
-        annotations: List[Annotation] = []
+        annotations: list[Annotation] = []
         for annotation in self.annotations:
             annotations.append(annotation.map_labels(labels=labels))
         return AnnotationScene(
@@ -384,9 +368,7 @@ class AnnotationScene:
             modified=self.modified,
         )
 
-    def filter_annotations(
-        self, labels: Sequence[Union[Label, ScoredLabel, str]]
-    ) -> "AnnotationScene":
+    def filter_annotations(self, labels: Sequence[Label | ScoredLabel | str]) -> "AnnotationScene":
         """
         Filter annotations in the scene to only include labels that are present in the
         provided list of labels.
@@ -394,10 +376,8 @@ class AnnotationScene:
         :param labels: List of labels or label names to filter the scene with
         :return: AnnotationScene with filtered annotations
         """
-        label_names_to_keep = {
-            label if type(label) is str else label.name for label in labels
-        }
-        filtered_annotations: List[Annotation] = []
+        label_names_to_keep = {label if type(label) is str else label.name for label in labels}
+        filtered_annotations: list[Annotation] = []
         for annotation in self.annotations:
             for label_name in annotation.label_names:
                 if label_name in label_names_to_keep:
@@ -409,7 +389,7 @@ class AnnotationScene:
             modified=self.modified,
         )
 
-    def resolve_label_names_and_colors(self, labels: List[Label]) -> None:
+    def resolve_label_names_and_colors(self, labels: list[Label]) -> None:
         """
         Add label names and colors to all annotations, based on a list of available
         labels.
@@ -424,7 +404,4 @@ class AnnotationScene:
                 label.name = name_map.get(label.id, None)
                 label.color = color_map.get(label.id, None)
                 if label.name is None:
-                    logging.warning(
-                        f"Unable to resolve label details for label with id "
-                        f"`{label.id}`"
-                    )
+                    logging.warning(f"Unable to resolve label details for label with id `{label.id}`")

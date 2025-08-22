@@ -15,18 +15,14 @@ import logging
 import os
 import time
 import warnings
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from glob import glob
 from typing import (
     Any,
     BinaryIO,
     ClassVar,
-    Dict,
     Generic,
-    List,
-    Optional,
-    Sequence,
-    Type,
 )
 
 from tqdm.auto import tqdm
@@ -63,10 +59,8 @@ class BaseMediaClient(Generic[MediaTypeVar]):
         self._workspace_id = workspace_id
         self._base_url = f"workspaces/{workspace_id}/projects/{project.id}/datasets"
         self._project = project
-        self.__media_type: Type[MediaTypeVar] = self.__get_media_type(self._MEDIA_TYPE)
-        self._dataset_client = DatasetClient(
-            session=session, project=project, workspace_id=workspace_id
-        )
+        self.__media_type: type[MediaTypeVar] = self.__get_media_type(self._MEDIA_TYPE)
+        self._dataset_client = DatasetClient(session=session, project=project, workspace_id=workspace_id)
 
     def base_url(self, dataset: Dataset) -> str:
         """
@@ -88,7 +82,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
         return f"{self._MEDIA_TYPE}s"
 
     @staticmethod
-    def __get_media_type(media_type: MediaType) -> Type[MediaTypeVar]:
+    def __get_media_type(media_type: MediaType) -> type[MediaTypeVar]:
         """
         Get the type of the media entities that are managed by this media client.
 
@@ -99,7 +93,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
         """
         return MEDIA_TYPE_MAPPING[media_type]
 
-    def _get_all(self, dataset: Optional[Dataset] = None) -> MediaList[MediaTypeVar]:
+    def _get_all(self, dataset: Dataset | None = None) -> MediaList[MediaTypeVar]:
         """
         Get a list holding all media entities of a certain type in the project.
 
@@ -124,20 +118,18 @@ class BaseMediaClient(Generic[MediaTypeVar]):
         response = self.session.get_rest_response(url=url, method="POST", data=data)
         total_number_of_media: int = response[f"total_matched_{self.plural_media_name}"]
 
-        raw_media_list: List[Dict[str, Any]] = []
+        raw_media_list: list[dict[str, Any]] = []
         while len(raw_media_list) < total_number_of_media:
             for media_item_dict in response["media"]:
                 raw_media_list.append(media_item_dict)
-            if "next_page" in response.keys():
+            if "next_page" in response:
                 response = self.session.get_rest_response(
                     url=response["next_page"],
                     method="POST",
                     data=data,
                     include_organization_id=False,
                 )
-        return MediaList.from_rest_list(
-            rest_input=raw_media_list, media_type=self.__media_type
-        )
+        return MediaList.from_rest_list(rest_input=raw_media_list, media_type=self.__media_type)
 
     def _delete_media(self, media_list: Sequence[MediaTypeVar]) -> bool:
         """
@@ -151,10 +143,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
             media_list = MediaList(media_list)
         if media_list.media_type == VideoFrame:
             raise ValueError("Unable to delete individual video frames.")
-        logging.info(
-            f"Deleting {len(media_list)} {self.plural_media_name} from project "
-            f"'{self._project.name}'..."
-        )
+        logging.info(f"Deleting {len(media_list)} {self.plural_media_name} from project '{self._project.name}'...")
         for media_item in media_list:
             try:
                 self.session.get_rest_response(url=media_item.base_url, method="DELETE")
@@ -171,9 +160,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
                     continue
         return True
 
-    def _upload_bytes(
-        self, buffer: BinaryIO, dataset: Optional[Dataset] = None
-    ) -> Dict[str, Any]:
+    def _upload_bytes(self, buffer: BinaryIO, dataset: Dataset | None = None) -> dict[str, Any]:
         """
         Upload a buffer representing a media file to the server.
 
@@ -185,17 +172,14 @@ class BaseMediaClient(Generic[MediaTypeVar]):
         """
         if dataset is None:
             dataset = self._project.training_dataset
-        response = self.session.get_rest_response(
+        return self.session.get_rest_response(
             url=f"{self.base_url(dataset)}",
             method="POST",
             contenttype="multipart",
             data={"file": buffer},
         )
-        return response
 
-    def _upload(
-        self, filepath: str, dataset: Optional[Dataset] = None
-    ) -> Dict[str, Any]:
+    def _upload(self, filepath: str, dataset: Dataset | None = None) -> dict[str, Any]:
         """
         Upload a media file to the server.
 
@@ -206,14 +190,13 @@ class BaseMediaClient(Generic[MediaTypeVar]):
             holds the details of the uploaded entity
         """
         with open(filepath, "rb") as f:
-            response = self._upload_bytes(f, dataset=dataset)
-        return response
+            return self._upload_bytes(f, dataset=dataset)
 
     def _upload_loop(
         self,
-        filepaths: List[str],
+        filepaths: list[str],
         skip_if_filename_exists: bool = False,
-        dataset: Optional[Dataset] = None,
+        dataset: Dataset | None = None,
         max_threads: int = 5,
     ) -> MediaList[MediaTypeVar]:
         """
@@ -242,9 +225,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
         uploaded_media: MediaList[MediaTypeVar] = MediaList[MediaTypeVar]([])
         upload_count = 0
         skip_count = 0
-        logging.info(
-            f"Starting {self._MEDIA_TYPE} upload to dataset '{dataset.name}'..."
-        )
+        logging.info(f"Starting {self._MEDIA_TYPE} upload to dataset '{dataset.name}'...")
         tqdm_prefix = f"Uploading {self.plural_media_name}"
 
         t_start = time.time()
@@ -259,16 +240,10 @@ class BaseMediaClient(Generic[MediaTypeVar]):
                 media_dict = self._upload(filepath=filepath, dataset=dataset)
             except GetiRequestException as error:
                 if error.status_code == 500:
-                    logging.error(
-                        f"Failed to upload {self._MEDIA_TYPE} '{name}'. Error message: "
-                        f"{error}"
-                    )
+                    logging.error(f"Failed to upload {self._MEDIA_TYPE} '{name}'. Error message: {error}")
                     return
-                else:
-                    raise error
-            media_item = MediaRESTConverter.from_dict(
-                input_dict=media_dict, media_type=self.__media_type
-            )
+                raise error
+            media_item = MediaRESTConverter.from_dict(input_dict=media_dict, media_type=self.__media_type)
             if isinstance(media_item, Video):
                 media_item._data = filepath
             # appends are thread safe
@@ -276,22 +251,18 @@ class BaseMediaClient(Generic[MediaTypeVar]):
             uploaded_media.append(media_item)
             upload_count += 1
 
-        with ThreadPoolExecutor(max_workers=max_threads) as executor:
-            with logging_redirect_tqdm(tqdm_class=tqdm):
-                list(
-                    tqdm(  # List unwraps the generator
-                        executor.map(upload_file, filepaths),
-                        total=len(filepaths),
-                        desc=tqdm_prefix,
-                    )
+        with ThreadPoolExecutor(max_workers=max_threads) as executor, logging_redirect_tqdm(tqdm_class=tqdm):
+            list(
+                tqdm(  # List unwraps the generator
+                    executor.map(upload_file, filepaths),
+                    total=len(filepaths),
+                    desc=tqdm_prefix,
                 )
+            )
 
         t_elapsed = time.time() - t_start
         if upload_count > 0:
-            msg = (
-                f"Upload complete. Uploaded {upload_count} new "
-                f"{self.plural_media_name} in {t_elapsed:.1f} seconds."
-            )
+            msg = f"Upload complete. Uploaded {upload_count} new {self.plural_media_name} in {t_elapsed:.1f} seconds."
         else:
             msg = f"No new {self.plural_media_name} were uploaded."
         if skip_count > 0:
@@ -308,7 +279,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
         path_to_folder: str,
         n_media: int = -1,
         skip_if_filename_exists: bool = False,
-        dataset: Optional[Dataset] = None,
+        dataset: Dataset | None = None,
         max_threads: int = 5,
     ) -> MediaList[MediaTypeVar]:
         """
@@ -328,7 +299,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
             to the project
         """
         media_formats = MEDIA_SUPPORTED_FORMAT_MAPPING[self._MEDIA_TYPE]
-        filepaths: List[str] = []
+        filepaths: list[str] = []
         for media_extension in media_formats:
             filepaths += glob(
                 os.path.join(path_to_folder, "**", f"*{media_extension}"),
@@ -356,7 +327,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
         path_to_folder: str,
         append_media_uid: bool = False,
         max_threads: int = 10,
-        dataset: Optional[Dataset] = None,
+        dataset: Dataset | None = None,
     ) -> None:
         """
         Download all media entities in a project to a folder on the local disk.
@@ -379,9 +350,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
                 return
             datasets = [dataset]
         for dataset in datasets:
-            path_to_media_folder = os.path.join(
-                path_to_folder, self.plural_media_name, dataset.name
-            )
+            path_to_media_folder = os.path.join(path_to_folder, self.plural_media_name, dataset.name)
             self._download_dataset(
                 dataset=dataset,
                 path_to_media_folder=path_to_media_folder,
@@ -431,9 +400,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
                 uid_string = f"_{media_item.id}"
             media_filepath = os.path.join(
                 path_to_media_folder,
-                os.path.basename(media_item.name)
-                + uid_string
-                + MEDIA_DOWNLOAD_FORMAT_MAPPING[self._MEDIA_TYPE],
+                os.path.basename(media_item.name) + uid_string + MEDIA_DOWNLOAD_FORMAT_MAPPING[self._MEDIA_TYPE],
             )
             if os.path.exists(media_filepath) and os.path.isfile(media_filepath):
                 existing_count += 1
@@ -452,34 +419,29 @@ class BaseMediaClient(Generic[MediaTypeVar]):
                         f"with ID '{media_item.id}'. Error message: {error}"
                     )
                     return
-                else:
-                    raise error
+                raise error
 
             with open(media_filepath, "wb") as f:
                 f.write(response.content)
-            if isinstance(media_item, (Image, VideoFrame)):
+            if isinstance(media_item, Image | VideoFrame):
                 # Set the numpy data attribute if the media item supports it
                 media_item._data = numpy_from_buffer(response.content)
             elif isinstance(media_item, Video):
                 media_item._data = media_filepath
             download_count += 1
 
-        with ThreadPoolExecutor(max_workers=max_threads) as executor:
-            with logging_redirect_tqdm(tqdm_class=tqdm):
-                list(
-                    tqdm(  # List unwraps the generator
-                        executor.map(download_file, media_list),
-                        total=len(media_list),
-                        desc=tqdm_prefix,
-                    )
+        with ThreadPoolExecutor(max_workers=max_threads) as executor, logging_redirect_tqdm(tqdm_class=tqdm):
+            list(
+                tqdm(  # List unwraps the generator
+                    executor.map(download_file, media_list),
+                    total=len(media_list),
+                    desc=tqdm_prefix,
                 )
+            )
 
         t_elapsed = time.time() - t_start
         if download_count > 0:
-            msg = (
-                f"Downloaded {download_count} {self.plural_media_name} in "
-                f"{t_elapsed:.1f} seconds."
-            )
+            msg = f"Downloaded {download_count} {self.plural_media_name} in {t_elapsed:.1f} seconds."
         else:
             msg = f"No {self.plural_media_name} were downloaded."
         if existing_count > 0:
