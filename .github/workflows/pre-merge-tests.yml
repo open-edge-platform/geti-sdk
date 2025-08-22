@@ -106,6 +106,7 @@ jobs:
           severity-level: "MEDIUM"
           confidence-level: "HIGH"
           fail-on-findings: true
+
   bandit-scan-pr:
     runs-on: ubuntu-latest
     permissions:
