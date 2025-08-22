@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import List, Optional
 
 import numpy as np
 
@@ -46,7 +45,7 @@ class ObjectCountTrigger(PostInferenceTrigger):
     def __init__(
         self,
         threshold: int = 1,
-        label_names: Optional[List[str]] = None,
+        label_names: list[str] | None = None,
         mode: str = "greater",
     ):
         super().__init__(threshold=threshold)
@@ -59,9 +58,7 @@ class ObjectCountTrigger(PostInferenceTrigger):
 
         lower_mode = mode.lower()
         if lower_mode not in SUPPORTED_MODES:
-            raise ValueError(
-                f"Invalid mode `{mode}`. Valid options are: {SUPPORTED_MODES}"
-            )
+            raise ValueError(f"Invalid mode `{mode}`. Valid options are: {SUPPORTED_MODES}")
         self.mode = lower_mode
         self._repr_info_ += f", mode={lower_mode}"
 
@@ -78,22 +75,18 @@ class ObjectCountTrigger(PostInferenceTrigger):
             n_objects = len(prediction.annotations)
             if n_objects != 1:
                 return n_objects
-            else:
-                # Prediction might be a 'No object', we have to check for this
-                predicted_labels = prediction.annotations[0].labels
-                if len(predicted_labels) > 1:
-                    return 1.0
-                else:
-                    if predicted_labels[0].name.lower() == "no object":
-                        return 0.0
-                    else:
-                        return 1.0
-        else:
-            object_count: int = 0
-            for predicted_object in prediction.annotations:
-                for label in predicted_object.labels:
-                    if label.name in self.label_names:
-                        object_count += 1
+            # Prediction might be a 'No object', we have to check for this
+            predicted_labels = prediction.annotations[0].labels
+            if len(predicted_labels) > 1:
+                return 1.0
+            if predicted_labels[0].name.lower() == "no object":
+                return 0.0
+            return 1.0
+        object_count: int = 0
+        for predicted_object in prediction.annotations:
+            for label in predicted_object.labels:
+                if label.name in self.label_names:
+                    object_count += 1
         return object_count
 
     def get_decision(self, score: float) -> bool:
@@ -107,7 +100,8 @@ class ObjectCountTrigger(PostInferenceTrigger):
         """
         if self.mode == "lower":
             return score < self.threshold
-        elif self.mode == "greater":
+        if self.mode == "greater":
             return score > self.threshold
-        elif self.mode == "equal":
+        if self.mode == "equal":
             return score == self.threshold
+        return None

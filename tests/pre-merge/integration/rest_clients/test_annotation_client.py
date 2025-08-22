@@ -2,7 +2,6 @@ import copy
 import json
 import os
 import time
-from typing import List
 
 import pytest
 
@@ -39,9 +38,7 @@ class TestAnnotationClient:
     ]
 
     @staticmethod
-    def ensure_test_project(
-        project_service: ProjectService, labels: List[str]
-    ) -> Project:
+    def ensure_test_project(project_service: ProjectService, labels: list[str]) -> Project:
         return project_service.get_or_create_project(
             project_name=f"{PROJECT_PREFIX}_annotation_client",
             project_type="classification",
@@ -52,7 +49,7 @@ class TestAnnotationClient:
     def test_upload_and_retrieve_annotations_for_video(
         self,
         fxt_project_service: ProjectService,
-        fxt_light_bulbs_labels: List[str],
+        fxt_light_bulbs_labels: list[str],
         fxt_video_path_1_light_bulbs: str,
         fxt_light_bulbs_annotation_path: str,
         fxt_test_mode: SdkTestMode,
@@ -69,18 +66,14 @@ class TestAnnotationClient:
         """
 
         # Create classification project
-        self.ensure_test_project(
-            project_service=fxt_project_service, labels=fxt_light_bulbs_labels
-        )
+        self.ensure_test_project(project_service=fxt_project_service, labels=fxt_light_bulbs_labels)
 
         # Upload video
         video_client = fxt_project_service.video_client
         video = video_client.upload_video(video=fxt_video_path_1_light_bulbs)
 
         # Upload annotations for video
-        annotation_reader = GetiAnnotationReader(
-            base_data_folder=fxt_light_bulbs_annotation_path
-        )
+        annotation_reader = GetiAnnotationReader(base_data_folder=fxt_light_bulbs_annotation_path)
 
         annotation_client = fxt_project_service.annotation_client
         annotation_client.annotation_reader = annotation_reader
@@ -94,9 +87,7 @@ class TestAnnotationClient:
             time.sleep(1)
 
         #  Fetch annotations from annotation client
-        annotation_scenes = annotation_client.get_latest_annotations_for_video(
-            video=video
-        )
+        annotation_scenes = annotation_client.get_latest_annotations_for_video(video=video)
 
         self.__assert_annotation_scenes_for_videos_light_bulbs_project(
             annotation_scenes=annotation_scenes,
@@ -107,10 +98,10 @@ class TestAnnotationClient:
 
     def __assert_annotation_scenes_for_videos_light_bulbs_project(
         self,
-        annotation_scenes: List[AnnotationScene],
+        annotation_scenes: list[AnnotationScene],
         video: Video,
-        project_labels: List[str],
-        expected_sorted_frame_indices: List[int],
+        project_labels: list[str],
+        expected_sorted_frame_indices: list[int],
     ):
         """
         Assertions for to check if the given annotation scenes match with video 1's annotation scenes for the light bulbs project
@@ -147,9 +138,7 @@ class TestAnnotationClient:
         assert len(annotation_scenes[0].annotations[0].labels) == 1
         assert annotation_scenes[0].annotations[0].labels[0].name in project_labels
 
-    def __get_sorted_frame_indices_from_annotation_scenes(
-        self, annotation_scenes: List[AnnotationScene]
-    ) -> List[int]:
+    def __get_sorted_frame_indices_from_annotation_scenes(self, annotation_scenes: list[AnnotationScene]) -> list[int]:
         frame_indices = []
 
         for annotation_scene in annotation_scenes:
@@ -162,7 +151,7 @@ class TestAnnotationClient:
     def test_upload_and_retrieve_annotations_for_videos(
         self,
         fxt_project_service: ProjectService,
-        fxt_light_bulbs_labels: List[str],
+        fxt_light_bulbs_labels: list[str],
         fxt_video_path_1_light_bulbs: str,
         fxt_video_path_2_light_bulbs: str,
         fxt_light_bulbs_annotation_path: str,
@@ -180,9 +169,7 @@ class TestAnnotationClient:
         6. Assert that the fetched annotations have the correct frame indices
         """
         #  Create classification project
-        self.ensure_test_project(
-            project_service=fxt_project_service, labels=fxt_light_bulbs_labels
-        )
+        self.ensure_test_project(project_service=fxt_project_service, labels=fxt_light_bulbs_labels)
 
         #  Upload video
         video_client = fxt_project_service.video_client
@@ -191,27 +178,19 @@ class TestAnnotationClient:
         video_2 = video_client.upload_video(video=fxt_video_path_2_light_bulbs)
 
         # Upload annotations for video
-        annotation_reader = GetiAnnotationReader(
-            base_data_folder=fxt_light_bulbs_annotation_path
-        )
+        annotation_reader = GetiAnnotationReader(base_data_folder=fxt_light_bulbs_annotation_path)
 
         annotation_client = fxt_project_service.annotation_client
         annotation_client.annotation_reader = annotation_reader
 
-        annotation_client.upload_annotations_for_videos(
-            videos=[video_1, video_2], max_threads=1
-        )
+        annotation_client.upload_annotations_for_videos(videos=[video_1, video_2], max_threads=1)
 
         if fxt_test_mode != SdkTestMode.OFFLINE:
             time.sleep(10)
 
         #  Fetch annotations from annotation client
-        annotation_scenes_for_video_1 = (
-            annotation_client.get_latest_annotations_for_video(video=video_1)
-        )
-        annotation_scenes_for_video_2 = (
-            annotation_client.get_latest_annotations_for_video(video=video_2)
-        )
+        annotation_scenes_for_video_1 = annotation_client.get_latest_annotations_for_video(video=video_1)
+        annotation_scenes_for_video_2 = annotation_client.get_latest_annotations_for_video(video=video_2)
 
         self.__assert_annotation_scenes_for_videos_light_bulbs_project(
             annotation_scenes=annotation_scenes_for_video_1,
@@ -230,7 +209,7 @@ class TestAnnotationClient:
     def test_upload_and_retrieve_annotations_for_images(
         self,
         fxt_project_service: ProjectService,
-        fxt_light_bulbs_labels: List[str],
+        fxt_light_bulbs_labels: list[str],
         fxt_image_path_1_light_bulbs: str,
         fxt_image_path_2_light_bulbs: str,
         fxt_light_bulbs_annotation_path: str,
@@ -247,9 +226,7 @@ class TestAnnotationClient:
         """
 
         # Create classification project
-        self.ensure_test_project(
-            project_service=fxt_project_service, labels=fxt_light_bulbs_labels
-        )
+        self.ensure_test_project(project_service=fxt_project_service, labels=fxt_light_bulbs_labels)
 
         image_client = fxt_project_service.image_client
 
@@ -258,16 +235,12 @@ class TestAnnotationClient:
         image_2 = image_client.upload_image(fxt_image_path_2_light_bulbs)
 
         # Upload annotations for image
-        annotation_reader = GetiAnnotationReader(
-            base_data_folder=fxt_light_bulbs_annotation_path
-        )
+        annotation_reader = GetiAnnotationReader(base_data_folder=fxt_light_bulbs_annotation_path)
 
         annotation_client = fxt_project_service.annotation_client
         annotation_client.annotation_reader = annotation_reader
 
-        annotation_client.upload_annotations_for_images(
-            images=[image_1, image_2], max_threads=1
-        )
+        annotation_client.upload_annotations_for_images(images=[image_1, image_2], max_threads=1)
 
         # Fetch annotations from annotation client
         annotation_for_image_1 = annotation_client.get_annotation(media_item=image_1)
@@ -307,40 +280,28 @@ class TestAnnotationClient:
         # Get annotation scene at frame 0
         annotation_client = fxt_project_service.annotation_client
         video_frame = VideoFrame.from_video(video=video, frame_index=0)
-        annotation_scene_frame_0 = annotation_client.get_annotation(
-            media_item=video_frame
-        )
+        annotation_scene_frame_0 = annotation_client.get_annotation(media_item=video_frame)
 
         # Download annotations to test directory
         temp_dir = fxt_temp_directory
         annotations_temp_dir = os.path.join(temp_dir, "annotations")
 
-        annotation_client.download_annotations_for_video(
-            video=video, path_to_folder=temp_dir, max_threads=1
-        )
+        annotation_client.download_annotations_for_video(video=video, path_to_folder=temp_dir, max_threads=1)
         # Get annotations for test directory
-        annotation_reader_from_temp_dir = GetiAnnotationReader(
-            base_data_folder=annotations_temp_dir
-        )
+        annotation_reader_from_temp_dir = GetiAnnotationReader(base_data_folder=annotations_temp_dir)
 
         file_names = annotation_reader_from_temp_dir.get_data_filenames()
 
         # Check that the length of the fetched annotations equal the length of the
         # annotations from dataset
-        assert len(file_names) == len(
-            TestAnnotationClient.sorted_frame_indices_video_1_light_bulbs_project
-        )
+        assert len(file_names) == len(TestAnnotationClient.sorted_frame_indices_video_1_light_bulbs_project)
 
         # Read and Retrieve first annotation from directory
-        with open(
-            os.path.join(temp_dir, "annotations", f"{video.name}_frame_0.json"), "r"
-        ) as file:
+        with open(os.path.join(temp_dir, "annotations", f"{video.name}_frame_0.json")) as file:
             json_annotation_scene = json.load(file)
 
         json_annotation_scene["media_identifier"] = video.identifier
-        downloaded_annotation_scene = AnnotationRESTConverter.from_dict(
-            annotation_scene=json_annotation_scene
-        )
+        downloaded_annotation_scene = AnnotationRESTConverter.from_dict(annotation_scene=json_annotation_scene)
 
         # De-identify both first and fetched annotation
         downloaded_annotation_scene.deidentify()

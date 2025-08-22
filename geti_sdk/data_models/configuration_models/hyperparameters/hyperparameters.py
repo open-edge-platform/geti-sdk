@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Union
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -64,7 +63,7 @@ class TrainingHyperParameters(BaseModel):
         title="Learning rate",
         description="Base learning rate for the optimizer",
     )
-    input_size_width: Union[int, None] = Field(
+    input_size_width: int | None = Field(
         default=None,
         gt=0,
         title="Input size width",
@@ -74,7 +73,7 @@ class TrainingHyperParameters(BaseModel):
         ),
         json_schema_extra={},
     )
-    input_size_height: Union[int, None] = Field(
+    input_size_height: int | None = Field(
         default=None,
         gt=0,
         title="Input size height",
@@ -84,7 +83,7 @@ class TrainingHyperParameters(BaseModel):
         ),
         json_schema_extra={},
     )
-    allowed_values_input_size: Union[list[int], None] = Field(
+    allowed_values_input_size: list[int] | None = Field(
         default=None,
         title="Supported input size dimensions",
         description=(
@@ -105,9 +104,7 @@ class TrainingHyperParameters(BaseModel):
         # For non-partial models, both width and height must be set
         class_name = type(self).__name__
         if "partial" not in class_name.lower() and (w is None or h is None):
-            raise ValueError(
-                "Both input_size_width and input_size_height must be specified"
-            )
+            raise ValueError("Both input_size_width and input_size_height must be specified")
 
         # Validate against allowed input sizes if available
         if allowed_values := self.allowed_values_input_size:
@@ -140,7 +137,7 @@ class TrainingHyperParameters(BaseModel):
 class EvaluationParameters(BaseModel):
     """Parameters for model evaluation."""
 
-    metric: Union[str, None] = Field(
+    metric: str | None = Field(
         default=None,
         title="Evaluation metric",
         description="Metric used to evaluate model performance",
@@ -155,7 +152,7 @@ class Hyperparameters(BaseModel):
         title="Dataset preparation",
         description="Parameters for preparing the dataset before training",
     )
-    training: Union[TrainingHyperParameters, None] = Field(
+    training: TrainingHyperParameters | None = Field(
         default=None,
         title="Training hyperparameters",
         description="Hyperparameters for the model training process",

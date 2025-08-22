@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
@@ -29,7 +29,7 @@ class TestPlatformAuthentication:
     def test_authentication_saas(
         self,
         fxt_mocked_server_credential_config,
-        fxt_server_token_config_parameters: Dict[str, Any],
+        fxt_server_token_config_parameters: dict[str, Any],
         mocker: MockerFixture,
     ):
         # Arrange
@@ -63,7 +63,7 @@ class TestPlatformAuthentication:
     def test_authentication_onprem(
         self,
         fxt_mocked_server_credential_config,
-        fxt_server_token_config_parameters: Dict[str, Any],
+        fxt_server_token_config_parameters: dict[str, Any],
         mocker: MockerFixture,
     ):
         # Arrange
@@ -84,9 +84,7 @@ class TestPlatformAuthentication:
             "geti_sdk.http_session.geti_session.GetiSession._get_organization_id",
             return_value="dummy_org_id",
         )
-        mocker.patch(
-            "geti_sdk.http_session.geti_session.GetiSession.authenticate_with_password"
-        )
+        mocker.patch("geti_sdk.http_session.geti_session.GetiSession.authenticate_with_password")
 
         # Act
         # Username and password will soon be deprecated for on-prem

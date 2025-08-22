@@ -26,9 +26,7 @@ class ActiveLearningClient:
         self.session = session
         self.project = project
         self.workspace_id = workspace_id
-        self.base_url = (
-            f"workspaces/{workspace_id}/projects/{project.id}/datasets/active"
-        )
+        self.base_url = f"workspaces/{workspace_id}/projects/{project.id}/datasets/active"
 
     def get_active_set(self) -> MediaList:
         """
@@ -42,9 +40,7 @@ class ActiveLearningClient:
         for media_item in result["active_set"]:
             media_item.pop("dataset_id")
             if media_item["type"] == "image":
-                active_set.append(
-                    MediaRESTConverter.from_dict(media_item, media_type=Image)
-                )
+                active_set.append(MediaRESTConverter.from_dict(media_item, media_type=Image))
             elif media_item["type"] == "video":
                 active_frames = media_item.pop("active_frames")
                 video = MediaRESTConverter.from_dict(media_item, media_type=Video)

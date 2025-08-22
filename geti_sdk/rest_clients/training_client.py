@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from geti_sdk.data_models import (
     Algorithm,
@@ -55,9 +55,7 @@ class TrainingClient:
 
         :return: ProjectStatus object reflecting the current project status
         """
-        response = self.session.get_rest_response(
-            url=f"{self.base_url}/status", method="GET"
-        )
+        response = self.session.get_rest_response(url=f"{self.base_url}/status", method="GET")
         return StatusRESTConverter.from_dict(response)
 
     def is_training(self) -> bool:
@@ -66,9 +64,7 @@ class TrainingClient:
         """
         return self.get_status().is_training
 
-    def get_jobs(
-        self, project_only: bool = True, running_only: bool = False
-    ) -> List[Job]:
+    def get_jobs(self, project_only: bool = True, running_only: bool = False) -> list[Job]:
         """
         Return a list of all jobs on the Intel® Geti™ server.
 
@@ -90,7 +86,7 @@ class TrainingClient:
             query += "&state=running"
         response_list_key = "jobs"
 
-        job_rest_list: List[dict] = []
+        job_rest_list: list[dict] = []
         while response := self.session.get_rest_response(
             url=f"workspaces/{self.workspace_id}/jobs{query}&skip={len(job_rest_list)}",
             method="GET",
@@ -106,7 +102,7 @@ class TrainingClient:
             if len(job_rest_list) >= total_job_count:
                 break
 
-        job_list: List[Job] = []
+        job_list: list[Job] = []
         for job_dict in job_rest_list:
             job = JobRESTConverter.from_dict(job_dict)
             if running_only and not job.is_running:
@@ -117,7 +113,7 @@ class TrainingClient:
 
         return job_list
 
-    def get_algorithms_for_task(self, task: Union[Task, int]) -> AlgorithmList:
+    def get_algorithms_for_task(self, task: Task | int) -> AlgorithmList:
         """
         Return a list of supported algorithms for a specific task.
 
@@ -137,12 +133,12 @@ class TrainingClient:
 
     def train_task(
         self,
-        task: Union[Task, int],
-        dataset: Optional[Dataset] = None,
-        algorithm: Optional[Algorithm] = None,
+        task: Task | int,
+        dataset: Dataset | None = None,
+        algorithm: Algorithm | None = None,
         train_from_scratch: bool = False,
-        hyper_parameters: Optional[TaskConfiguration] = None,
-        hpo_parameters: Optional[Dict[str, Any]] = None,
+        hyper_parameters: TaskConfiguration | None = None,
+        hpo_parameters: dict[str, Any] | None = None,
         await_running_jobs: bool = True,
         timeout: int = 3600,
     ) -> Job:
@@ -186,7 +182,7 @@ class TrainingClient:
             dataset = self.project.training_dataset
         if algorithm is None:
             algorithm = self.supported_algos.get_default_for_task_type(task.type)
-        request_data: Dict[str, Any] = {
+        request_data: dict[str, Any] = {
             "dataset_id": dataset.id,
             "task_id": task.id,
             "train_from_scratch": train_from_scratch,
@@ -194,14 +190,10 @@ class TrainingClient:
         }
         if hyper_parameters is not None:
             hypers = hyper_parameters.model_configurations
-            hypers_rest = (
-                ConfigurationRESTConverter.configurable_parameter_list_to_rest(hypers)
-            )
+            hypers_rest = ConfigurationRESTConverter.configurable_parameter_list_to_rest(hypers)
             request_data.update({"hyper_parameters": hypers_rest})
         if hpo_parameters is not None:
-            logging.warning(
-                "`hpo_parameters` have been deprecated and will be ignored."
-            )
+            logging.warning("`hpo_parameters` have been deprecated and will be ignored.")
 
         request_data.pop("dataset_id")
         data = request_data
@@ -224,17 +216,14 @@ class TrainingClient:
                     "set the `await_running_jobs` parameter in this "
                     "method to `True`."
                 )
-            else:
-                logging.info(
-                    log_warning_msg + f" Awaiting completion of currently running jobs "
-                    f"before a new train request can be submitted. "
-                    f"Maximum waiting time set to {timeout} seconds."
-                )
-                self.monitor_jobs(jobs=task_training_jobs, timeout=timeout)
+            logging.info(
+                log_warning_msg + f" Awaiting completion of currently running jobs "
+                f"before a new train request can be submitted. "
+                f"Maximum waiting time set to {timeout} seconds."
+            )
+            self.monitor_jobs(jobs=task_training_jobs, timeout=timeout)
 
-        response = self.session.get_rest_response(
-            url=f"{self.base_url}:train", method="POST", data=data
-        )
+        response = self.session.get_rest_response(url=f"{self.base_url}:train", method="POST", data=data)
 
         job_id = response["job_id"]
 
@@ -253,9 +242,7 @@ class TrainingClient:
         logging.info(f"Training job with id {job.id} submitted successfully.")
         return job
 
-    def monitor_jobs(
-        self, jobs: List[Job], timeout: int = 10000, interval: int = 15
-    ) -> List[Job]:
+    def monitor_jobs(self, jobs: list[Job], timeout: int = 10000, interval: int = 15) -> list[Job]:
         """
         Monitor and print the progress of all jobs in the list `jobs`. Execution is
         halted until all jobs have either finished, failed or were cancelled.
@@ -268,9 +255,7 @@ class TrainingClient:
             the server to update the status of the jobs. Defaults to 15 seconds
         :return: List of finished (or failed) jobs with their status updated
         """
-        return monitor_jobs(
-            session=self.session, jobs=jobs, timeout=timeout, interval=interval
-        )
+        return monitor_jobs(session=self.session, jobs=jobs, timeout=timeout, interval=interval)
 
     def monitor_job(self, job: Job, timeout: int = 10000, interval: int = 15) -> Job:
         """
@@ -285,11 +270,9 @@ class TrainingClient:
             the server to update the status of the jobs. Defaults to 15 seconds
         :return: job with it's status updated
         """
-        return monitor_job(
-            session=self.session, job=job, timeout=timeout, interval=interval
-        )
+        return monitor_job(session=self.session, job=job, timeout=timeout, interval=interval)
 
-    def get_jobs_for_task(self, task: Task, running_only: bool = True) -> List[Job]:
+    def get_jobs_for_task(self, task: Task, running_only: bool = True) -> list[Job]:
         """
         Return a list of current jobs for the task, if any
 
@@ -299,14 +282,12 @@ class TrainingClient:
         :return: List of Jobs running on the server for this particular task
         """
         project_jobs = self.get_jobs(project_only=True)
-        task_jobs: List[Job] = []
+        task_jobs: list[Job] = []
         for job in project_jobs:
-            if job.metadata is not None:
-                if job.metadata.task is not None:
-                    if job.metadata.task.task_id == task.id:
-                        if running_only:
-                            if job.state == JobState.RUNNING:
-                                task_jobs.append(job)
-                        else:
-                            task_jobs.append(job)
+            if job.metadata is not None and job.metadata.task is not None and job.metadata.task.task_id == task.id:
+                if running_only:
+                    if job.state == JobState.RUNNING:
+                        task_jobs.append(job)
+                else:
+                    task_jobs.append(job)
         return task_jobs

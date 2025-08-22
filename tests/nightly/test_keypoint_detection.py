@@ -14,7 +14,7 @@
 from test_nightly_project import TestNightlyProject
 
 from geti_sdk import Geti
-from tests.helpers import ProjectService, DatumAnnotationReader
+from tests.helpers import DatumAnnotationReader, ProjectService
 
 
 class TestKeypointDetection(TestNightlyProject):

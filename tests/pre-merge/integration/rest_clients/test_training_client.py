@@ -30,9 +30,7 @@ from tests.helpers.constants import PROJECT_PREFIX
 
 class TestTrainingClient:
     @staticmethod
-    def ensure_annotated_project(
-        project_service: ProjectService, annotation_reader: DatumAnnotationReader
-    ) -> Project:
+    def ensure_annotated_project(project_service: ProjectService, annotation_reader: DatumAnnotationReader) -> Project:
         return get_or_create_annotated_project_for_test_class(
             project_service=project_service,
             annotation_readers=[annotation_reader],
@@ -75,9 +73,7 @@ class TestTrainingClient:
             logging.info(f"Job '{job.name}' is still active, cancelling...")
             job.cancel(fxt_project_service.session)
         else:
-            logging.info(
-                f"Job '{job.name}' has already excited with status {job.state}."
-            )
+            logging.info(f"Job '{job.name}' has already excited with status {job.state}.")
         logging.info(job.state)
 
     @pytest.mark.vcr()
@@ -90,8 +86,6 @@ class TestTrainingClient:
         Test that fetching project status works
 
         """
-        self.ensure_annotated_project(
-            project_service=fxt_project_service, annotation_reader=fxt_annotation_reader
-        )
+        self.ensure_annotated_project(project_service=fxt_project_service, annotation_reader=fxt_annotation_reader)
         status = fxt_project_service.training_client.get_status()
         assert isinstance(status, ProjectStatus)

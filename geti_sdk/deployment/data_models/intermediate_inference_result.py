@@ -13,7 +13,6 @@
 # and limitations under the License.
 
 from multiprocessing import Queue, Value
-from typing import List, Optional
 
 import attr
 import numpy as np
@@ -31,7 +30,7 @@ class IntermediateInferenceResult:
 
     prediction: Prediction
     image: np.ndarray
-    rois: Optional[List[ROI]] = None
+    rois: list[ROI] | None = None
 
     def __attrs_post_init__(self):
         """
@@ -58,7 +57,7 @@ class IntermediateInferenceResult:
         """
         return self.image.shape[0]
 
-    def filter_rois(self, label: Optional[Label] = None) -> List[ROI]:
+    def filter_rois(self, label: Label | None = None) -> list[ROI]:
         """
         Filter the ROIs for the inference results based on an input label.
 
@@ -70,7 +69,7 @@ class IntermediateInferenceResult:
             return self.rois
         return [roi for roi in self.rois if label.name in roi.label_names]
 
-    def generate_views(self, rois: Optional[List[ROI]] = None) -> List[np.ndarray]:
+    def generate_views(self, rois: list[ROI] | None = None) -> list[np.ndarray]:
         """
         Generate a list of image views holding the pixel data for the ROIs produced
         by the last local-label task in the pipeline.
@@ -88,7 +87,7 @@ class IntermediateInferenceResult:
         else:
             rois_to_get = [roi.shape for roi in self.rois]
 
-        views: List[np.ndarray] = []
+        views: list[np.ndarray] = []
         for roi in rois_to_get:
             y0, y1 = int(roi.y), int(roi.y + roi.height)
             x0, x1 = int(roi.x), int(roi.x + roi.width)
@@ -97,10 +96,7 @@ class IntermediateInferenceResult:
             elif len(self.image.shape) == 2:
                 views.append(self.image[y0:y1, x0:x1])
             else:
-                raise ValueError(
-                    f"Unexpected image shape: {self.image.shape}. Unable to generate "
-                    f"image views"
-                )
+                raise ValueError(f"Unexpected image shape: {self.image.shape}. Unable to generate image views")
         return views
 
     def append_annotation(self, annotation: Annotation, roi: ROI):
@@ -115,11 +111,9 @@ class IntermediateInferenceResult:
         :param roi: ROI in which the prediction was made
         """
         absolute_shape = annotation.shape.to_absolute_coordinates(parent_roi=roi.shape)
-        self.prediction.append(
-            Annotation(labels=annotation.labels, shape=absolute_shape)
-        )
+        self.prediction.append(Annotation(labels=annotation.labels, shape=absolute_shape))
 
-    def extend_annotations(self, annotations: List[Annotation], roi: ROI):
+    def extend_annotations(self, annotations: list[Annotation], roi: ROI):
         """
         Extend the list of annotations for the current prediction results, taking
         into account the ROI for which the annotation was predicted.
@@ -142,11 +136,11 @@ class IntermediateInferenceResult:
         """
         self._infer_queue.put(roi)
 
-    def get_infer_queue(self) -> List[ROI]:
+    def get_infer_queue(self) -> list[ROI]:
         """
         Return the full infer queue
         """
-        rois: List[ROI] = []
+        rois: list[ROI] = []
         while not self._infer_queue.empty():
             rois.append(self._infer_queue.get())
         return rois

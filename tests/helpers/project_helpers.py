@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import logging
-from typing import Dict, List, Optional, Sequence
+from collections.abc import Sequence
 
-from numpy.random import random
+import numpy as np
 
 from geti_sdk import Geti
 from geti_sdk.annotation_readers import AnnotationReader
@@ -31,8 +31,8 @@ def get_or_create_annotated_project_for_test_class(
     project_name: str,
     project_type: str = "detection",
     enable_auto_train: bool = False,
-    annotation_requirements_first_training: Optional[int] = None,
-    keypoint_structure: Optional[Dict[str, list]] = None,
+    annotation_requirements_first_training: int | None = None,
+    keypoint_structure: dict[str, list] | None = None,
 ):
     """
     This function returns an annotated project with `project_name` of type
@@ -57,9 +57,8 @@ def get_or_create_annotated_project_for_test_class(
         reader = annotation_readers[0]
         joints = reader.get_keypoint_joints()
         edges = [{"nodes": [keypoints[a - 1], keypoints[b - 1]]} for a, b in joints]
-        positions = [
-            {"label": keypoint, "x": random(), "y": random()} for keypoint in keypoints
-        ]
+        rng = np.random.default_rng(seed=42)
+        positions = [{"label": keypoint, "x": rng.random(), "y": rng.random()} for keypoint in keypoints]
         keypoint_structure = {"edges": edges, "positions": positions}
 
     project = project_service.get_or_create_project(
@@ -75,14 +74,12 @@ def get_or_create_annotated_project_for_test_class(
                 required_images=annotation_requirements_first_training
             )
 
-        project_service.add_annotated_media(
-            annotation_readers=annotation_readers, n_images=-1
-        )
+        project_service.add_annotated_media(annotation_readers=annotation_readers, n_images=-1)
         project_service.set_auto_train(enable_auto_train)
     return project
 
 
-def remove_all_test_projects(geti: Geti) -> List[str]:
+def remove_all_test_projects(geti: Geti) -> list[str]:
     """
     Removes all projects created in the SDK tests from the server.
 
@@ -93,7 +90,7 @@ def remove_all_test_projects(geti: Geti) -> List[str]:
         projects created by the SDK test suite
     """
     project_client = ProjectClient(session=geti.session, workspace_id=geti.workspace_id)
-    projects_removed: List[str] = []
+    projects_removed: list[str] = []
     for project in project_client.get_all_projects(get_project_details=False):
         if project.name.startswith(PROJECT_PREFIX):
             force_delete_project(project, project_client)

@@ -15,7 +15,6 @@
 import logging
 import os
 import tarfile
-from typing import Optional
 
 from geti_sdk.demos.constants import DEFAULT_DATA_PATH
 
@@ -66,12 +65,8 @@ def get_mvtec_dataset_from_path(dataset_path: str = "data") -> str:
     dataset_name = "transistor"
     os.makedirs(dataset_path, exist_ok=True, mode=0o770)
     transistor_dataset_path = os.path.join(dataset_path, dataset_name)
-    if os.path.isdir(transistor_dataset_path) and is_ad_dataset(
-        transistor_dataset_path
-    ):
-        logging.info(
-            f"MVTEC '{dataset_name}' dataset found at path {transistor_dataset_path}"
-        )
+    if os.path.isdir(transistor_dataset_path) and is_ad_dataset(transistor_dataset_path):
+        logging.info(f"MVTEC '{dataset_name}' dataset found at path {transistor_dataset_path}")
         return transistor_dataset_path
 
     logging.info(
@@ -99,9 +94,7 @@ def get_mvtec_dataset_from_path(dataset_path: str = "data") -> str:
     archive_name = f"{dataset_name}.tar.xz"
     url = f"https://www.mydrive.ch/shares/38536/3830184030e49fe74747669442f0f282/download/420938166-1629953277/{archive_name}"
     # mydrive.ch uses Let's Encrypt certs, verify_cert is set to True
-    download_file(
-        url, target_folder=dataset_path, check_valid_archive=False, verify_cert=True
-    )
+    download_file(url, target_folder=dataset_path, check_valid_archive=False, verify_cert=True)
     archive_path = os.path.join(dataset_path, archive_name)
     validate_hash(
         file_path=archive_path,
@@ -129,7 +122,7 @@ def get_mvtec_dataset_from_path(dataset_path: str = "data") -> str:
     return transistor_dataset_path
 
 
-def get_mvtec_dataset(dataset_path: Optional[str] = None) -> str:
+def get_mvtec_dataset(dataset_path: str | None = None) -> str:
     """
     Check if the MVTEC 'transistor' dataset is present at the specified path. If not,
     this method will attempt to download the dataset to the path specified.

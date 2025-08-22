@@ -33,9 +33,7 @@ class TestShapes:
         expected_area = fxt_rectangle.width * fxt_rectangle.height
 
         # Act
-        rect_in_roi = fxt_rectangle.to_absolute_coordinates(
-            parent_roi=fxt_rectangle_roi
-        )
+        rect_in_roi = fxt_rectangle.to_absolute_coordinates(parent_roi=fxt_rectangle_roi)
         area = fxt_rectangle.area
 
         # Assert
@@ -61,9 +59,7 @@ class TestShapes:
         expected_ymax = fxt_ellipse.y + fxt_ellipse.height
 
         # Act
-        ellipse_in_roi = fxt_ellipse.to_absolute_coordinates(
-            parent_roi=fxt_rectangle_roi
-        )
+        ellipse_in_roi = fxt_ellipse.to_absolute_coordinates(parent_roi=fxt_rectangle_roi)
         area = fxt_ellipse.area
         roi = fxt_ellipse.to_roi()
 
@@ -79,17 +75,13 @@ class TestShapes:
         # Arrange
         x_roi, width_roi = 10, 40
         y_roi, height_roi = 20, 30
-        expected_triangle_in_roi = Polygon(
-            points=[Point(x=110, y=220), Point(x=130, y=250), Point(x=150, y=220)]
-        )
+        expected_triangle_in_roi = Polygon(points=[Point(x=110, y=220), Point(x=130, y=250), Point(x=150, y=220)])
         expected_area = 0.5 * 30 * 40
 
         # Act
         area = fxt_triangle.area
         roi = fxt_triangle.to_roi()
-        triangle_in_roi = fxt_triangle.to_absolute_coordinates(
-            parent_roi=fxt_rectangle_roi
-        )
+        triangle_in_roi = fxt_triangle.to_absolute_coordinates(parent_roi=fxt_rectangle_roi)
         rotated_rect = fxt_triangle.fit_rotated_rectangle()
 
         # Assert
@@ -115,13 +107,9 @@ class TestShapes:
         y_in_roi = fxt_rectangle_roi.y + fxt_rotated_rectangle.y
 
         # Act
-        rotated_rect = RotatedRectangle.from_polygon(
-            polygon=fxt_rotated_rectangle_as_polygon
-        )
+        rotated_rect = RotatedRectangle.from_polygon(polygon=fxt_rotated_rectangle_as_polygon)
         roi = fxt_rotated_rectangle.to_roi()
-        rotated_rect_in_roi = fxt_rotated_rectangle.to_absolute_coordinates(
-            parent_roi=fxt_rectangle_roi
-        )
+        rotated_rect_in_roi = fxt_rotated_rectangle.to_absolute_coordinates(parent_roi=fxt_rectangle_roi)
         rotated_rect_polygon = fxt_rotated_rectangle.to_polygon()
 
         # Assert
@@ -142,9 +130,7 @@ class TestShapes:
         expected_is_visible = True
 
         # Act
-        keypoint_in_roi = fxt_keypoint.to_absolute_coordinates(
-            parent_roi=fxt_rectangle_roi
-        )
+        keypoint_in_roi = fxt_keypoint.to_absolute_coordinates(parent_roi=fxt_rectangle_roi)
 
         # Assert
         assert keypoint_in_roi.x == expected_x

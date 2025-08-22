@@ -13,7 +13,7 @@
 # and limitations under the License.
 
 import copy
-from typing import Any, Dict, List, Union
+from typing import Any
 
 import attr
 
@@ -50,14 +50,14 @@ class ConfigurationRESTConverter:
     """
 
     @staticmethod
-    def entity_identifier_from_dict(input_dict: Dict[str, Any]) -> EntityIdentifier:
+    def entity_identifier_from_dict(input_dict: dict[str, Any]) -> EntityIdentifier:
         """
         Create an EntityIdentifier object from an input dictionary.
 
         :param input_dict: Dictionary representing an EntityIdentifier in Intel® Geti™
         :return: EntityIdentifier object corresponding to the data in `input_dict`
         """
-        identifier_type = input_dict.get("type", None)
+        identifier_type = input_dict.get("type")
         if isinstance(identifier_type, str):
             identifier_type = ConfigurationEntityType(identifier_type)
         if identifier_type == ConfigurationEntityType.HYPER_PARAMETER_GROUP:
@@ -66,13 +66,12 @@ class ConfigurationRESTConverter:
             identifier_class = ComponentEntityIdentifier
         else:
             raise ValueError(
-                f"Invalid entity identifier type found: Entity identifier of type "
-                f"{identifier_type} is not supported."
+                f"Invalid entity identifier type found: Entity identifier of type {identifier_type} is not supported."
             )
         return identifier_class(**input_dict)
 
     @staticmethod
-    def from_dict(input_dict: Dict[str, Any]) -> ConfigurableParameters:
+    def from_dict(input_dict: dict[str, Any]) -> ConfigurableParameters:
         """
         Create a ConfigurableParameters object holding the configurable parameters
         for an entity in the Intel® Geti™ platform, from a dictionary returned by the
@@ -85,17 +84,15 @@ class ConfigurationRESTConverter:
         entity_identifier = input_copy.pop("entity_identifier")
 
         if not isinstance(entity_identifier, EntityIdentifier):
-            entity_identifier = ConfigurationRESTConverter.entity_identifier_from_dict(
-                input_dict=entity_identifier
-            )
+            entity_identifier = ConfigurationRESTConverter.entity_identifier_from_dict(input_dict=entity_identifier)
 
         input_copy["entity_identifier"] = entity_identifier
         return ConfigurableParameters.from_dict(input_dict=input_copy)
 
     @staticmethod
     def _rest_components_to_objects(
-        input_list: List[Dict[str, Any]],
-    ) -> List[ConfigurableParameters]:
+        input_list: list[dict[str, Any]],
+    ) -> list[ConfigurableParameters]:
         """
         Create a list of configurable parameters from a list of dictionaries received
         by the Intel® Geti™ /configuration endpoints.
@@ -103,12 +100,10 @@ class ConfigurationRESTConverter:
         :param input_list: List of dictionaries to convert
         :return: List of ConfigurableParameters instances
         """
-        component_objects: List[ConfigurableParameters] = []
+        component_objects: list[ConfigurableParameters] = []
         for component in input_list:
             if not isinstance(component, ConfigurableParameters):
-                component_objects.append(
-                    ConfigurationRESTConverter.from_dict(component)
-                )
+                component_objects.append(ConfigurationRESTConverter.from_dict(component))
             else:
                 component_objects.append(component)
         return component_objects
@@ -142,7 +137,7 @@ class ConfigurationRESTConverter:
                 ConfigurationRESTConverter._remove_non_minimal_fields(group)
 
     @staticmethod
-    def task_configuration_from_dict(input_dict: Dict[str, Any]) -> TaskConfiguration:
+    def task_configuration_from_dict(input_dict: dict[str, Any]) -> TaskConfiguration:
         """
         Create a TaskConfiguration object holding all configurable parameters for a
         task in an Intel�� Geti™ project, from a dictionary returned by the
@@ -154,17 +149,15 @@ class ConfigurationRESTConverter:
         """
         input_copy = copy.deepcopy(input_dict)
         components = input_copy.pop("components")
-        component_objects = ConfigurationRESTConverter._rest_components_to_objects(
-            components
-        )
+        component_objects = ConfigurationRESTConverter._rest_components_to_objects(components)
         input_copy.update({"components": component_objects})
         return TaskConfiguration(**input_copy)
 
     @staticmethod
     def configuration_to_minimal_dict(
-        configuration: Union[TaskConfiguration, GlobalConfiguration, FullConfiguration],
+        configuration: TaskConfiguration | GlobalConfiguration | FullConfiguration,
         deidentify: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Convert a TaskConfiguration, GlobalConfiguration or FullConfiguration into a
         dictionary, removing fields that are None or are only relevant to the
@@ -193,7 +186,7 @@ class ConfigurationRESTConverter:
 
     @staticmethod
     def global_configuration_from_rest(
-        input_: Union[List[Dict[str, Any]], Dict[str, Any]],
+        input_: list[dict[str, Any]] | dict[str, Any],
     ) -> GlobalConfiguration:
         """
         Create a GlobalConfiguration object holding the configurable parameters
@@ -204,21 +197,15 @@ class ConfigurationRESTConverter:
         :return:
         """
         input_copy = copy.deepcopy(input_)
-        if isinstance(input_copy, list):
-            input_list = input_copy
-        else:
-            input_list = input_copy.pop("items")
-        component_objects = ConfigurationRESTConverter._rest_components_to_objects(
-            input_list
-        )
+        input_list = input_copy if isinstance(input_copy, list) else input_copy.pop("items")
+        component_objects = ConfigurationRESTConverter._rest_components_to_objects(input_list)
         if isinstance(input_copy, list):
             return GlobalConfiguration(components=component_objects)
-        else:
-            input_copy.update({"components": component_objects})
-            return GlobalConfiguration(**input_copy)
+        input_copy.update({"components": component_objects})
+        return GlobalConfiguration(**input_copy)
 
     @staticmethod
-    def full_configuration_from_rest(input_dict: Dict[str, Any]) -> FullConfiguration:
+    def full_configuration_from_rest(input_dict: dict[str, Any]) -> FullConfiguration:
         """
         Convert a dictionary holding the full configuration for an Intel® Geti™
         project, as returned by the /configuration endpoint, to an object
@@ -230,19 +217,16 @@ class ConfigurationRESTConverter:
         """
         global_dict = input_dict.pop("global")
         task_chain_list = input_dict.pop("task_chain")
-        global_config = ConfigurationRESTConverter.global_configuration_from_rest(
-            global_dict
-        )
+        global_config = ConfigurationRESTConverter.global_configuration_from_rest(global_dict)
         task_chain_config = [
-            ConfigurationRESTConverter.task_configuration_from_dict(task_config)
-            for task_config in task_chain_list
+            ConfigurationRESTConverter.task_configuration_from_dict(task_config) for task_config in task_chain_list
         ]
         return FullConfiguration(global_=global_config, task_chain=task_chain_config)
 
     @staticmethod
     def configurable_parameter_list_to_rest(
-        configurable_parameter_list: List[ConfigurableParameters],
-    ) -> Dict[str, List[Dict[str, Any]]]:
+        configurable_parameter_list: list[ConfigurableParameters],
+    ) -> dict[str, list[dict[str, Any]]]:
         """
         Convert a list of model hyper parameters to a dictionary that can be sent to
         the /configuration POST endpoints.
@@ -252,7 +236,7 @@ class ConfigurationRESTConverter:
             - 'components': list of dictionaries representing configurable parameters,
                             that are conforming to the /configuration REST endpoints
         """
-        rest_parameters: List[Dict[str, Any]] = []
+        rest_parameters: list[dict[str, Any]] = []
         for parameter_set in configurable_parameter_list:
             parameter_copy = copy.deepcopy(parameter_set)
             ConfigurationRESTConverter._remove_non_minimal_fields(parameter_copy)

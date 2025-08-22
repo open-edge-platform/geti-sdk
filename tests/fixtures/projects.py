@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Callable, List
+from collections.abc import Callable
 
 import pytest
 from vcr import VCR
@@ -38,9 +38,7 @@ def fxt_project_client_no_vcr(fxt_geti_no_vcr: Geti) -> ProjectClient:
     """
     This fixture returns a ProjectClient instance corresponding to the Geti instance
     """
-    yield ProjectClient(
-        session=fxt_geti_no_vcr.session, workspace_id=fxt_geti_no_vcr.workspace_id
-    )
+    yield ProjectClient(session=fxt_geti_no_vcr.session, workspace_id=fxt_geti_no_vcr.workspace_id)
 
 
 @pytest.fixture(scope="class")
@@ -58,9 +56,7 @@ def fxt_project_service(
 
     The project is deleted once the test function finishes.
     """
-    project_service = ProjectService(
-        geti=fxt_geti, vcr=fxt_vcr, is_offline=(fxt_test_mode == SdkTestMode.OFFLINE)
-    )
+    project_service = ProjectService(geti=fxt_geti, vcr=fxt_vcr, is_offline=(fxt_test_mode == SdkTestMode.OFFLINE))
     yield project_service
     project_service.delete_project()
 
@@ -83,9 +79,7 @@ def fxt_project_service_2(
     NOTE: This fixture is the same as `fxt_project_service`, but was added to make
     it possible to persist two projects for the scope of one test class
     """
-    project_service = ProjectService(
-        geti=fxt_geti, vcr=fxt_vcr, is_offline=(fxt_test_mode == SdkTestMode.OFFLINE)
-    )
+    project_service = ProjectService(geti=fxt_geti, vcr=fxt_vcr, is_offline=(fxt_test_mode == SdkTestMode.OFFLINE))
     yield project_service
     project_service.delete_project()
 
@@ -112,12 +106,9 @@ def fxt_project_finalizer(fxt_project_client: ProjectClient) -> Callable[[str], 
 
 
 @pytest.fixture(scope="function")
-def fxt_existing_projects(
-    fxt_vcr: VCR, fxt_project_client: ProjectClient
-) -> List[Project]:
+def fxt_existing_projects(fxt_vcr: VCR, fxt_project_client: ProjectClient) -> list[Project]:
     """
     This fixture returns a list of the projects that currently exist on the Geti server
     """
     with fxt_vcr.use_cassette(f"existing_projects.{CASSETTE_EXTENSION}"):
-        projects = fxt_project_client.get_all_projects()
-    return projects
+        return fxt_project_client.get_all_projects()

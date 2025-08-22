@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import Dict
 
 import cv2
 import numpy as np
@@ -46,7 +45,7 @@ def fxt_video_identifier() -> VideoIdentifier:
 
 
 @pytest.fixture()
-def fxt_image_identifier_rest() -> Dict[str, str]:
+def fxt_image_identifier_rest() -> dict[str, str]:
     yield {"image_id": "image_0", "type": "image"}
 
 

@@ -68,9 +68,7 @@ class TaskConfig(BaseModel):
     @model_validator(mode="after")
     def task_id_not_empty(self) -> "TaskConfig":
         if not self.task_id:
-            raise ValueError(
-                "Task ID must be provided as part of the task configuration and cannot be empty."
-            )
+            raise ValueError("Task ID must be provided as part of the task configuration and cannot be empty.")
         return self
 
 

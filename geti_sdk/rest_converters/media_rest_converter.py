@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, Dict, Type
+from typing import Any
 
 from geti_sdk.data_models.containers.media_list import MediaTypeVar
 from geti_sdk.utils import deserialize_dictionary
@@ -25,9 +25,7 @@ class MediaRESTConverter:
     """
 
     @staticmethod
-    def from_dict(
-        input_dict: Dict[str, Any], media_type: Type[MediaTypeVar]
-    ) -> MediaTypeVar:
+    def from_dict(input_dict: dict[str, Any], media_type: type[MediaTypeVar]) -> MediaTypeVar:
         """
         Create an instance of type `media_type` representing a media entity on the
         Intel® Geti™ server from a dictionary returned by the GETi /media REST

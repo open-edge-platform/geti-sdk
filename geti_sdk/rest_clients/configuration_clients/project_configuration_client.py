@@ -36,9 +36,7 @@ class ProjectConfigurationClient:
         project_id = project.id
         self.project = project
         self.workspace_id = workspace_id
-        self.base_url = (
-            f"workspaces/{workspace_id}/projects/{project_id}/project_configuration"
-        )
+        self.base_url = f"workspaces/{workspace_id}/projects/{project_id}/project_configuration"
 
     def get_configuration(self) -> ProjectConfiguration:
         """
@@ -50,9 +48,7 @@ class ProjectConfigurationClient:
         :return: ProjectConfiguration object containing all project-level settings
         """
         config_rest = self.session.get_rest_response(url=self.base_url, method="GET")
-        return ProjectConfigurationRESTConverter.project_configuration_from_rest(
-            config_rest
-        )
+        return ProjectConfigurationRESTConverter.project_configuration_from_rest(config_rest)
 
     def set_project_auto_train(self, auto_train: bool = False) -> None:
         """
@@ -82,9 +78,5 @@ class ProjectConfigurationClient:
                             settings to apply to the project
         :return: None
         """
-        config_rest = ProjectConfigurationRESTConverter.project_configuration_to_rest(
-            configuration
-        )
-        self.session.get_rest_response(
-            url=self.base_url, method="PATCH", data=config_rest
-        )
+        config_rest = ProjectConfigurationRESTConverter.project_configuration_to_rest(configuration)
+        self.session.get_rest_response(url=self.base_url, method="PATCH", data=config_rest)

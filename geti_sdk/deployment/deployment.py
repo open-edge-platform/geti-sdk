@@ -16,8 +16,8 @@ import json
 import logging
 import os
 import shutil
-from collections.abc import Sequence
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable, Sequence
+from typing import Any
 
 import attr
 import numpy as np
@@ -46,7 +46,7 @@ class Deployment:
     """
 
     project: Project
-    models: List[DeployedModel]
+    models: list[DeployedModel]
 
     def __attrs_post_init__(self):
         """
@@ -54,11 +54,11 @@ class Deployment:
         """
         self._is_single_task: bool = len(self.project.get_trainable_tasks()) == 1
         self._are_models_loaded: bool = False
-        self._inference_converters: Dict[str, Any] = {}
-        self._path_to_temp_resources: Optional[str] = None
+        self._inference_converters: dict[str, Any] = {}
+        self._path_to_temp_resources: str | None = None
         self._requires_resource_cleanup: bool = False
-        self._post_inference_hooks: List[PostInferenceHookInterface] = []
-        self._empty_label: Optional[Label] = None
+        self._post_inference_hooks: list[PostInferenceHookInterface] = []
+        self._empty_label: Label | None = None
         self._asynchronous_mode: bool = False
         self._async_callback_defined: bool = False
 
@@ -114,15 +114,14 @@ class Deployment:
                     "Please use the `set_asynchronous_callback` method to switch a "
                     "deployment to asynchronous inference mode."
                 )
-            else:
-                logging.debug("Deployment is already in asynchronous mode.")
+            logging.debug("Deployment is already in asynchronous mode.")
         else:
             self._async_callback_defined = False
             for model in self.models:
                 model.asynchronous_mode = False
             logging.info("Asynchronous inference mode disabled. All callbacks removed.")
 
-    def save(self, path_to_folder: Union[str, os.PathLike]) -> bool:
+    def save(self, path_to_folder: str | os.PathLike) -> bool:
         """
         Save the Deployment instance to a folder on local disk.
 
@@ -140,9 +139,7 @@ class Deployment:
             os.makedirs(model_dir, exist_ok=True, mode=0o770)
             success = model.save(model_dir)
             if not success:
-                logging.exception(
-                    f"Saving model '{model.name}' failed. Unable to save deployment."
-                )
+                logging.exception(f"Saving model '{model.name}' failed. Unable to save deployment.")
                 return False
 
         # Save project data
@@ -153,7 +150,7 @@ class Deployment:
         # Save post inference hooks, if any
         if self.post_inference_hooks:
             hook_config_file = os.path.join(deployment_folder, "hook_config.json")
-            hook_configs: List[Dict[str, Any]] = []
+            hook_configs: list[dict[str, Any]] = []
             for hook in self.post_inference_hooks:
                 hook_configs.append(hook.to_dict())
             with open(hook_config_file, "w") as file:
@@ -167,7 +164,7 @@ class Deployment:
         return True
 
     @classmethod
-    def from_folder(cls, path_to_folder: Union[str, os.PathLike]) -> "Deployment":
+    def from_folder(cls, path_to_folder: str | os.PathLike) -> "Deployment":
         """
         Create a Deployment instance from a specified `path_to_folder`.
 
@@ -182,29 +179,23 @@ class Deployment:
                 deployment_folder = os.path.join(path_to_folder, "deployment")
             else:
                 raise ValueError(
-                    f"No `deployment` folder found in the directory at "
-                    f"`{path_to_folder}`. Unable to load Deployment."
+                    f"No `deployment` folder found in the directory at `{path_to_folder}`. Unable to load Deployment."
                 )
         project_filepath = os.path.join(deployment_folder, "project.json")
-        with open(project_filepath, "r") as project_file:
+        with open(project_filepath) as project_file:
             project_dict = json.load(project_file)
         project = ProjectRESTConverter.from_dict(project_dict)
         task_folder_names = [task.title for task in project.get_trainable_tasks()]
-        models: List[DeployedModel] = []
+        models: list[DeployedModel] = []
         for task_folder in task_folder_names:
-            models.append(
-                DeployedModel.from_folder(os.path.join(deployment_folder, task_folder))
-            )
+            models.append(DeployedModel.from_folder(os.path.join(deployment_folder, task_folder)))
         deployment = cls(models=models, project=project)
 
         # Load post inference hooks, if any
         hook_config_file = os.path.join(deployment_folder, "hook_config.json")
         if os.path.isfile(hook_config_file):
-            available_hooks = {
-                subcls.__name__: subcls
-                for subcls in PostInferenceHookInterface.__subclasses__()
-            }
-            with open(hook_config_file, "r") as file:
+            available_hooks = {subcls.__name__: subcls for subcls in PostInferenceHookInterface.__subclasses__()}
+            with open(hook_config_file) as file:
                 hook_dict = json.load(file)
             for hook_data in hook_dict["post_inference_hooks"]:
                 for hook_name, hook_args in hook_data.items():
@@ -215,9 +206,9 @@ class Deployment:
 
     def load_inference_models(
         self,
-        device: Union[str, Sequence[str]] = "CPU",
-        max_async_infer_requests: Optional[Union[int, Sequence[int]]] = None,
-        openvino_configuration: Optional[Dict[str, str]] = None,
+        device: str | Sequence[str] = "CPU",
+        max_async_infer_requests: int | Sequence[int] | None = None,
+        openvino_configuration: dict[str, str] | None = None,
     ):
         """
         Load the inference models for the deployment to the specified device.
@@ -255,10 +246,7 @@ class Deployment:
             max_async_infer_requests = os.cpu_count()
 
         for idx, model in enumerate(self.models):
-            if isinstance(device, Sequence) and not isinstance(device, str):
-                dev = device[idx]
-            else:
-                dev = device
+            dev = device[idx] if isinstance(device, Sequence) and not isinstance(device, str) else device
             if isinstance(max_async_infer_requests, Sequence):
                 max_requests = max_async_infer_requests[idx]
             else:
@@ -277,7 +265,7 @@ class Deployment:
         self._are_models_loaded = True
         logging.info(f"Inference models loaded on device `{device}` successfully.")
 
-    def infer(self, image: np.ndarray, name: Optional[str] = None) -> Prediction:
+    def infer(self, image: np.ndarray, name: str | None = None) -> Prediction:
         """
         Run inference on an image for the full model chain in the deployment.
 
@@ -299,28 +287,20 @@ class Deployment:
 
         # Single task inference
         if self.is_single_task:
-            prediction = self._infer_task(
-                image, task=self.project.get_trainable_tasks()[0], explain=False
-            )
+            prediction = self._infer_task(image, task=self.project.get_trainable_tasks()[0], explain=False)
         # Multi-task inference
         else:
             prediction = self._infer_pipeline(image=image, explain=False)
 
         # Empty label is not generated by prediction postprocessing correctly, append
         # it here if there are no other predictions
-        assign_empty_label(
-            prediction=prediction, image=image, empty_label=self._empty_label
-        )
+        assign_empty_label(prediction=prediction, image=image, empty_label=self._empty_label)
 
-        self._execute_post_inference_hooks(
-            image=image, prediction=prediction, name=name
-        )
+        self._execute_post_inference_hooks(image=image, prediction=prediction, name=name)
 
         return prediction
 
-    def infer_async(
-        self, image: np.ndarray, runtime_data: Optional[Any] = None
-    ) -> None:
+    def infer_async(self, image: np.ndarray, runtime_data: Any | None = None) -> None:
         """
         Perform asynchronous inference on the `image`.
 
@@ -355,7 +335,7 @@ class Deployment:
             runtime_data=runtime_data_tuple,
         )
 
-    def explain(self, image: np.ndarray, name: Optional[str] = None) -> Prediction:
+    def explain(self, image: np.ndarray, name: str | None = None) -> Prediction:
         """
         Run inference on an image for the full model chain in the deployment. The
         resulting prediction will also contain saliency maps and the feature vector
@@ -379,21 +359,15 @@ class Deployment:
 
         # Single task inference
         if self.is_single_task:
-            prediction = self._infer_task(
-                image, task=self.project.get_trainable_tasks()[0], explain=True
-            )
+            prediction = self._infer_task(image, task=self.project.get_trainable_tasks()[0], explain=True)
         # Multi-task inference
         else:
             prediction = self._infer_pipeline(image=image, explain=True)
 
-        self._execute_post_inference_hooks(
-            image=image, prediction=prediction, name=name
-        )
+        self._execute_post_inference_hooks(image=image, prediction=prediction, name=name)
         return prediction
 
-    def explain_async(
-        self, image: np.ndarray, runtime_data: Optional[Any] = None
-    ) -> None:
+    def explain_async(self, image: np.ndarray, runtime_data: Any | None = None) -> None:
         """
         Perform asynchronous inference on the `image`, and generate saliency maps and
         feature vectors
@@ -441,9 +415,7 @@ class Deployment:
                 f"not loaded. Please call 'load_inference_models' first."
             )
 
-    def _infer_task(
-        self, image: np.ndarray, task: Task, explain: bool = False
-    ) -> Prediction:
+    def _infer_task(self, image: np.ndarray, task: Task, explain: bool = False) -> Prediction:
         """
         Run pre-processing, inference, and post-processing on the input `image`, for
         the model associated with the `task`.
@@ -462,7 +434,7 @@ class Deployment:
         image: np.ndarray,
         task: Task,
         explain: bool = False,
-        runtime_data: Optional[Any] = None,
+        runtime_data: Any | None = None,
     ) -> None:
         """
         Perform asynchronous inference on the `image`.
@@ -496,25 +468,20 @@ class Deployment:
             including saliency maps and the feature vector for the image
         :return: Inference result
         """
-        previous_labels: Optional[List[Label]] = None
-        intermediate_result: Optional[IntermediateInferenceResult] = None
-        rois: Optional[List[ROI]] = None
-        image_views: Optional[List[np.ndarray]] = None
+        previous_labels: list[Label] | None = None
+        intermediate_result: IntermediateInferenceResult | None = None
+        rois: list[ROI] | None = None
+        image_views: list[np.ndarray] | None = None
 
         # Pipeline inference
         for task in self.project.pipeline.tasks[1:]:
             # First task in the pipeline generates the initial result and ROIs
             if task.is_trainable and previous_labels is None:
                 task_prediction = self._infer_task(image, task=task, explain=explain)
-                rois: Optional[List[ROI]] = None
+                rois: list[ROI] | None = None
                 if not task.is_global:
-                    rois = [
-                        ROI.from_annotation(annotation)
-                        for annotation in task_prediction.annotations
-                    ]
-                intermediate_result = IntermediateInferenceResult(
-                    image=image, prediction=task_prediction, rois=rois
-                )
+                    rois = [ROI.from_annotation(annotation) for annotation in task_prediction.annotations]
+                intermediate_result = IntermediateInferenceResult(image=image, prediction=task_prediction, rois=rois)
                 previous_labels = [label for label in task.labels if not label.is_empty]
 
             # Downstream trainable tasks
@@ -525,14 +492,12 @@ class Deployment:
                         "project: A flow control task is required between each "
                         "trainable task in the pipeline."
                     )
-                new_rois: List[ROI] = []
+                new_rois: list[ROI] = []
                 for roi, view in zip(rois, image_views):
                     view_prediction = self._infer_task(view, task)
                     if task.is_global:
                         # Global tasks add their labels to the existing shape in the ROI
-                        intermediate_result.extend_annotations(
-                            view_prediction.annotations, roi=roi
-                        )
+                        intermediate_result.extend_annotations(view_prediction.annotations, roi=roi)
                     else:
                         # Local tasks create new shapes in the image coordinate system,
                         # and generate ROI's corresponding to the new shapes
@@ -540,8 +505,7 @@ class Deployment:
                             intermediate_result.append_annotation(annotation, roi=roi)
                             new_rois.append(ROI.from_annotation(annotation))
                         intermediate_result.rois = [
-                            new_roi.to_absolute_coordinates(parent_roi=roi)
-                            for new_roi in new_rois
+                            new_roi.to_absolute_coordinates(parent_roi=roi) for new_roi in new_rois
                         ]
                 previous_labels = [label for label in task.labels if not label.is_empty]
 
@@ -554,9 +518,7 @@ class Deployment:
                         f"has to be a trainable task, found task of type {task.type} "
                         f"instead."
                     )
-                rois, image_views = flow_control(
-                    intermediate_result=intermediate_result, task=task
-                )
+                rois, image_views = flow_control(intermediate_result=intermediate_result, task=task)
         return intermediate_result.prediction
 
     def _get_model_for_task(self, task: Task) -> DeployedModel:
@@ -570,8 +532,7 @@ class Deployment:
             task_index = self.project.get_trainable_tasks().index(task)
         except ValueError as error:
             raise ValueError(
-                f"Task {task.title} is not in the list of trainable tasks for project "
-                f"{self.project.name}."
+                f"Task {task.title} is not in the list of trainable tasks for project {self.project.name}."
             ) from error
         return self.models[task_index]
 
@@ -581,9 +542,7 @@ class Deployment:
 
         :return: True if temp files have been deleted successfully
         """
-        if self._path_to_temp_resources is not None and os.path.isdir(
-            self._path_to_temp_resources
-        ):
+        if self._path_to_temp_resources is not None and os.path.isdir(self._path_to_temp_resources):
             try:
                 shutil.rmtree(self._path_to_temp_resources)
             except PermissionError:
@@ -610,7 +569,7 @@ class Deployment:
         if self._requires_resource_cleanup:
             self._remove_temporary_resources()
 
-    def generate_ovms_config(self, output_folder: Union[str, os.PathLike]) -> None:
+    def generate_ovms_config(self, output_folder: str | os.PathLike) -> None:
         """
         Generate the configuration files needed to push the models for the
         `Deployment` instance to OVMS.
@@ -625,12 +584,10 @@ class Deployment:
             output_folder = os.path.dirname(ovms_models_dir)
         os.makedirs(ovms_models_dir, exist_ok=True)
 
-        model_configs: List[Dict[str, Dict[str, Any]]] = []
+        model_configs: list[dict[str, dict[str, Any]]] = []
         for model in self.models:
             # Create configuration entry for model
-            model_name = generate_ovms_model_name(
-                project=self.project, model=model, omit_version=True
-            )
+            model_name = generate_ovms_model_name(project=self.project, model=model, omit_version=True)
             config = {
                 "name": model_name,
                 "base_path": f"/models/{model_name}",
@@ -648,9 +605,7 @@ class Deployment:
             ovms_model_dir = os.path.join(ovms_models_dir, model_name, model_version)
 
             # Load the model to embed preprocessing for inference with OVMS adapter
-            embedded_model = OMZModel.create_model(
-                model=os.path.join(model.model_data_path, "model.xml")
-            )
+            embedded_model = OMZModel.create_model(model=os.path.join(model.model_data_path, "model.xml"))
             embedded_model.save(
                 xml_path=os.path.join(ovms_model_dir, "model.xml"),
                 bin_path=os.path.join(ovms_model_dir, "model.bin"),
@@ -681,10 +636,7 @@ class Deployment:
         :return: True if the infer queue is full, False otherwise
         """
         if not self.asynchronous_mode:
-            logging.warning(
-                "Method `infer_queue_full()` has no effect in synchronous execution "
-                "mode"
-            )
+            logging.warning("Method `infer_queue_full()` has no effect in synchronous execution mode")
         # Check the infer queue of the first model in the deployment
         return self.models[0].infer_queue_full()
 
@@ -699,9 +651,7 @@ class Deployment:
         asynchronous inference.
         """
         if not self.asynchronous_mode:
-            logging.warning(
-                "Method `await_all()` has no effect in synchronous execution mode"
-            )
+            logging.warning("Method `await_all()` has no effect in synchronous execution mode")
         # Wait until the infer queue of the last model in the task chain is empty
         for model in self.models:
             model.await_all()
@@ -718,16 +668,12 @@ class Deployment:
         asynchronous inference.
         """
         if not self.asynchronous_mode:
-            logging.warning(
-                "Method `await_any()` has no effect in synchronous execution mode"
-            )
+            logging.warning("Method `await_any()` has no effect in synchronous execution mode")
         self.models[0].await_any()
 
     def set_asynchronous_callback(
         self,
-        callback_function: Optional[
-            Callable[[np.ndarray, Prediction, Optional[Any]], None]
-        ] = None,
+        callback_function: Callable[[np.ndarray, Prediction, Any | None], None] | None = None,
     ) -> None:
         """
         Set the callback function to handle asynchronous inference results. This
@@ -757,16 +703,9 @@ class Deployment:
                       executed after each infer request
         """
 
-        def post_inference_hook_callback(
-            image: np.ndarray, prediction: Prediction, runtime_data: Optional[Any]
-        ):
-            if isinstance(runtime_data, dict):
-                name = runtime_data.get("name", None)
-            else:
-                name = None
-            self._execute_post_inference_hooks(
-                image=image, prediction=prediction, name=name
-            )
+        def post_inference_hook_callback(image: np.ndarray, prediction: Prediction, runtime_data: Any | None):
+            name = runtime_data.get("name", None) if isinstance(runtime_data, dict) else None
+            self._execute_post_inference_hooks(image=image, prediction=prediction, name=name)
 
         if callback_function is None:
             final_callback_function = post_inference_hook_callback
@@ -780,11 +719,9 @@ class Deployment:
 
         if self.is_single_task:
 
-            def full_callback(result: Prediction, runtime_data: Tuple[np.ndarray, Any]):
+            def full_callback(result: Prediction, runtime_data: tuple[np.ndarray, Any]):
                 image, runtime_user_data = runtime_data
-                assign_empty_label(
-                    prediction=result, image=image, empty_label=self._empty_label
-                )
+                assign_empty_label(prediction=result, image=image, empty_label=self._empty_label)
 
                 # User defined callback to further process the prediction results
                 final_callback_function(image, result, runtime_user_data)
@@ -793,7 +730,7 @@ class Deployment:
         else:
             # Pipeline case, this is a general implementation accounting for
             # pipelines with more than 2 trainable tasks!
-            callbacks: List[Callable[[Prediction, Any], None]] = []
+            callbacks: list[Callable[[Prediction, Any], None]] = []
             trainable_tasks = self.project.get_trainable_tasks()
 
             for task_idx, task in enumerate(self.project.pipeline.tasks):
@@ -805,8 +742,8 @@ class Deployment:
                 is_first_task = trainable_task_idx == 0
                 is_final_task = trainable_task_idx == len(trainable_tasks) - 1
 
-                next_task: Optional[Task] = None
-                next_trainable_task: Optional[Task] = None
+                next_task: Task | None = None
+                next_trainable_task: Task | None = None
                 add_flow_control = False
                 if not is_final_task:
                     next_task = self.project.pipeline.tasks[task_idx + 1]
@@ -833,7 +770,7 @@ class Deployment:
         logging.info("Asynchronous inference mode enabled.")
 
     @property
-    def post_inference_hooks(self) -> List[PostInferenceHookInterface]:
+    def post_inference_hooks(self) -> list[PostInferenceHookInterface]:
         """
         Return the currently active post inference hooks for the deployment
 
@@ -848,10 +785,7 @@ class Deployment:
         n_hooks = len(self.post_inference_hooks)
         self._post_inference_hooks = []
         if n_hooks != 0:
-            logging.info(
-                f"Post inference hooks cleared. {n_hooks} hooks were removed "
-                f"successfully"
-            )
+            logging.info(f"Post inference hooks cleared. {n_hooks} hooks were removed successfully")
 
     def add_post_inference_hook(self, hook: PostInferenceHookInterface) -> None:
         """
@@ -862,14 +796,9 @@ class Deployment:
         """
         self._post_inference_hooks.append(hook)
         logging.info(f"Hook `{hook}` added.")
-        logging.info(
-            f"Deployment now contains {len(self.post_inference_hooks)} "
-            f"post inference hooks."
-        )
+        logging.info(f"Deployment now contains {len(self.post_inference_hooks)} post inference hooks.")
 
-    def _execute_post_inference_hooks(
-        self, image: np.ndarray, prediction: Prediction, name: Optional[str] = None
-    ) -> None:
+    def _execute_post_inference_hooks(self, image: np.ndarray, prediction: Prediction, name: str | None = None) -> None:
         """
         Execute all post inference hooks
 

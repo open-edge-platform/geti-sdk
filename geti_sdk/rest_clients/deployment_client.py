@@ -15,7 +15,7 @@ import logging
 import os
 import tempfile
 import zipfile
-from typing import List, Optional, Sequence, Union
+from collections.abc import Sequence
 
 from geti_sdk.data_models import Project
 from geti_sdk.data_models.code_deployment_info import (
@@ -49,19 +49,13 @@ class DeploymentClient:
             rest_session=session, project=project, workspace_id=workspace_id
         )
 
-        self._model_client = ModelClient(
-            workspace_id=workspace_id, project=project, session=session
-        )
-        self._prediction_client = PredictionClient(
-            workspace_id=workspace_id, project=project, session=session
-        )
+        self._model_client = ModelClient(workspace_id=workspace_id, project=project, session=session)
+        self._prediction_client = PredictionClient(workspace_id=workspace_id, project=project, session=session)
         self._training_configuration_client = TrainingConfigurationClient(
             workspace_id=workspace_id, project=project, session=session
         )
         # legacy configuration client for backward compatibility
-        self._configuration_client = ConfigurationClient(
-            workspace_id=workspace_id, project=project, session=session
-        )
+        self._configuration_client = ConfigurationClient(workspace_id=workspace_id, project=project, session=session)
 
     @property
     def deployment_package_url(self) -> str:
@@ -86,9 +80,7 @@ class DeploymentClient:
             model is not None for model in self._model_client.get_all_active_models()
         )
 
-    def _fetch_deployment(
-        self, model_identifiers: list[DeploymentModelIdentifier]
-    ) -> Deployment:
+    def _fetch_deployment(self, model_identifiers: list[DeploymentModelIdentifier]) -> Deployment:
         """
         Download and return the deployment.
 
@@ -110,23 +102,18 @@ class DeploymentClient:
             f.write(response.content)
         with zipfile.ZipFile(zipfile_path, "r") as zipped_deployment:
             zipped_deployment.extractall(deployment_tempdir)
-        logging.info(
-            f"Deployment for project '{self.project.name}' downloaded and extracted "
-            f"successfully."
-        )
+        logging.info(f"Deployment for project '{self.project.name}' downloaded and extracted successfully.")
         if os.path.exists(zipfile_path):
             os.remove(zipfile_path)
-        deployment = Deployment.from_folder(
-            path_to_folder=os.path.join(deployment_tempdir, "deployment")
-        )
+        deployment = Deployment.from_folder(path_to_folder=os.path.join(deployment_tempdir, "deployment"))
         deployment._path_to_temp_resources = deployment_tempdir
         deployment._requires_resource_cleanup = True
         return deployment
 
     def deploy_project(
         self,
-        output_folder: Optional[Union[str, os.PathLike]] = None,
-        models: Optional[Sequence[Union[Model, OptimizedModel]]] = None,
+        output_folder: str | os.PathLike | None = None,
+        models: Sequence[Model | OptimizedModel] | None = None,
         enable_explainable_ai: bool = False,
         prepare_for_ovms: bool = False,
     ) -> Deployment:
@@ -178,10 +165,7 @@ class DeploymentClient:
                 f"trained before deploying the project."
             )
         if prepare_for_ovms and output_folder is None:
-            raise ValueError(
-                "An `output_folder` must be specified when setting "
-                "`prepare_for_ovms=True`."
-            )
+            raise ValueError("An `output_folder` must be specified when setting `prepare_for_ovms=True`.")
         deployment = self._backend_deploy_project(
             output_folder=output_folder,
             models=models,
@@ -193,8 +177,8 @@ class DeploymentClient:
 
     def _backend_deploy_project(
         self,
-        output_folder: Optional[Union[str, os.PathLike]] = None,
-        models: Optional[Sequence[Union[Model, OptimizedModel]]] = None,
+        output_folder: str | os.PathLike | None = None,
+        models: Sequence[Model | OptimizedModel] | None = None,
         require_xai: bool = False,
     ) -> Deployment:
         """
@@ -216,51 +200,35 @@ class DeploymentClient:
         if models is None:
             models = self._model_client.get_all_active_models()
 
-        tasks_with_model = [
-            self._model_client.get_task_for_model(model) for model in models
-        ]
+        tasks_with_model = [self._model_client.get_task_for_model(model) for model in models]
 
         if len(models) < len(tasks):
-            tasks_without_model = [
-                task for task in tasks if task not in tasks_with_model
-            ]
-            active_models = [
-                self._model_client.get_active_model_for_task(task)
-                for task in tasks_without_model
-            ]
+            tasks_without_model = [task for task in tasks if task not in tasks_with_model]
+            active_models = [self._model_client.get_active_model_for_task(task) for task in tasks_without_model]
 
             models = models + active_models
 
             model_id_to_task_id = {
-                model.id: task.id
-                for model, task in zip(models, tasks_with_model + tasks_without_model)
+                model.id: task.id for model, task in zip(models, tasks_with_model + tasks_without_model)
             }
         else:
-            model_id_to_task_id = {
-                model.id: task.id for model, task in zip(models, tasks_with_model)
-            }
+            model_id_to_task_id = {model.id: task.id for model, task in zip(models, tasks_with_model)}
 
         # Fetch the optimized model for each model, if it is not optimized already
-        optimized_models: List[OptimizedModel] = []
+        optimized_models: list[OptimizedModel] = []
         for model in models:
             if not isinstance(model, OptimizedModel):
                 current_optim_models = model.optimized_models
-                optimization_types = set(
-                    (op_model.optimization_type for op_model in current_optim_models)
-                )
+                optimization_types = {op_model.optimization_type for op_model in current_optim_models}
                 preferred_model = None
                 for optimization_type in OptimizationType:
                     # The order of fields in OptimizationType gives us priority order for optimization types
                     if optimization_type not in optimization_types or (
-                        optimization_type
-                        in (OptimizationType.ONNX, OptimizationType.NONE)
+                        optimization_type in (OptimizationType.ONNX, OptimizationType.NONE)
                     ):
                         continue
                     for op_model in current_optim_models:
-                        if (
-                            op_model.optimization_type == optimization_type
-                            and require_xai == op_model.has_xai_head
-                        ):
+                        if op_model.optimization_type == optimization_type and require_xai == op_model.has_xai_head:
                             preferred_model = op_model
                             break
                 if preferred_model is None:
@@ -277,11 +245,9 @@ class DeploymentClient:
             else:
                 optimized_models.append(model)
 
-        model_identifiers = [
-            DeploymentModelIdentifier.from_model(model) for model in optimized_models
-        ]
+        model_identifiers = [DeploymentModelIdentifier.from_model(model) for model in optimized_models]
         # Make sure models are sorted according to task order
-        sorted_optimized_models: List[OptimizedModel] = []
+        sorted_optimized_models: list[OptimizedModel] = []
         for task in tasks:
             for model in optimized_models:
                 model_task_id = model_id_to_task_id[model.id]
@@ -293,20 +259,14 @@ class DeploymentClient:
         hyper_parameters = []
         for model in sorted_optimized_models:
             if self.session.version.is_configuration_revamped:
-                hyperparams_dict = (
-                    self._training_configuration_client.get_hyperparameters_by_model_id(
-                        model_id=model.id, task_id=model_id_to_task_id[model.id]
-                    ).model_dump()
-                )
+                hyperparams_dict = self._training_configuration_client.get_hyperparameters_by_model_id(
+                    model_id=model.id, task_id=model_id_to_task_id[model.id]
+                ).model_dump()
             else:
                 hyperparams = self._configuration_client.get_for_model(
                     model_id=model.id, task_id=model_id_to_task_id[model.id]
                 )
-                hyperparams_dict = (
-                    ConfigurationRESTConverter.configuration_to_minimal_dict(
-                        hyperparams
-                    )
-                )
+                hyperparams_dict = ConfigurationRESTConverter.configuration_to_minimal_dict(hyperparams)
             hyper_parameters.append(hyperparams_dict)
 
         # Make the request to prepare and fetch the deployment package

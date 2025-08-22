@@ -64,9 +64,7 @@ class TestUtils:
         for algorithm in algorithms:
             assert isinstance(algorithm, Algorithm)
 
-        classification_algos = algorithms.get_by_task_type(
-            task_type=TaskType.CLASSIFICATION
-        )
+        classification_algos = algorithms.get_by_task_type(task_type=TaskType.CLASSIFICATION)
         assert len(classification_algos) > 0
         for algorithm in classification_algos:
             assert algorithm.task == TaskType.CLASSIFICATION
@@ -82,7 +80,7 @@ class TestUtils:
 
         assert server_config.host == f"https://{DUMMY_HOST}"
         assert server_config.token == "this_is_a_fake_token"
-        assert "https" in server_config.proxies.keys()
+        assert "https" in server_config.proxies
         assert not hasattr(server_config, "username")
         assert not hasattr(server_config, "password")
 
@@ -104,8 +102,6 @@ class TestUtils:
                 expected_results.update(variable_dictionary)
 
         server_config = get_server_details_from_env(use_global_variables=True)
-        assert server_config.host.replace("https://", "") == expected_results[
-            "GETI_HOST"
-        ].replace("https://", "")
+        assert server_config.host.replace("https://", "") == expected_results["GETI_HOST"].replace("https://", "")
         assert server_config.token == expected_results["GETI_TOKEN"]
         assert server_config.proxies is None

@@ -14,7 +14,6 @@
 import copy
 import os
 import time
-from typing import List, Optional
 
 import numpy as np
 import pytest
@@ -36,9 +35,7 @@ from tests.helpers.constants import PROJECT_PREFIX
 
 class TestModelAndPredictionClient:
     @staticmethod
-    def ensure_annotated_project(
-        project_service: ProjectService, annotation_reader: DatumAnnotationReader
-    ) -> Project:
+    def ensure_annotated_project(project_service: ProjectService, annotation_reader: DatumAnnotationReader) -> Project:
         return get_or_create_annotated_project_for_test_class(
             project_service=project_service,
             annotation_readers=[annotation_reader],
@@ -51,7 +48,7 @@ class TestModelAndPredictionClient:
         self,
         fxt_project_service: ProjectService,
         fxt_annotation_reader: DatumAnnotationReader,
-        fxt_default_labels: List[str],
+        fxt_default_labels: list[str],
         fxt_test_mode: SdkTestMode,
     ) -> None:
         """
@@ -82,16 +79,12 @@ class TestModelAndPredictionClient:
         # Monitor train job to make sure the project is train-ready
         timeout = 600 if fxt_test_mode != SdkTestMode.OFFLINE else 1
         interval = 5 if fxt_test_mode != SdkTestMode.OFFLINE else 1
-        fxt_project_service.training_client.monitor_jobs(
-            [job], timeout=timeout, interval=interval
-        )
+        fxt_project_service.training_client.monitor_jobs([job], timeout=timeout, interval=interval)
 
         # Test that getting model for the train job works
         if fxt_test_mode == SdkTestMode.OFFLINE:
             job.state = JobState.FINISHED
-        model = fxt_project_service.model_client.get_model_for_job(
-            job=job, check_status=False
-        )
+        model = fxt_project_service.model_client.get_model_for_job(job=job, check_status=False)
         assert model is not None
 
     @pytest.mark.vcr()
@@ -105,13 +98,9 @@ class TestModelAndPredictionClient:
         model_client = fxt_project_service.model_client
         project = fxt_project_service.project
         task = project.get_trainable_tasks()[0]
-        default_algo = model_client.supported_algos.get_default_for_task_type(
-            task_type=task.type
-        )
+        default_algo = model_client.supported_algos.get_default_for_task_type(task_type=task.type)
 
-        model_group = fxt_project_service.model_client.get_model_group_by_algo_name(
-            algorithm_name=default_algo.name
-        )
+        model_group = fxt_project_service.model_client.get_model_group_by_algo_name(algorithm_name=default_algo.name)
 
         assert model_group is not None
 
@@ -127,16 +116,12 @@ class TestModelAndPredictionClient:
         model_client = fxt_project_service.model_client
         project = fxt_project_service.project
         task = project.get_trainable_tasks()[0]
-        default_algorithm = model_client.supported_algos.get_default_for_task_type(
-            task.type
-        )
+        default_algorithm = model_client.supported_algos.get_default_for_task_type(task.type)
         default_model = model_client.get_active_model_for_task(task=task)
 
         unsupported_algorithm_name = "unsupported_algorithm"
 
-        untrained_algos = copy.deepcopy(
-            model_client.supported_algos.get_by_task_type(task.type)
-        )
+        untrained_algos = copy.deepcopy(model_client.supported_algos.get_by_task_type(task.type))
         untrained_algos.remove(default_algorithm)
         untrained_algo = sorted(untrained_algos, key=lambda x: x.stats.gigaflops)[0]
 
@@ -162,22 +147,14 @@ class TestModelAndPredictionClient:
         # Monitor train job to make sure the project is train-ready
         timeout = 600 if fxt_test_mode != SdkTestMode.OFFLINE else 1
         interval = 5 if fxt_test_mode != SdkTestMode.OFFLINE else 1
-        fxt_project_service.training_client.monitor_jobs(
-            [job], timeout=timeout, interval=interval
-        )
+        fxt_project_service.training_client.monitor_jobs([job], timeout=timeout, interval=interval)
 
         # Set the new algorithm active once a model is trained
         model_client.set_active_model(algorithm=untrained_algo)
-        assert (
-            model_client.get_active_model_for_task(task=task).architecture
-            == untrained_algo.name
-        )
+        assert model_client.get_active_model_for_task(task=task).architecture == untrained_algo.name
         # Activate the old one again
         model_client.set_active_model(algorithm=default_algorithm)
-        assert (
-            model_client.get_active_model_for_task(task=task).architecture
-            == default_algorithm.name
-        )
+        assert model_client.get_active_model_for_task(task=task).architecture == default_algorithm.name
 
     @pytest.mark.vcr()
     def test_get_model_algorithm_task_and_version(
@@ -193,28 +170,20 @@ class TestModelAndPredictionClient:
         task = project.get_trainable_tasks()[0]
         algorithm = model_client.supported_algos.get_default_for_task_type(task.type)
 
-        untrained_algos = copy.deepcopy(
-            model_client.supported_algos.get_by_task_type(task.type)
-        )
+        untrained_algos = copy.deepcopy(model_client.supported_algos.get_by_task_type(task.type))
         default_algo = untrained_algos.get_default_for_task_type(task.type)
         untrained_algos.remove(default_algo)
         untrained_algo = sorted(untrained_algos, key=lambda x: x.stats.gigaflops)[1]
 
-        model_1 = model_client.get_model_by_algorithm_task_and_version(
-            algorithm=algorithm, task=task, version=1
-        )
+        model_1 = model_client.get_model_by_algorithm_task_and_version(algorithm=algorithm, task=task, version=1)
 
-        model_no_task = model_client.get_model_by_algorithm_task_and_version(
-            algorithm=algorithm, version=1
-        )
+        model_no_task = model_client.get_model_by_algorithm_task_and_version(algorithm=algorithm, version=1)
 
         latest_model = model_client.get_model_by_algorithm_task_and_version(
             algorithm=algorithm,
         )
 
-        model_not_trained = model_client.get_model_by_algorithm_task_and_version(
-            algorithm=untrained_algo, task=task
-        )
+        model_not_trained = model_client.get_model_by_algorithm_task_and_version(algorithm=untrained_algo, task=task)
 
         model_invalid_version = model_client.get_model_by_algorithm_task_and_version(
             algorithm=algorithm, task=task, version=10
@@ -226,9 +195,7 @@ class TestModelAndPredictionClient:
         assert model_invalid_version is None
 
     @pytest.mark.vcr()
-    def test_download_active_model_for_task(
-        self, fxt_project_service: ProjectService, fxt_temp_directory: str
-    ) -> None:
+    def test_download_active_model_for_task(self, fxt_project_service: ProjectService, fxt_temp_directory: str) -> None:
         """
         Test that downloading the active model for a task works.
         """
@@ -240,9 +207,7 @@ class TestModelAndPredictionClient:
         models_folder_name = "models"
         models_filepath = os.path.join(fxt_temp_directory, models_folder_name)
 
-        model_client.download_active_model_for_task(
-            path_to_folder=fxt_temp_directory, task=task
-        )
+        model_client.download_active_model_for_task(path_to_folder=fxt_temp_directory, task=task)
 
         assert os.path.isdir(models_filepath)
         models_content = os.listdir(models_filepath)
@@ -257,9 +222,7 @@ class TestModelAndPredictionClient:
             mo_model_name = f"{algorithm.name} OpenVINO FP16_MO_optimized.zip"
         assert mo_model_name in models_content
 
-    def test_prediction_client_set_mode(
-        self, fxt_project_service: ProjectService
-    ) -> None:
+    def test_prediction_client_set_mode(self, fxt_project_service: ProjectService) -> None:
         """
         Test that changing the prediction mode for the PredictionClient works
         """
@@ -285,13 +248,11 @@ class TestModelAndPredictionClient:
         sleep_time = 10 if fxt_test_mode != SdkTestMode.OFFLINE else 1
         attempts = 10
 
-        prediction_file: Optional[Prediction] = None
+        prediction_file: Prediction | None = None
         n = 0
         while prediction_file is None and n < attempts:
             try:
-                prediction_file = prediction_client.predict_image(
-                    image=EXAMPLE_IMAGE_PATH
-                )
+                prediction_file = prediction_client.predict_image(image=EXAMPLE_IMAGE_PATH)
                 break
             except GetiRequestException as error:
                 if error.status_code != 503:
@@ -303,9 +264,7 @@ class TestModelAndPredictionClient:
         prediction_geti_image = prediction_client.predict_image(image=fxt_geti_image)
 
         assert len(prediction_file.annotations) == len(prediction_numpy.annotations)
-        assert len(prediction_numpy.annotations) == len(
-            prediction_geti_image.annotations
-        )
+        assert len(prediction_numpy.annotations) == len(prediction_geti_image.annotations)
 
     @pytest.mark.vcr()
     def test_purge_model(
@@ -326,9 +285,7 @@ class TestModelAndPredictionClient:
         active_model = model_client.get_active_model_for_task(task=task)
         # Train another model for the active algo
         algo = next(
-            algorithm
-            for algorithm in model_client.supported_algos
-            if algorithm.name == active_model.architecture
+            algorithm for algorithm in model_client.supported_algos if algorithm.name == active_model.architecture
         )
         job = attempt_to_train_task(
             training_client=fxt_project_service.training_client,
@@ -339,9 +296,7 @@ class TestModelAndPredictionClient:
         # Monitor train job to make sure the project is train-ready
         timeout = 600 if fxt_test_mode != SdkTestMode.OFFLINE else 1
         interval = 5 if fxt_test_mode != SdkTestMode.OFFLINE else 1
-        fxt_project_service.training_client.monitor_jobs(
-            [job], timeout=timeout, interval=interval
-        )
+        fxt_project_service.training_client.monitor_jobs([job], timeout=timeout, interval=interval)
         models_in_group = model_client.get_model_group_by_algo_name(algo.name).models
         models_in_group.sort(key=lambda x: x.version)
 

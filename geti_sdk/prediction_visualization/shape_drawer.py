@@ -16,17 +16,11 @@
 
 # pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-locals
 import abc
+from collections.abc import Callable, Sequence
 from typing import (
-    Callable,
     Generic,
-    List,
     NewType,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
-    Union,
 )
 
 import cv2
@@ -46,7 +40,7 @@ from geti_sdk.data_models.shapes import (
     Shape,
 )
 
-CvTextSize = NewType("CvTextSize", Tuple[Tuple[int, int], int])
+CvTextSize = NewType("CvTextSize", tuple[tuple[int, int], int])
 
 _Any = TypeVar("_Any")
 
@@ -54,12 +48,10 @@ _Any = TypeVar("_Any")
 class DrawerEntity(Generic[_Any]):
     """An interface to draw a shape of type ``T`` onto an image."""
 
-    supported_types: Sequence[Type[Shape]] = []
+    supported_types: Sequence[type[Shape]] = []
 
     @abc.abstractmethod
-    def draw(
-        self, image: np.ndarray, entity: _Any, labels: List[ScoredLabel]
-    ) -> np.ndarray:
+    def draw(self, image: np.ndarray, entity: _Any, labels: list[ScoredLabel]) -> np.ndarray:
         """
         Draw an entity to a given frame.
 
@@ -83,9 +75,7 @@ class Helpers:
         # Same alpha value that the UI uses for Labels
         self.alpha_shape = 100 / 256
         self.alpha_labels = 153 / 256
-        self.assumed_image_width_for_text_scale = (
-            1500  # constant number for size of classification/counting overlay
-        )
+        self.assumed_image_width_for_text_scale = 1500  # constant number for size of classification/counting overlay
         self.top_margin = 0.07  # part of the top screen reserved for top left classification/counting overlay
         self.content_padding = 3
         self.top_left_box_thickness = 1
@@ -106,7 +96,7 @@ class Helpers:
         y1: int,
         x2: int,
         y2: int,
-        color: Tuple[int, int, int],
+        color: tuple[int, int, int],
         alpha: float,
     ) -> np.ndarray:
         """
@@ -139,9 +129,7 @@ class Helpers:
         return round(image.shape[1] / self.assumed_image_width_for_text_scale, 1)
 
     @staticmethod
-    def generate_text_for_label(
-        label: Union[Label, ScoredLabel], show_labels: bool, show_confidence: bool
-    ) -> str:
+    def generate_text_for_label(label: Label | ScoredLabel, show_labels: bool, show_confidence: bool) -> str:
         """
         Return a string representing a given label and its associated probability if label is a ScoredLabel.
 
@@ -161,11 +149,11 @@ class Helpers:
 
     def generate_draw_command_for_labels(
         self,
-        labels: Sequence[Union[Label, ScoredLabel]],
+        labels: Sequence[Label | ScoredLabel],
         image: np.ndarray,
         show_labels: bool,
         show_confidence: bool,
-    ) -> Tuple[Callable[[np.ndarray], np.ndarray], int, int]:
+    ) -> tuple[Callable[[np.ndarray], np.ndarray], int, int]:
         """
         Generate draw function and content width and height for labels.
 
@@ -211,8 +199,8 @@ class Helpers:
         return draw_command, content_width, content_height
 
     def generate_draw_command_for_text(
-        self, text: str, text_scale: float, thickness: int, color: Tuple[int, int, int]
-    ) -> Tuple[Callable[[np.ndarray], np.ndarray], int, int]:
+        self, text: str, text_scale: float, thickness: int, color: tuple[int, int, int]
+    ) -> tuple[Callable[[np.ndarray], np.ndarray], int, int]:
         """
         Generate function to draw text on image relative to cursor position.
 
@@ -239,10 +227,7 @@ class Helpers:
         height = text_height + baseline + 2 * padding
         content_width = width + margin
 
-        if (color[0] + color[1] + color[2]) / 3 > 200:
-            text_color = self.black
-        else:
-            text_color = self.white
+        text_color = self.black if (color[0] + color[1] + color[2]) / 3 > 200 else self.white
 
         def draw_command(img: np.ndarray) -> np.ndarray:
             cursor_pos = Point(int(self.cursor_pos.x), int(self.cursor_pos.y))
@@ -282,7 +267,7 @@ class Helpers:
         image: np.ndarray,
         flagpole_start_point: Point,
         flagpole_end_point: Point,
-        color: Tuple[int, int, int] = (0, 0, 0),
+        color: tuple[int, int, int] = (0, 0, 0),
     ):
         """
         Draw a small flagpole between two points.
@@ -305,7 +290,7 @@ class Helpers:
         self.cursor_pos.x = 0
         self.cursor_pos.y += self.line_height + self.content_margin
 
-    def set_cursor_pos(self, cursor_pos: Optional[Point] = None) -> None:
+    def set_cursor_pos(self, cursor_pos: Point | None = None) -> None:
         """
         Move the cursor to a new position.
 
@@ -349,15 +334,13 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
         ]
 
         # Always show global labels, especially if shape labels are disabled (because of is_one_label).
-        self.top_left_drawer = self.TopLeftDrawer(
-            True, self.show_confidence, self.is_one_label
-        )
+        self.top_left_drawer = self.TopLeftDrawer(True, self.show_confidence, self.is_one_label)
 
     def draw(
         self,
         image: np.ndarray,
-        scene: Union[AnnotationScene, Prediction],
-        labels: List[ScoredLabel],
+        scene: AnnotationScene | Prediction,
+        labels: list[ScoredLabel],
         fill_shapes: bool = True,
     ) -> np.ndarray:
         """
@@ -375,9 +358,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
         self.top_left_drawer.set_cursor_pos()
 
         for annotation in scene.annotations:
-            if isinstance(annotation.shape, Rectangle) and annotation.shape.is_full_box(
-                image.shape[1], image.shape[0]
-            ):
+            if isinstance(annotation.shape, Rectangle) and annotation.shape.is_full_box(image.shape[1], image.shape[0]):
                 # If is_one_label is activated, don't draw the labels here
                 # because we will draw them again outside the loop.
                 if not self.is_one_label:
@@ -385,10 +366,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             else:
                 num_annotations += 1
                 for drawer in self.shape_drawers:
-                    if (
-                        type(annotation.shape) in drawer.supported_types
-                        and len(annotation.labels) > 0
-                    ):
+                    if type(annotation.shape) in drawer.supported_types and len(annotation.labels) > 0:
                         image = drawer.draw(
                             image,
                             annotation.shape,
@@ -410,9 +388,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             self.show_confidence = show_confidence
             self.is_one_label = is_one_label
 
-        def draw(
-            self, image: np.ndarray, annotation: Annotation, labels: List[ScoredLabel]
-        ) -> np.ndarray:
+        def draw(self, image: np.ndarray, annotation: Annotation, labels: list[ScoredLabel]) -> np.ndarray:
             """
             Draw the labels of a shape in the image top left corner.
 
@@ -423,9 +399,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             """
             return self.draw_labels(image, annotation.labels)
 
-        def draw_labels(
-            self, image: np.ndarray, labels: Sequence[Union[Label, ScoredLabel]]
-        ) -> np.ndarray:
+        def draw_labels(self, image: np.ndarray, labels: Sequence[Label | ScoredLabel]) -> np.ndarray:
             """
             Draw the labels in the image top left corner.
 
@@ -435,9 +409,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             """
             show_confidence = self.show_confidence if not self.is_one_label else False
 
-            draw_command, _, _ = self.generate_draw_command_for_labels(
-                labels, image, self.show_labels, show_confidence
-            )
+            draw_command, _, _ = self.generate_draw_command_for_labels(labels, image, self.show_labels, show_confidence)
 
             image = draw_command(image)
 
@@ -446,9 +418,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
 
             return image
 
-        def draw_annotation_count(
-            self, image: np.ndarray, num_annotations: int
-        ) -> np.ndarray:
+        def draw_annotation_count(self, image: np.ndarray, num_annotations: int) -> np.ndarray:
             """
             Draw the number of annotations to the top left corner of the image.
 
@@ -484,7 +454,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             self,
             image: np.ndarray,
             entity: Rectangle,
-            labels: List[ScoredLabel],
+            labels: list[ScoredLabel],
             fill_shapes: bool = True,
         ) -> np.ndarray:
             """
@@ -502,20 +472,14 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             x1, y1 = int(entity.x), int(entity.y)
             x2, y2 = int(entity.x + entity.width), int(entity.y + entity.height)
             if fill_shapes:
-                image = self.draw_transparent_rectangle(
-                    image, x1, y1, x2, y2, base_color, self.alpha_shape
-                )
-            image = cv2.rectangle(
-                img=image, pt1=(x1, y1), pt2=(x2, y2), color=base_color, thickness=2
-            )
+                image = self.draw_transparent_rectangle(image, x1, y1, x2, y2, base_color, self.alpha_shape)
+            image = cv2.rectangle(img=image, pt1=(x1, y1), pt2=(x2, y2), color=base_color, thickness=2)
 
             (
                 draw_command,
                 content_width,
                 content_height,
-            ) = self.generate_draw_command_for_labels(
-                labels, image, self.show_labels, self.show_confidence
-            )
+            ) = self.generate_draw_command_for_labels(labels, image, self.show_labels, self.show_confidence)
 
             # Generate a command to draw the list of labels
             # and compute the actual size of the list of labels.
@@ -530,8 +494,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
 
             # Draw the list of labels.
             self.set_cursor_pos(Point(x_coord, y_coord))
-            image = draw_command(image)
-            return image
+            return draw_command(image)
 
     class EllipseDrawer(Helpers, DrawerEntity[Ellipse]):
         """Draws ellipses."""
@@ -547,7 +510,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             self,
             image: np.ndarray,
             entity: Ellipse,
-            labels: List[ScoredLabel],
+            labels: list[ScoredLabel],
             fill_shapes: bool = True,
         ) -> np.ndarray:
             """
@@ -587,9 +550,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
                     color=base_color,
                     thickness=cv2.FILLED,
                 )
-                result_without_border = cv2.addWeighted(
-                    overlay, alpha, image, 1 - alpha, 0
-                )
+                result_without_border = cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0)
             else:
                 result_without_border = image
             result_with_border = cv2.ellipse(
@@ -609,9 +570,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
                 draw_command,
                 content_width,
                 content_height,
-            ) = self.generate_draw_command_for_labels(
-                labels, image, self.show_labels, self.show_confidence
-            )
+            ) = self.generate_draw_command_for_labels(labels, image, self.show_labels, self.show_confidence)
 
             # get top left corner of imaginary bbox around circle
             offset = self.label_offset_box_shape
@@ -622,9 +581,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
 
             # put label at bottom if it is out of bounds at the top of the shape, and shift label to left if needed
             if y_coord < self.top_margin * image.shape[0]:
-                y_coord = (
-                    (entity.y1 * image.shape[0]) + (entity.y2 * image.shape[0]) + offset
-                )
+                y_coord = (entity.y1 * image.shape[0]) + (entity.y2 * image.shape[0]) + offset
                 flagpole_start_point = Point(x_coord + 1, y_coord)
             else:
                 flagpole_start_point = Point(x_coord + 1, y_coord + content_height)
@@ -637,11 +594,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             # Draw the list of labels and a small flagpole.
             self.set_cursor_pos(Point(x_coord, y_coord))
             image = draw_command(result_with_border)
-            image = self.draw_flagpole(
-                image, flagpole_start_point, flagpole_end_point, labels[0].color_tuple
-            )
-
-            return image
+            return self.draw_flagpole(image, flagpole_start_point, flagpole_end_point, labels[0].color_tuple)
 
     class PolygonDrawer(Helpers, DrawerEntity[Polygon]):
         """Draws polygons."""
@@ -656,8 +609,8 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
         def draw(
             self,
             image: np.ndarray,
-            entity: Union[Polygon, RotatedRectangle],
-            labels: List[ScoredLabel],
+            entity: Polygon | RotatedRectangle,
+            labels: list[ScoredLabel],
             fill_shapes: bool = True,
         ) -> np.ndarray:
             """
@@ -687,9 +640,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
                     color=base_color,
                     thickness=cv2.FILLED,
                 )
-                result_without_border = cv2.addWeighted(
-                    overlay, alpha, image, 1 - alpha, 0
-                )
+                result_without_border = cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0)
             else:
                 result_without_border = image
             result_with_border = cv2.drawContours(
@@ -707,9 +658,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
                 draw_command,
                 content_width,
                 content_height,
-            ) = self.generate_draw_command_for_labels(
-                labels, image, self.show_labels, self.show_confidence
-            )
+            ) = self.generate_draw_command_for_labels(labels, image, self.show_labels, self.show_confidence)
 
             # get point in the center of imaginary bbox around polygon
             x_coords, y_coords = zip(*[(point[0], point[1]) for point in contours])
@@ -735,11 +684,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             # Draw the list of labels and a small flagpole.
             self.set_cursor_pos(Point(x_coord, y_coord))
             image = draw_command(result_with_border)
-            image = self.draw_flagpole(
-                image, flagpole_start_point, flagpole_end_point, labels[0].color_tuple
-            )
-
-            return image
+            return self.draw_flagpole(image, flagpole_start_point, flagpole_end_point, labels[0].color_tuple)
 
     class KeypointDrawer(Helpers, DrawerEntity[Keypoint]):
         """
@@ -757,7 +702,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             self,
             image: np.ndarray,
             entity: Keypoint,
-            labels: List[ScoredLabel],
+            labels: list[ScoredLabel],
             fill_shapes: bool = True,
         ) -> np.ndarray:
             """
@@ -777,9 +722,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
                 center=(int(entity.x), int(entity.y)),
                 radius=radius,
                 color=(0, 255, 0),
-                thickness=(
-                    -1 if entity.is_visible else 1
-                ),  # Fill the circle for visible, draw a circle for invisible
+                thickness=(-1 if entity.is_visible else 1),  # Fill the circle for visible, draw a circle for invisible
             )
 
             # Generate a command to draw the list of labels
@@ -788,9 +731,7 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
                 draw_command,
                 content_width,
                 content_height,
-            ) = self.generate_draw_command_for_labels(
-                labels, image, self.show_labels, self.show_confidence
-            )
+            ) = self.generate_draw_command_for_labels(labels, image, self.show_labels, self.show_confidence)
 
             # Get top edge of keypoint
             offset = self.label_offset_box_shape
@@ -808,5 +749,4 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
 
             # Draw the list of labels.
             self.set_cursor_pos(Point(x_coord, y_coord))
-            image = draw_command(circle)
-            return image
+            return draw_command(circle)

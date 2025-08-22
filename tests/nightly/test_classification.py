@@ -44,10 +44,7 @@ class TestClassification(TestNightlyProject):
         """
         project = fxt_project_service_no_vcr.project
         algorithms_to_benchmark = [
-            algo.name
-            for algo in fxt_project_service_no_vcr._training_client.get_algorithms_for_task(
-                0
-            )
+            algo.name for algo in fxt_project_service_no_vcr._training_client.get_algorithms_for_task(0)
         ][:2]
         images = [fxt_image_path, fxt_image_path_complex]
         precision_levels = ["FP16", "INT8"]
@@ -68,9 +65,7 @@ class TestClassification(TestNightlyProject):
             repeats=2,
         )
         pd.DataFrame(results)
-        benchmarker.compare_predictions(
-            working_directory=fxt_temp_directory, throughput_benchmark_results=results
-        )
+        benchmarker.compare_predictions(working_directory=fxt_temp_directory, throughput_benchmark_results=results)
 
     def test_export_import_project(
         self,
@@ -95,38 +90,23 @@ class TestClassification(TestNightlyProject):
         assert os.path.exists(archive_path)
 
         # Project is imported
-        existing_projects_pre_import = fxt_geti_no_vcr.project_client.get_all_projects(
-            get_project_details=False
-        )
+        existing_projects_pre_import = fxt_geti_no_vcr.project_client.get_all_projects(get_project_details=False)
         # Import
-        imported_project = fxt_geti_no_vcr.import_project(
-            filepath=archive_path, project_name=imported_project_name
-        )
+        imported_project = fxt_geti_no_vcr.import_project(filepath=archive_path, project_name=imported_project_name)
         assert imported_project.name == imported_project_name
-        existing_projects = fxt_geti_no_vcr.project_client.get_all_projects(
-            get_project_details=False
-        )
+        existing_projects = fxt_geti_no_vcr.project_client.get_all_projects(get_project_details=False)
         # Assert the imported project is NOT in the project list before the import
         assert (
             next(
-                (
-                    p
-                    for p in existing_projects_pre_import
-                    if p.id == imported_project.id
-                ),
+                (p for p in existing_projects_pre_import if p.id == imported_project.id),
                 None,
             )
             is None
         )
         # Assert the imported project is in the project list after the import
-        assert (
-            next((p for p in existing_projects if p.id == imported_project.id), None)
-            is not None
-        )
+        assert next((p for p in existing_projects if p.id == imported_project.id), None) is not None
         # Project is deleted
-        fxt_geti_no_vcr.project_client.delete_project(
-            imported_project, requires_confirmation=False
-        )
+        fxt_geti_no_vcr.project_client.delete_project(imported_project, requires_confirmation=False)
 
     def test_export_import_dataset(
         self,
@@ -146,14 +126,10 @@ class TestClassification(TestNightlyProject):
 
         # Dataset is exported
         assert not os.path.exists(archive_path)
-        fxt_geti_no_vcr.export_dataset(
-            project=project, dataset=dataset, filepath=archive_path
-        )
+        fxt_geti_no_vcr.export_dataset(project=project, dataset=dataset, filepath=archive_path)
         assert os.path.exists(archive_path)
         # Dataset is imported as a project
-        existing_projects_pre_import = fxt_geti_no_vcr.project_client.get_all_projects(
-            get_project_details=False
-        )
+        existing_projects_pre_import = fxt_geti_no_vcr.project_client.get_all_projects(get_project_details=False)
         # Import
         imported_project = fxt_geti_no_vcr.import_dataset(
             filepath=archive_path,
@@ -161,27 +137,16 @@ class TestClassification(TestNightlyProject):
             project_type=project.project_type,
         )
         assert imported_project.name == imported_project_name
-        existing_projects = fxt_geti_no_vcr.project_client.get_all_projects(
-            get_project_details=False
-        )
+        existing_projects = fxt_geti_no_vcr.project_client.get_all_projects(get_project_details=False)
         # Assert the imported project is NOT in the project list before the import
         assert (
             next(
-                (
-                    p
-                    for p in existing_projects_pre_import
-                    if p.id == imported_project.id
-                ),
+                (p for p in existing_projects_pre_import if p.id == imported_project.id),
                 None,
             )
             is None
         )
         # Assert the imported project is in the project list after the import
-        assert (
-            next((p for p in existing_projects if p.id == imported_project.id), None)
-            is not None
-        )
+        assert next((p for p in existing_projects if p.id == imported_project.id), None) is not None
         # Project is deleted
-        fxt_geti_no_vcr.project_client.delete_project(
-            imported_project, requires_confirmation=False
-        )
+        fxt_geti_no_vcr.project_client.delete_project(imported_project, requires_confirmation=False)

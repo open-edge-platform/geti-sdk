@@ -18,13 +18,12 @@ import os
 import shutil
 import urllib.request
 import zipfile
-from typing import Dict, Optional
 
 import requests
 from tqdm import tqdm
 
 
-def get_proxies(url: str = "", verify_cert: bool = True) -> Dict[str, str]:
+def get_proxies(url: str = "", verify_cert: bool = True) -> dict[str, str]:
     """
     Determine whether or not to use proxies to attempt to reach a certain url.
 
@@ -33,7 +32,7 @@ def get_proxies(url: str = "", verify_cert: bool = True) -> Dict[str, str]:
     :return:
     """
     logging.info(f"Connecting to url {url}...")
-    proxies: Dict[str, str] = {}
+    proxies: dict[str, str] = {}
     timeout = 10
     try:
         requests.head(url=url, proxies=proxies, timeout=timeout, verify=verify_cert)
@@ -55,7 +54,7 @@ def get_proxies(url: str = "", verify_cert: bool = True) -> Dict[str, str]:
 
 def download_file(
     url: str,
-    target_folder: Optional[str],
+    target_folder: str | None,
     check_valid_archive: bool = False,
     verify_cert: bool = True,
     timeout: int = 1800,
@@ -82,37 +81,29 @@ def download_file(
     valid_file_exists = False
     if os.path.exists(path_to_file) and os.path.isfile(path_to_file):
         valid_file_exists = True
-        if check_valid_archive:
-            if not zipfile.is_zipfile(path_to_file):
-                logging.info(
-                    f"File {filename} exists at {path_to_file}, but is is not a valid "
-                    f"archive. Overwriting the existing file."
-                )
-                try:
-                    shutil.rmtree(path_to_file)
-                except NotADirectoryError:
-                    os.remove(path_to_file)
-                valid_file_exists = False
+        if check_valid_archive and not zipfile.is_zipfile(path_to_file):
+            logging.info(
+                f"File {filename} exists at {path_to_file}, but is is not a valid "
+                f"archive. Overwriting the existing file."
+            )
+            try:
+                shutil.rmtree(path_to_file)
+            except NotADirectoryError:
+                os.remove(path_to_file)
+            valid_file_exists = False
     if valid_file_exists:
-        logging.info(
-            f"File {filename} exists at {path_to_file}. No new data was downloaded."
-        )
+        logging.info(f"File {filename} exists at {path_to_file}. No new data was downloaded.")
         return path_to_file
 
     proxies = get_proxies(url, verify_cert=verify_cert)
     logging.info(f"Downloading {filename}...")
-    with requests.get(
-        url, stream=True, proxies=proxies, verify=verify_cert, timeout=timeout
-    ) as r:
+    with requests.get(url, stream=True, proxies=proxies, verify=verify_cert, timeout=timeout) as r:
         if r.status_code != 200:
             r.raise_for_status()
-            raise RuntimeError(
-                f"Request to {url} failed, returned status code {r.status_code}"
-            )
+            raise RuntimeError(f"Request to {url} failed, returned status code {r.status_code}")
         file_size = int(r.headers.get("Content-Length", 0))
-        with tqdm.wrapattr(r.raw, "read", total=file_size, desc="") as r_raw:
-            with open(path_to_file, "wb") as f:
-                shutil.copyfileobj(r_raw, f)
+        with tqdm.wrapattr(r.raw, "read", total=file_size, desc="") as r_raw, open(path_to_file, "wb") as f:
+            shutil.copyfileobj(r_raw, f)
     logging.info("Download complete.")
     return path_to_file
 
@@ -127,14 +118,10 @@ def validate_hash(file_path: str, expected_hash: str) -> None:
     with open(file_path, "rb") as hash_file:
         downloaded_hash = hashlib.sha3_512(hash_file.read()).hexdigest()
     if downloaded_hash != expected_hash:
-        raise ValueError(
-            f"Downloaded file {file_path} does not match the required hash."
-        )
+        raise ValueError(f"Downloaded file {file_path} does not match the required hash.")
 
 
-def set_directory_permissions(
-    target_directory: str, file_permissions=0o660, dir_permissions=0o770
-) -> None:
+def set_directory_permissions(target_directory: str, file_permissions=0o660, dir_permissions=0o770) -> None:
     """
     Set read, write, execute permissions for user and user_group on a directory tree.
 

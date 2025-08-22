@@ -13,7 +13,7 @@
 # and limitations under the License.
 
 from pprint import pformat
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar
 
 import attr
 
@@ -52,8 +52,8 @@ class ConfigurableParameter:
         parameter
     """
 
-    _identifier_fields: ClassVar[List[str]] = []
-    _non_minimal_fields: ClassVar[List[str]] = [
+    _identifier_fields: ClassVar[list[str]] = []
+    _non_minimal_fields: ClassVar[list[str]] = [
         "default_value",
         "description",
         "editable",
@@ -63,21 +63,17 @@ class ConfigurableParameter:
     ]
 
     name: str
-    value: Union[str, bool, float, int]
-    data_type: Optional[str] = attr.field(
-        default=None, converter=str_to_enum_converter(ParameterDataType)
-    )
-    default_value: Optional[Union[str, bool, float, int]] = None
-    description: Optional[str] = None
-    editable: Optional[bool] = None
-    header: Optional[str] = None
-    template_type: Optional[str] = attr.field(
-        default=None, converter=str_to_enum_converter(ParameterInputType)
-    )
-    ui_rules: Optional[Dict[str, Any]] = None
-    warning: Optional[str] = None
+    value: str | bool | float | int
+    data_type: str | None = attr.field(default=None, converter=str_to_enum_converter(ParameterDataType))
+    default_value: str | bool | float | int | None = None
+    description: str | None = None
+    editable: bool | None = None
+    header: str | None = None
+    template_type: str | None = attr.field(default=None, converter=str_to_enum_converter(ParameterInputType))
+    ui_rules: dict[str, Any] | None = None
+    warning: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return the dictionary representation of the ConfigurableParameter object.
         """
@@ -91,8 +87,7 @@ class ConfigurableParameter:
 
         :return: string holding a very short summary of the ConfigurableParameter
         """
-        summary_str = f"{self.header} -- Name: {self.name} -- Value: {self.value}"
-        return summary_str
+        return f"{self.header} -- Name: {self.name} -- Value: {self.value}"
 
     @property
     def overview(self) -> str:
@@ -115,7 +110,7 @@ class ConfigurableBoolean(ConfigurableParameter):
     Representation of a configurable boolean in GETi.
     """
 
-    default_value: Optional[bool] = attr.field(default=None, kw_only=True)
+    default_value: bool | None = attr.field(default=None, kw_only=True)
     value: bool = attr.field(kw_only=True)
 
 
@@ -128,10 +123,10 @@ class ConfigurableInteger(ConfigurableParameter):
     :var max_value: Maximum value allowed to be set for the configurable integer
     """
 
-    default_value: Optional[int] = attr.field(default=None, kw_only=True)
+    default_value: int | None = attr.field(default=None, kw_only=True)
     value: int = attr.field(kw_only=True)
-    min_value: Optional[int] = attr.field(default=None, kw_only=True)
-    max_value: Optional[int] = attr.field(default=None, kw_only=True)
+    min_value: int | None = attr.field(default=None, kw_only=True)
+    max_value: int | None = attr.field(default=None, kw_only=True)
 
 
 @attr.define
@@ -143,13 +138,11 @@ class ConfigurableFloat(ConfigurableParameter):
     :var max_value: Maximum value allowed to be set for the configurable float
     """
 
-    default_value: Optional[float] = attr.field(kw_only=True, default=None)
+    default_value: float | None = attr.field(kw_only=True, default=None)
     value: float = attr.field(kw_only=True)
     min_value: float = attr.field(kw_only=True)
     max_value: float = attr.field(kw_only=True)
-    step_size: Optional[float] = attr.field(
-        kw_only=True, default=None
-    )  # Added in Geti v1.6
+    step_size: float | None = attr.field(kw_only=True, default=None)  # Added in Geti v1.6
 
 
 @attr.define
@@ -160,9 +153,9 @@ class SelectableFloat(ConfigurableParameter):
     :var options: List of options that the selectable float is allowed to take
     """
 
-    default_value: Optional[float] = attr.field(kw_only=True, default=None)
+    default_value: float | None = attr.field(kw_only=True, default=None)
     value: float = attr.field(kw_only=True)
-    options: List[float] = attr.field(kw_only=True)
+    options: list[float] = attr.field(kw_only=True)
 
 
 @attr.define
@@ -173,7 +166,7 @@ class SelectableString(ConfigurableParameter):
     :var options: List of options that the selectable string is allowed to take
     """
 
-    default_value: Optional[str] = attr.field(kw_only=True, default=None)
+    default_value: str | None = attr.field(kw_only=True, default=None)
     enum_name: str = attr.field(kw_only=True)
     value: str = attr.field(kw_only=True)
-    options: List[str] = attr.field(kw_only=True)
+    options: list[str] = attr.field(kw_only=True)

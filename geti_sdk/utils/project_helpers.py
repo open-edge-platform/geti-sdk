@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import List
 
 from pathvalidate import sanitize_filename
 
@@ -19,7 +18,7 @@ from geti_sdk.data_models.enums import TaskType
 from geti_sdk.data_models.project import Project
 
 
-def get_task_types_by_project_type(project_type: str) -> List[TaskType]:
+def get_task_types_by_project_type(project_type: str) -> list[TaskType]:
     """
     Return a list of task_type for each task in the project pipeline, for a certain
     'project_type'.

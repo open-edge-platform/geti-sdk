@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Dict, Optional
 
 import attrs
 
@@ -54,7 +53,7 @@ class ServerConfig:
 
     host: str = attrs.field(converter=trim_trailing_slash)
     has_valid_certificate: bool = attrs.field(default=False, kw_only=True)
-    proxies: Optional[Dict[str, str]] = attrs.field(default=None, kw_only=True)
+    proxies: dict[str, str] | None = attrs.field(default=None, kw_only=True)
 
     def __attrs_post_init__(self):
         """
@@ -65,11 +64,8 @@ class ServerConfig:
         # Sanitize hostname
         if not self.host.startswith("https://"):
             if self.host.startswith("http://"):
-                raise ValueError(
-                    "HTTP connections are not supported, please use HTTPS instead."
-                )
-            else:
-                self.host = "https://" + self.host
+                raise ValueError("HTTP connections are not supported, please use HTTPS instead.")
+            self.host = "https://" + self.host
 
     @property
     def base_url(self) -> str:

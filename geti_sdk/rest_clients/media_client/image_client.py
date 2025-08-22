@@ -17,7 +17,7 @@ import glob
 import io
 import logging
 import os
-from typing import List, Optional, Sequence, Union
+from collections.abc import Sequence
 
 import cv2
 import numpy as np
@@ -36,7 +36,7 @@ class ImageClient(BaseMediaClient[Image]):
 
     _MEDIA_TYPE = MediaType.IMAGE
 
-    def get_all_images(self, dataset: Optional[Dataset] = None) -> MediaList[Image]:
+    def get_all_images(self, dataset: Dataset | None = None) -> MediaList[Image]:
         """
         Get the ID's and filenames of all images in the project, from a specific
         dataset. If no dataset is passed, images from the training dataset will be
@@ -50,8 +50,8 @@ class ImageClient(BaseMediaClient[Image]):
 
     def upload_image(
         self,
-        image: Union[np.ndarray, str, os.PathLike],
-        dataset: Optional[Dataset] = None,
+        image: np.ndarray | str | os.PathLike,
+        dataset: Dataset | None = None,
     ) -> Image:
         """
         Upload an image file to the server.
@@ -62,7 +62,7 @@ class ImageClient(BaseMediaClient[Image]):
             passed, the image is uploaded to the training dataset
         :return: Image object representing the uploaded image on the server
         """
-        if isinstance(image, (str, os.PathLike)):
+        if isinstance(image, str | os.PathLike):
             image_dict = self._upload(image, dataset=dataset)
         elif isinstance(image, np.ndarray):
             image_io = io.BytesIO(cv2.imencode(".jpg", image)[1].tobytes())
@@ -78,7 +78,7 @@ class ImageClient(BaseMediaClient[Image]):
         path_to_folder: str,
         n_images: int = -1,
         skip_if_filename_exists: bool = False,
-        dataset: Optional[Dataset] = None,
+        dataset: Dataset | None = None,
         max_threads: int = 5,
     ) -> MediaList[Image]:
         """
@@ -109,7 +109,7 @@ class ImageClient(BaseMediaClient[Image]):
         path_to_folder: str,
         append_image_uid: bool = False,
         max_threads: int = 10,
-        dataset: Optional[Dataset] = None,
+        dataset: Dataset | None = None,
     ) -> None:
         """
         Download all images in a project or a dataset to a folder on the local disk.
@@ -135,12 +135,12 @@ class ImageClient(BaseMediaClient[Image]):
     def upload_from_list(
         self,
         path_to_folder: str,
-        image_names: List[str],
+        image_names: list[str],
         extension_included: bool = False,
         n_images: int = -1,
         skip_if_filename_exists: bool = False,
         image_names_as_full_paths: bool = False,
-        dataset: Optional[Dataset] = None,
+        dataset: Dataset | None = None,
         max_threads: int = 5,
     ) -> MediaList[Image]:
         """
@@ -166,12 +166,9 @@ class ImageClient(BaseMediaClient[Image]):
         """
         media_formats = MEDIA_SUPPORTED_FORMAT_MAPPING[self._MEDIA_TYPE]
 
-        if n_images > len(image_names) or n_images == -1:
-            n_to_upload = len(image_names)
-        else:
-            n_to_upload = n_images
+        n_to_upload = len(image_names) if n_images > len(image_names) or n_images == -1 else n_images
 
-        image_filepaths: List[str] = []
+        image_filepaths: list[str] = []
         if image_names_as_full_paths:
             if extension_included:
                 image_filepaths = image_names
@@ -186,34 +183,20 @@ class ImageClient(BaseMediaClient[Image]):
         else:
             logging.debug("Retrieving full filepaths for image upload...")
             filenames_lookup = {
-                os.path.basename(path): path
-                for path in glob.glob(
-                    os.path.join(path_to_folder, "**"), recursive=True
-                )
+                os.path.basename(path): path for path in glob.glob(os.path.join(path_to_folder, "**"), recursive=True)
             }
             for image_name in image_names[0:n_to_upload]:
-                matches: List[str] = []
+                matches: list[str] = []
                 if not extension_included:
                     for media_extension in media_formats:
-                        if (
-                            filename := f"{image_name}{media_extension}"
-                        ) in filenames_lookup:
+                        if (filename := f"{image_name}{media_extension}") in filenames_lookup:
                             matches.append(filenames_lookup[filename])
                 else:
-                    matches = (
-                        [filenames_lookup[image_name]]
-                        if image_name in filenames_lookup
-                        else []
-                    )
+                    matches = [filenames_lookup[image_name]] if image_name in filenames_lookup else []
                 if not matches:
-                    raise ValueError(
-                        f"No matching file found for image with name {image_name}"
-                    )
-                elif len(matches) != 1:
-                    raise ValueError(
-                        f"Multiple files found for image with name {image_name}: "
-                        f"{matches}"
-                    )
+                    raise ValueError(f"No matching file found for image with name {image_name}")
+                if len(matches) != 1:
+                    raise ValueError(f"Multiple files found for image with name {image_name}: {matches}")
                 image_filepaths.append(matches[0])
         return self._upload_loop(
             filepaths=image_filepaths,

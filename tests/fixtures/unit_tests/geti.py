@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
@@ -25,9 +26,7 @@ from geti_sdk.http_session.server_config import ServerConfig
 
 @pytest.fixture
 def fxt_mocked_server_credential_config():
-    yield ServerCredentialConfig(
-        host="dummy_host", username="dummy_user", password="dummy_password"
-    )
+    yield ServerCredentialConfig(host="dummy_host", username="dummy_user", password="dummy_password")
 
 
 @pytest.fixture
@@ -35,16 +34,14 @@ def fxt_mocked_session_factory(
     mocker: MockerFixture, fxt_mocked_server_credential_config: ServerCredentialConfig
 ) -> Callable[[Any], GetiSession]:
     def _mocked_session_factory(
-        return_value: Optional[Union[List, Dict]] = None,
-        server_config: Optional[ServerConfig] = None,
+        return_value: list | dict | None = None,
+        server_config: ServerConfig | None = None,
     ) -> GetiSession:
         mocker.patch(
             "geti_sdk.http_session.geti_session.GetiSession.platform_serving_mode",
             ONPREM_MODE,
         )
-        mocker.patch(
-            "geti_sdk.http_session.geti_session.GetiSession.authenticate_with_password"
-        )
+        mocker.patch("geti_sdk.http_session.geti_session.GetiSession.authenticate_with_password")
         mocker.patch(
             "geti_sdk.http_session.geti_session.GetiSession.get_rest_response",
             return_value=return_value,

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import Union
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from .hyperparameters.hyperparameters import Hyperparameters
@@ -149,9 +149,7 @@ class GlobalDatasetPreparationParameters(BaseModel):
         title="Subset split",
         description="Configuration for splitting data into subsets",
     )
-    filtering: Filtering = Field(
-        title="Filtering", description="Configuration for filtering annotations"
-    )
+    filtering: Filtering = Field(title="Filtering", description="Configuration for filtering annotations")
 
 
 class GlobalParameters(BaseModel):
@@ -169,10 +167,8 @@ class TrainingConfiguration(BaseModel):
     """Configuration for model training"""
 
     task_id: str = Field(title="Task ID", description="Unique identifier for the task")
-    model_config = ConfigDict(
-        protected_namespaces=()
-    )  # avoid conflict with "model_" namespace
-    model_manifest_id: Union[str, None] = Field(
+    model_config = ConfigDict(protected_namespaces=())  # avoid conflict with "model_" namespace
+    model_manifest_id: str | None = Field(
         default=None,
         title="Model manifest ID",
         description="ID for the model manifest that defines the supported parameters and capabilities for training",
@@ -181,6 +177,4 @@ class TrainingConfiguration(BaseModel):
         title="Global parameters",
         description="Global configuration parameters for training",
     )
-    hyperparameters: Hyperparameters = Field(
-        title="Hyperparameters", description="Hyperparameters for training"
-    )
+    hyperparameters: Hyperparameters = Field(title="Hyperparameters", description="Hyperparameters for training")

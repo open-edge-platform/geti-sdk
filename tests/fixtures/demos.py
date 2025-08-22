@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import shutil
-from typing import Tuple
 
 import pytest
 
@@ -34,7 +33,7 @@ from tests.helpers.constants import PROJECT_PREFIX
 
 
 @pytest.fixture(scope="session")
-def fxt_demo_images_and_annotations() -> Tuple[int, int]:
+def fxt_demo_images_and_annotations() -> tuple[int, int]:
     """
     Return the number of images and annotations used in the demo project fixtures
 
@@ -47,7 +46,7 @@ def fxt_demo_images_and_annotations() -> Tuple[int, int]:
 def fxt_anomaly_classification_demo_project(
     fxt_geti_no_vcr: Geti,
     fxt_project_client_no_vcr: ProjectClient,
-    fxt_demo_images_and_annotations: Tuple[int, int],
+    fxt_demo_images_and_annotations: tuple[int, int],
 ) -> Project:
     """
     Create an annotated anomaly detection project on the Geti instance, and
@@ -71,7 +70,7 @@ def fxt_anomaly_classification_demo_project(
 def fxt_segmentation_demo_project(
     fxt_geti_no_vcr: Geti,
     fxt_project_client_no_vcr: ProjectClient,
-    fxt_demo_images_and_annotations: Tuple[int, int],
+    fxt_demo_images_and_annotations: tuple[int, int],
 ) -> Project:
     """
     Create an annotated segmentation project on the Geti instance, and
@@ -95,7 +94,7 @@ def fxt_segmentation_demo_project(
 def fxt_detection_to_classification_demo_project(
     fxt_geti_no_vcr: Geti,
     fxt_project_client_no_vcr: ProjectClient,
-    fxt_demo_images_and_annotations: Tuple[int, int],
+    fxt_demo_images_and_annotations: tuple[int, int],
 ) -> Project:
     """
     Create an annotated detection_to_classification project on the Geti instance, and
@@ -119,7 +118,7 @@ def fxt_detection_to_classification_demo_project(
 def fxt_detection_to_segmentation_demo_project(
     fxt_geti_no_vcr: Geti,
     fxt_project_client_no_vcr: ProjectClient,
-    fxt_demo_images_and_annotations: Tuple[int, int],
+    fxt_demo_images_and_annotations: tuple[int, int],
 ) -> Project:
     """
     Create an annotated detection_to_segmentation project on the Geti instance, and
@@ -143,7 +142,7 @@ def fxt_detection_to_segmentation_demo_project(
 def fxt_classification_demo_project(
     fxt_geti_no_vcr: Geti,
     fxt_project_client_no_vcr: ProjectClient,
-    fxt_demo_images_and_annotations: Tuple[int, int],
+    fxt_demo_images_and_annotations: tuple[int, int],
 ) -> Project:
     """
     Create an annotated classification project on the Geti instance, and
@@ -167,7 +166,7 @@ def fxt_classification_demo_project(
 def fxt_detection_demo_project(
     fxt_geti_no_vcr: Geti,
     fxt_project_client_no_vcr: ProjectClient,
-    fxt_demo_images_and_annotations: Tuple[int, int],
+    fxt_demo_images_and_annotations: tuple[int, int],
 ) -> Project:
     """
     Create an annotated detection project on the Geti instance, and

@@ -15,7 +15,7 @@
 """Configuration fixtures for VCR"""
 
 import os
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from vcr import VCR
@@ -30,9 +30,7 @@ from tests.helpers.constants import (
 
 
 @pytest.fixture(scope="session")
-def vcr_record_config(
-    fxt_test_mode, fxt_server_config, vcr_cassette_dir
-) -> Dict[str, Any]:
+def vcr_record_config(fxt_test_mode, fxt_server_config, vcr_cassette_dir) -> dict[str, Any]:
     """
     This fixture determines the record mode for the VCR cassettes used in the tests
     """
@@ -61,7 +59,7 @@ def vcr_record_config(
 
 
 @pytest.fixture(scope="session")
-def vcr_config(vcr_record_config) -> Dict[str, Any]:
+def vcr_config(vcr_record_config) -> dict[str, Any]:
     """
     This fixture defines the configuration for VCR.py
     """

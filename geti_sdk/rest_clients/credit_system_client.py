@@ -14,7 +14,6 @@
 
 import logging
 from datetime import datetime
-from typing import List, Optional, Union
 
 from geti_sdk.data_models import CreditAccount, CreditBalance, Subscription
 from geti_sdk.data_models.job import Job, JobCost
@@ -32,11 +31,8 @@ def allow_supported(func):
     def wrapper(instance, *args, **kwargs):
         if instance._is_supported:
             return func(instance, *args, **kwargs)
-        else:
-            logging.warning(
-                "Credit System is not supported by the Intel Geti Platform."
-            )
-            return None
+        logging.warning("Credit System is not supported by the Intel Geti Platform.")
+        return None
 
     return wrapper
 
@@ -46,7 +42,7 @@ class CreditSystemClient:
     Class to work with credits in Intel Geti.
     """
 
-    def __init__(self, session: GetiSession, workspace_id: Optional[str] = None):
+    def __init__(self, session: GetiSession, workspace_id: str | None = None):
         self.session = session
         if workspace_id is not None:
             self.workspace_id = workspace_id
@@ -69,35 +65,28 @@ class CreditSystemClient:
             method="GET",
             allow_text_response=True,
         )
-        if isinstance(r, dict):
-            # If the Platform responds with the information about the available subscriptions,
-            # then it supports Credit System. Session will decode the message into a `dict`
-            return True
-        else:
-            # In case the server returns an empty 200 message, it means the Credit System is not supported.
-            # The session would return a Response object.
-            return False
+        # If the Platform responds with the information about the available subscriptions,
+        # then it supports Credit System. Session will decode the message into a `dict`
+        # In case the server returns an empty 200 message, it means the Credit System is not supported.
+        # The session would return a Response object.
+        return isinstance(r, dict)
 
     @allow_supported
-    def get_balance(
-        self, timestamp: Optional[datetime] = None
-    ) -> Optional[CreditBalance]:
+    def get_balance(self, timestamp: datetime | None = None) -> CreditBalance | None:
         """
         Get the current credit balance in the workspace.
 
         :param timestamp: The timestamp to get the balance at. If None, the current balance is returned.
         :return: The available credit balance in the workspace.
         """
-        query_postfix = (
-            f"?date={int(timestamp.timestamp() * 1000)}" if timestamp else ""
-        )
+        query_postfix = f"?date={int(timestamp.timestamp() * 1000)}" if timestamp else ""
         response = self.session.get_rest_response(
             url=self.session.base_url + "balance" + query_postfix,
             method="GET",
         )
         return deserialize_dictionary(response, CreditBalance)
 
-    def get_job_cost(self, job: Union[Job, str]) -> Optional[JobCost]:
+    def get_job_cost(self, job: Job | str) -> JobCost | None:
         """
         Get the cost of a job.
 
@@ -106,15 +95,12 @@ class CreditSystemClient:
         :param job: A Job object or a Job ID.
         :return: A JobCost object presenting the total cost and the consumed credits.
         """
-        if isinstance(job, Job):
-            job_id = job.id
-        else:
-            job_id = job
+        job_id = job.id if isinstance(job, Job) else job
         fetched_job = get_job_by_id(job_id, self.session, self.workspace_id)
         return fetched_job.cost if fetched_job else None
 
     @allow_supported
-    def get_subscriptions(self) -> Optional[List[Subscription]]:
+    def get_subscriptions(self) -> list[Subscription] | None:
         """
         Get the subscription details for the workspace.
 
@@ -124,13 +110,10 @@ class CreditSystemClient:
             url=self.session.base_url + "subscriptions",
             method="GET",
         )
-        return [
-            deserialize_dictionary(sub, Subscription)
-            for sub in response.get("subscriptions", [])
-        ]
+        return [deserialize_dictionary(sub, Subscription) for sub in response.get("subscriptions", [])]
 
     @allow_supported
-    def get_credit_accounts(self) -> Optional[List[CreditAccount]]:
+    def get_credit_accounts(self) -> list[CreditAccount] | None:
         """
         Get the subscription details for the workspace.
 
@@ -140,7 +123,4 @@ class CreditSystemClient:
             url=self.session.base_url + "credit_accounts",
             method="GET",
         )
-        return [
-            deserialize_dictionary(sub, CreditAccount)
-            for sub in response.get("credit_accounts", [])
-        ]
+        return [deserialize_dictionary(sub, CreditAccount) for sub in response.get("credit_accounts", [])]

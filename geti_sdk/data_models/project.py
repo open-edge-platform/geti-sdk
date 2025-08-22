@@ -14,7 +14,7 @@
 
 import copy
 from pprint import pformat
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar
 
 import attr
 
@@ -52,11 +52,11 @@ class Pipeline:
     :var connections: List of connections between the tasks in the pipeline
     """
 
-    tasks: List[Task]
-    connections: List[Connection]
+    tasks: list[Task]
+    connections: list[Connection]
 
     @property
-    def trainable_tasks(self) -> List[Task]:
+    def trainable_tasks(self) -> list[Task]:
         """
         Return an ordered list of trainable tasks.
 
@@ -73,9 +73,9 @@ class Pipeline:
         """
         task_id_to_name = {task.id: task.title for task in self.tasks}
         for connection in self.connections:
-            if connection.to in task_id_to_name.keys():
+            if connection.to in task_id_to_name:
                 connection.to = task_id_to_name[connection.to]
-            if connection.from_ in task_id_to_name.keys():
+            if connection.from_ in task_id_to_name:
                 connection.from_ = task_id_to_name[connection.from_]
 
     def resolve_parent_labels(self):
@@ -86,23 +86,23 @@ class Pipeline:
         """
         for task in self.trainable_tasks:
             for label in task.labels:
-                if label.parent_id in self.label_id_to_name_mapping.keys():
+                if label.parent_id in self.label_id_to_name_mapping:
                     label.parent_id = self.label_id_to_name_mapping[label.parent_id]
 
     @property
-    def label_id_to_name_mapping(self) -> Dict[str, str]:
+    def label_id_to_name_mapping(self) -> dict[str, str]:
         """
         Return a mapping of label ID's to label names for all labels in the pipeline.
 
         :return: dictionary containing the label ID's as keys and the label names as
             values
         """
-        label_mapping: Dict[str, str] = {}
+        label_mapping: dict[str, str] = {}
         for task in self.trainable_tasks:
             label_mapping.update({label.id: label.name for label in task.labels})
         return label_mapping
 
-    def get_labels_per_task(self, include_empty: bool = True) -> List[List[Label]]:
+    def get_labels_per_task(self, include_empty: bool = True) -> list[list[Label]]:
         """
         Return a nested list of labels for each task in the pipeline.
 
@@ -112,22 +112,19 @@ class Pipeline:
         :param include_empty: True to include empty labels in the output
         :return: nested list of labels for each task in the pipeline
         """
-        outer_list: List[List[Label]] = []
+        outer_list: list[list[Label]] = []
         for task in self.trainable_tasks:
-            if not include_empty:
-                task_labels = [label for label in task.labels if not label.is_empty]
-            else:
-                task_labels = task.labels
+            task_labels = [label for label in task.labels if not label.is_empty] if not include_empty else task.labels
             outer_list.append(task_labels)
         return outer_list
 
-    def get_all_labels(self) -> List[Label]:
+    def get_all_labels(self) -> list[Label]:
         """
         Return a list of all labels in the pipeline.
 
         :return: List of all labels for every task in the pipeline
         """
-        label_list: List[Label] = []
+        label_list: list[Label] = []
         for task in self.trainable_tasks:
             label_list.extend(task.labels)
         return label_list
@@ -167,13 +164,13 @@ class Project:
     :var storage_info: Storage information for the project can be obtained
     """
 
-    _identifier_fields: ClassVar[List[str]] = [
+    _identifier_fields: ClassVar[list[str]] = [
         "id",
         "thumbnail",
         "creation_time",
         "creator_id",
     ]
-    _GET_only_fields: ClassVar[List[str]] = [
+    _GET_only_fields: ClassVar[list[str]] = [
         "thumbnail",
         "score",
         "performance",
@@ -184,18 +181,16 @@ class Project:
 
     name: str
     pipeline: Pipeline
-    datasets: Optional[List[Dataset]] = (
-        None  # `datasets` was removed from project listing in Geti v1.15
-    )
-    score: Optional[float] = None  # 'score' is removed in v1.1
-    performance: Optional[Performance] = None
-    creation_time: Optional[str] = attr.field(default=None, converter=str_to_datetime)
-    id: Optional[str] = None
-    thumbnail: Optional[str] = None
-    creator_id: Optional[str] = None
-    storage_info: Optional[Dict] = None
+    datasets: list[Dataset] | None = None  # `datasets` was removed from project listing in Geti v1.15
+    score: float | None = None  # 'score' is removed in v1.1
+    performance: Performance | None = None
+    creation_time: str | None = attr.field(default=None, converter=str_to_datetime)
+    id: str | None = None
+    thumbnail: str | None = None
+    creator_id: str | None = None
+    storage_info: dict | None = None
 
-    def get_trainable_tasks(self) -> List[Task]:
+    def get_trainable_tasks(self) -> list[Task]:
         """
         Return an ordered list of trainable tasks.
 
@@ -248,7 +243,7 @@ class Project:
         for dataset in self.datasets:
             dataset.prepare_for_post()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the project to a dictionary representation.
 
@@ -260,9 +255,7 @@ class Project:
             connection["from"] = from_value
         return output_dict
 
-    def get_labels_per_task(
-        self, include_empty: bool = True
-    ) -> List[List[Dict[str, Any]]]:
+    def get_labels_per_task(self, include_empty: bool = True) -> list[list[dict[str, Any]]]:
         """
         Return a nested list containing the labels for each task in the project.
         Each entry in the outermost list corresponds to a trainable task in the project.
@@ -273,12 +266,10 @@ class Project:
         """
         return [
             [attr.asdict(label) for label in task_labels]
-            for task_labels in self.pipeline.get_labels_per_task(
-                include_empty=include_empty
-            )
+            for task_labels in self.pipeline.get_labels_per_task(include_empty=include_empty)
         ]
 
-    def get_parameters(self) -> Dict[str, Union[str, List[str]]]:
+    def get_parameters(self) -> dict[str, str | list[str]]:
         """
         Return the parameters used to create the project.
 
@@ -293,7 +284,7 @@ class Project:
         remove_null_fields(parameter_dict)
         return parameter_dict
 
-    def get_all_labels(self) -> List[Label]:
+    def get_all_labels(self) -> list[Label]:
         """
         Return a list of all labels in the project.
 

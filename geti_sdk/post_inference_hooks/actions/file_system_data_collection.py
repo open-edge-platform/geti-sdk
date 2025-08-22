@@ -15,7 +15,6 @@ import json
 import logging
 import os
 from datetime import datetime
-from typing import Optional
 
 import cv2
 import numpy as np
@@ -95,9 +94,9 @@ class FileSystemDataCollection(PostInferenceAction):
         self,
         image: np.ndarray,
         prediction: Prediction,
-        score: Optional[float] = None,
-        name: Optional[str] = None,
-        timestamp: Optional[datetime] = None,
+        score: float | None = None,
+        name: str | None = None,
+        timestamp: datetime | None = None,
     ):
         """
         Execute the action, save the given `image` to the predefined target folder.
@@ -114,37 +113,27 @@ class FileSystemDataCollection(PostInferenceAction):
         # we use cv2 to encode the numpy array as image, so it expects an
         # image in BGR format. However, `Deployment.infer` requires RGB format, so
         # we have to convert
-        if name is None:
-            name = self.prefix
-        else:
-            name = self.prefix + name
+        name = self.prefix if name is None else self.prefix + name
         if timestamp is None:
             timestamp = datetime.now()
 
         filename = name + "_" + timestamp.strftime("%Y%m%dT%H-%M-%S-%f")
 
-        success = cv2.imwrite(
-            os.path.join(self.image_path, filename + ".png"), image_bgr
-        )
+        success = cv2.imwrite(os.path.join(self.image_path, filename + ".png"), image_bgr)
         if not success:
-            logging.error(
-                f"Failed to save image `{filename}.png` to folder `{self.image_path}`."
-            )
+            logging.error(f"Failed to save image `{filename}.png` to folder `{self.image_path}`.")
 
         try:
             if self.save_predictions:
-                prediction_filepath = os.path.join(
-                    self.predictions_path, filename + ".json"
-                )
+                prediction_filepath = os.path.join(self.predictions_path, filename + ".json")
                 with open(prediction_filepath, "w") as file:
                     prediction_dict = PredictionRESTConverter.to_dict(prediction)
                     json.dump(prediction_dict, fp=file)
 
-            if self.save_scores:
-                if score is not None:
-                    score_filepath = os.path.join(self.scores_path, filename + ".txt")
-                    with open(score_filepath, "w") as file:
-                        file.write(f"{score}")
+            if self.save_scores and score is not None:
+                score_filepath = os.path.join(self.scores_path, filename + ".txt")
+                with open(score_filepath, "w") as file:
+                    file.write(f"{score}")
 
             if self.save_overlays:
                 overlay_path = os.path.join(self.overlays_path, filename + ".jpg")
@@ -153,7 +142,4 @@ class FileSystemDataCollection(PostInferenceAction):
         except Exception as e:
             logging.exception(e, stack_info=True, exc_info=True)
 
-        self.log_function(
-            f"FileSystemDataCollection inference action saved image data to folder "
-            f"`{self.image_path}`"
-        )
+        self.log_function(f"FileSystemDataCollection inference action saved image data to folder `{self.image_path}`")

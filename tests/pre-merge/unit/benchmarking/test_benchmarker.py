@@ -36,12 +36,8 @@ class TestBenchmarker:
             "geti_sdk.geti.Geti.get_project",
             return_value=fxt_classification_project,
         )
-        mocked_model_client = mocker.patch(
-            "geti_sdk.benchmarking.benchmarker.ModelClient"
-        )
-        mocked_training_client = mocker.patch(
-            "geti_sdk.benchmarking.benchmarker.TrainingClient"
-        )
+        mocked_model_client = mocker.patch("geti_sdk.benchmarking.benchmarker.ModelClient")
+        mocked_training_client = mocker.patch("geti_sdk.benchmarking.benchmarker.TrainingClient")
         project_mock = mocker.MagicMock()
         algorithms_to_benchmark = ("ALGO_1", "ALGO_2")
         precision_levels = ("PRECISION_1", "PRECISION_2")
@@ -103,9 +99,7 @@ class TestBenchmarker:
         active_models = (mocker.MagicMock(), mocker.MagicMock())
         model_client_object_mock.get_all_active_models.return_value = active_models
 
-        mocked_training_client = mocker.patch(
-            "geti_sdk.benchmarking.benchmarker.TrainingClient"
-        )
+        mocked_training_client = mocker.patch("geti_sdk.benchmarking.benchmarker.TrainingClient")
         project_mock = mocker.MagicMock()
         precision_levels = ["PRECISION_1", "PRECISION_2"]
 
@@ -121,9 +115,7 @@ class TestBenchmarker:
         mock_image_client_get_all.assert_called_once()
         mocked_model_client.assert_called_once()
         model_client_object_mock.get_all_active_models.assert_called_once()
-        model_client_object_mock.get_task_for_model.assert_called_with(
-            model=active_models[1]
-        )
+        model_client_object_mock.get_task_for_model.assert_called_with(model=active_models[1])
         mocked_training_client.assert_called_once()
         assert not benchmarker._is_single_task
         assert benchmarker._task_chain_algorithms == [
@@ -137,9 +129,7 @@ class TestBenchmarker:
         assert tuple(benchmarker.images) == fetched_images
         assert benchmarker._are_models_specified
 
-    def test_set_task_chain_models(
-        self, fxt_benchmarker_task_chain: Benchmarker, mocker: MockerFixture
-    ):
+    def test_set_task_chain_models(self, fxt_benchmarker_task_chain: Benchmarker, mocker: MockerFixture):
         # Arrange
         models_task_1 = (mocker.MagicMock(), mocker.MagicMock())
         models_task_2 = (mocker.MagicMock(), mocker.MagicMock())
@@ -162,17 +152,13 @@ class TestBenchmarker:
             [models_task_1[1].architecture, models_task_2[1].architecture],
         ]
 
-    def test_set_task_chain_algorithms(
-        self, fxt_benchmarker_task_chain: Benchmarker, mocker: MockerFixture
-    ):
+    def test_set_task_chain_algorithms(self, fxt_benchmarker_task_chain: Benchmarker, mocker: MockerFixture):
         # Arrange
         algorithms_task_1 = ("ALGO_1", "ALGO_2")
         algorithms_task_2 = ("ALGO_3", "ALGO_4")
 
         # Act
-        fxt_benchmarker_task_chain.set_task_chain_algorithms(
-            algorithms_task_1, algorithms_task_2
-        )
+        fxt_benchmarker_task_chain.set_task_chain_algorithms(algorithms_task_1, algorithms_task_2)
 
         # Assert
         assert not fxt_benchmarker_task_chain._are_models_specified
@@ -186,14 +172,8 @@ class TestBenchmarker:
 
     def test_properties(self, fxt_benchmarker_task_chain: Benchmarker):
         # Assert
-        assert (
-            fxt_benchmarker_task_chain.models
-            == fxt_benchmarker_task_chain._task_chain_models
-        )
-        assert (
-            fxt_benchmarker_task_chain.algorithms
-            == fxt_benchmarker_task_chain._task_chain_algorithms
-        )
+        assert fxt_benchmarker_task_chain.models == fxt_benchmarker_task_chain._task_chain_models
+        assert fxt_benchmarker_task_chain.algorithms == fxt_benchmarker_task_chain._task_chain_algorithms
         with pytest.raises(ValueError):
             # benchmarker has not been initialized
             fxt_benchmarker_task_chain.optimized_models
@@ -204,34 +184,23 @@ class TestBenchmarker:
         algorithm_name = "ALGO_1"
 
         # Act
-        model = fxt_benchmarker_task_chain._train_model_for_algorithm(
-            task_index, algorithm_name
-        )
+        model = fxt_benchmarker_task_chain._train_model_for_algorithm(task_index, algorithm_name)
 
         # Assert
         fxt_benchmarker_task_chain.training_client.train_task.assert_called_once()
         assert model is fxt_benchmarker_task_chain.model_client.get_model_for_job()
 
-    def test__optimize_model_for_algorithm(
-        self, fxt_benchmarker_task_chain: Benchmarker, mocker: MockerFixture
-    ):
+    def test__optimize_model_for_algorithm(self, fxt_benchmarker_task_chain: Benchmarker, mocker: MockerFixture):
         # Arrange
         model = mocker.MagicMock()
         precision = "INT8"
 
         # Act
-        optimized_model = fxt_benchmarker_task_chain._optimize_model_for_algorithm(
-            model, precision
-        )
+        optimized_model = fxt_benchmarker_task_chain._optimize_model_for_algorithm(model, precision)
 
         # Assert
-        fxt_benchmarker_task_chain.model_client.optimize_model.assert_called_once_with(
-            model=model
-        )
-        assert (
-            optimized_model
-            is fxt_benchmarker_task_chain.model_client.update_model_detail().get_optimized_model()
-        )
+        fxt_benchmarker_task_chain.model_client.optimize_model.assert_called_once_with(model=model)
+        assert optimized_model is fxt_benchmarker_task_chain.model_client.update_model_detail().get_optimized_model()
 
     def test_prepare_benchmark(
         self,
@@ -240,21 +209,16 @@ class TestBenchmarker:
         fxt_temp_directory: str,
     ):
         # Arrange
-        mock_deploy_project = mocker.patch.object(
-            fxt_benchmarker.geti, "deploy_project"
-        )
+        mock_deploy_project = mocker.patch.object(fxt_benchmarker.geti, "deploy_project")
 
         # Act
         fxt_benchmarker.prepare_benchmark(fxt_temp_directory)
 
         # Assert
-        assert mock_deploy_project.call_count == len(fxt_benchmarker.models) * len(
-            fxt_benchmarker.precision_levels
-        )
+        assert mock_deploy_project.call_count == len(fxt_benchmarker.models) * len(fxt_benchmarker.precision_levels)
         assert fxt_benchmarker._optimized_models is not None
         assert fxt_benchmarker._deployment_folders == [
-            str(Path(fxt_temp_directory) / f"deployment_{i}")
-            for i in range(len(fxt_benchmarker._optimized_models))
+            str(Path(fxt_temp_directory) / f"deployment_{i}") for i in range(len(fxt_benchmarker._optimized_models))
         ]
 
     def test_initialize_from_folder(
@@ -277,9 +241,7 @@ class TestBenchmarker:
         fxt_benchmarker.initialize_from_folder(fxt_temp_directory)
 
         # Assert
-        mocked_deployment_from_folder.assert_called_once_with(
-            path_to_folder=str(deployment_path)
-        )
+        mocked_deployment_from_folder.assert_called_once_with(path_to_folder=str(deployment_path))
         assert len(fxt_benchmarker._deployment_folders) == 1
         assert fxt_benchmarker._deployment_folders[0] == str(deployment_path)
 
@@ -307,9 +269,7 @@ class TestBenchmarker:
             return_value=deployment,
         )
 
-        number_of_runs = len(fxt_benchmarker.models) * len(
-            fxt_benchmarker.precision_levels
-        )
+        number_of_runs = len(fxt_benchmarker.models) * len(fxt_benchmarker.precision_levels)
         frames, repeats = len(loaded_images), 2
         results_file = Path(fxt_temp_directory) / "results.csv"
 
@@ -384,9 +344,7 @@ class TestBenchmarker:
 
         # Assert
         assert results_file.is_file()
-        mocked_prediction_client.return_value.predict_image.assert_called_once_with(
-            mock_image
-        )
+        mocked_prediction_client.return_value.predict_image.assert_called_once_with(mock_image)
         assert (
             mock_visualizer_draw.call_count
             == mock_pad_image_and_put_caption.call_count

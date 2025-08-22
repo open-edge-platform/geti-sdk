@@ -13,7 +13,7 @@
 # and limitations under the License.
 
 from datetime import datetime
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar
 
 import attr
 import numpy as np
@@ -46,24 +46,22 @@ class ResultMedium:
     _identifier_fields: ClassVar[str] = ["id", "data", "label_id", "url"]
 
     name: str
-    type: Optional[str] = None
-    url: Optional[str] = None
-    label_id: Optional[str] = None
-    id: Optional[str] = None
-    roi: Optional[Dict[str, Any]] = None
-    label_name: Optional[str] = attr.field(init=False, default=None)
-    data: Optional[bytes] = attr.field(default=None, repr=False, init=False)
+    type: str | None = None
+    url: str | None = None
+    label_id: str | None = None
+    id: str | None = None
+    roi: dict[str, Any] | None = None
+    label_name: str | None = attr.field(init=False, default=None)
+    data: bytes | None = attr.field(default=None, repr=False, init=False)
 
-    def resolve_label_name(self, labels: List[Label]):
+    def resolve_label_name(self, labels: list[Label]):
         """
         Add the label name to the result medium, by matching the label_id to a list of
         Labels.
 
         :param labels: List of Labels to get the name from
         """
-        self.label_name = next(
-            (label.name for label in labels if label.id == self.label_id), None
-        )
+        self.label_name = next((label.name for label in labels if label.id == self.label_id), None)
         # Label id is not defined for anomaly classification, it will always return
         # the saliency map for the 'Anomalous' label
         if self.name.lower() == "anomaly map" and self.label_name is None:
@@ -77,18 +75,15 @@ class ResultMedium:
             was generated
         :return: bytes object holding the data, if any is found
         """
-        if self.data is None:
-            if self.url is not None:
-                response = session.get_rest_response(
-                    url=self.url, method="GET", contenttype="jpeg"
+        if self.data is None and self.url is not None:
+            response = session.get_rest_response(url=self.url, method="GET", contenttype="jpeg")
+            if response.status_code == 200:
+                self.data = response.content
+            else:
+                raise ValueError(
+                    f"Unable to retrieve data for result medium {self}, received "
+                    f"response {response} from Intel® Geti™ server."
                 )
-                if response.status_code == 200:
-                    self.data = response.content
-                else:
-                    raise ValueError(
-                        f"Unable to retrieve data for result medium {self}, received "
-                        f"response {response} from Intel® Geti™ server."
-                    )
         return self.data
 
     @property
@@ -98,11 +93,7 @@ class ResultMedium:
 
         :return: friendly name for the result medium
         """
-        return (
-            self.name + "_" + self.label_name
-            if self.label_name is not None
-            else self.name
-        )
+        return self.name + "_" + self.label_name if self.label_name is not None else self.name
 
 
 @attr.define
@@ -128,13 +119,11 @@ class Prediction(AnnotationScene):
         default=AnnotationKind.PREDICTION,
         kw_only=True,
     )
-    maps: List[ResultMedium] = attr.field(factory=list, kw_only=True)
-    feature_vector: Optional[np.ndarray] = attr.field(
-        kw_only=True, default=None, repr=False
-    )
-    created: Optional[str] = attr.field(converter=str_to_datetime, default=None)
+    maps: list[ResultMedium] = attr.field(factory=list, kw_only=True)
+    feature_vector: np.ndarray | None = attr.field(kw_only=True, default=None, repr=False)
+    created: str | None = attr.field(converter=str_to_datetime, default=None)
 
-    def resolve_labels_for_result_media(self, labels: List[Label]) -> None:
+    def resolve_labels_for_result_media(self, labels: list[Label]) -> None:
         """
         Resolve the label names for all result media available with this Prediction.
 
@@ -165,7 +154,7 @@ class Prediction(AnnotationScene):
         """
         return len(self.maps) > 0
 
-    def get_result_media_data(self, session: GetiSession) -> List[ResultMedium]:
+    def get_result_media_data(self, session: GetiSession) -> list[ResultMedium]:
         """
         Download the data for all result media belonging to this prediction.
 
@@ -173,7 +162,7 @@ class Prediction(AnnotationScene):
             was generated
         :return: List of result media, that have their data downloaded from the cluster
         """
-        result: List[ResultMedium] = []
+        result: list[ResultMedium] = []
         for medium in self.maps:
             medium.get_data(session=session)
             result.append(medium)
@@ -182,7 +171,7 @@ class Prediction(AnnotationScene):
     def as_mask(
         self,
         media_information: MediaInformation,
-        probability_threshold: Optional[float] = None,
+        probability_threshold: float | None = None,
     ) -> np.ndarray:
         """
         Convert the shapes in the prediction to a mask that can be overlayed on an
@@ -201,13 +190,10 @@ class Prediction(AnnotationScene):
         mask = np.zeros((image_height, image_width, 3), dtype=np.uint8)
 
         for annotation in self.annotations:
-            max_prob_label_index = int(
-                np.argmax([label.probability for label in annotation.labels])
-            )
+            max_prob_label_index = int(np.argmax([label.probability for label in annotation.labels]))
             max_prob_label = annotation.labels[max_prob_label_index]
-            if probability_threshold is not None:
-                if max_prob_label.probability < probability_threshold:
-                    continue
+            if probability_threshold is not None and max_prob_label.probability < probability_threshold:
+                continue
             color = max_prob_label.color_tuple
             line_thickness = 3
             shape = annotation.shape
@@ -231,7 +217,7 @@ class Prediction(AnnotationScene):
         :return: new Prediction object containing only annotations with a predicted
             probability higher than the confidence_threshold
         """
-        annotations: List[Annotation] = []
+        annotations: list[Annotation] = []
         for annotation in self.annotations:
             max_prob = max([label.probability for label in annotation.labels])
             if max_prob > confidence_threshold:

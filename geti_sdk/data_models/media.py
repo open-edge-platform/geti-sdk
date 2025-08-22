@@ -17,7 +17,7 @@ import os
 import tempfile
 from multiprocessing import Lock
 from pprint import pformat
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import attr
 import cv2
@@ -55,8 +55,8 @@ class MediaInformation:
     display_url: str
     height: int
     width: int
-    extension: Optional[str] = None  # Added in Geti v2.5
-    size: Optional[int] = None  # Added in Geti v1.2
+    extension: str | None = None  # Added in Geti v2.5
+    size: int | None = None  # Added in Geti v1.2
 
 
 @attr.define
@@ -73,9 +73,7 @@ class VideoInformation(MediaInformation):
     duration: int = attr.ib(kw_only=True)
     frame_count: int = attr.ib(kw_only=True)
     frame_stride: int = attr.ib(kw_only=True)
-    frame_rate: Optional[float] = attr.ib(
-        kw_only=True, default=None
-    )  # Added in Geti v1.1
+    frame_rate: float | None = attr.ib(kw_only=True, default=None)  # Added in Geti v1.1
 
 
 @attr.define
@@ -104,7 +102,7 @@ class MediaPreprocessing:
     """
 
     status: str = attr.ib(kw_only=True)
-    message: Optional[str] = attr.ib(kw_only=True, default=None)
+    message: str | None = attr.ib(kw_only=True, default=None)
 
 
 @attr.define
@@ -129,14 +127,12 @@ class MediaItem:
     type: str = attr.field(converter=str_to_media_type)
     upload_time: str = attr.field(converter=str_to_datetime)
     media_information: MediaInformation
-    preprocessing: Optional[MediaPreprocessing] = (
-        None  # preprocessing was added in Geti 2.10
-    )
-    annotation_state_per_task: Optional[List[TaskAnnotationState]] = None
-    thumbnail: Optional[str] = None
-    uploader_id: Optional[str] = None
+    preprocessing: MediaPreprocessing | None = None  # preprocessing was added in Geti 2.10
+    annotation_state_per_task: list[TaskAnnotationState] | None = None
+    thumbnail: str | None = None
+    uploader_id: str | None = None
     # last_annotator_id was added in Geti v 2.0. It replaced `editor_name`
-    last_annotator_id: Optional[str] = None
+    last_annotator_id: str | None = None
 
     @property
     def download_url(self) -> str:
@@ -181,7 +177,7 @@ class MediaItem:
         return MediaIdentifier(type=self.type)
 
     @abc.abstractmethod
-    def get_data(self, session: GetiSession) -> Union[np.ndarray, str]:
+    def get_data(self, session: GetiSession) -> np.ndarray | str:
         """
         Get the pixel data for this MediaItem. Uses caching.
 
@@ -198,14 +194,13 @@ class MediaItem:
         """
         raise NotImplementedError
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert the MediaItem to a dictionary representation.
 
         :return: Dictionary holding the annotation scene data
         """
-        output_dict = attr.asdict(self, value_serializer=attr_value_serializer)
-        return output_dict
+        return attr.asdict(self, value_serializer=attr_value_serializer)
 
     @property
     def overview(self) -> str:
@@ -227,18 +222,14 @@ class Image(MediaItem):
     """
 
     media_information: ImageInformation = attr.field(kw_only=True)
-    annotation_scene_id: Optional[str] = attr.field(
-        kw_only=True, default=None, repr=False
-    )  # Added in Geti v 1.16
-    roi_id: Optional[str] = attr.field(
-        kw_only=True, default=None, repr=False
-    )  # Added in Geti v 1.16
+    annotation_scene_id: str | None = attr.field(kw_only=True, default=None, repr=False)  # Added in Geti v 1.16
+    roi_id: str | None = attr.field(kw_only=True, default=None, repr=False)  # Added in Geti v 1.16
 
     def __attrs_post_init__(self):
         """
         Initialize private attributes.
         """
-        self._data: Optional[np.ndarray] = None
+        self._data: np.ndarray | None = None
 
     @property
     def identifier(self) -> ImageIdentifier:
@@ -263,20 +254,17 @@ class Image(MediaItem):
         :return: Numpy.ndarray holding the pixel data for this Image.
         """
         if self._data is None:
-            response = session.get_rest_response(
-                url=self.download_url, method="GET", contenttype="jpeg"
-            )
+            response = session.get_rest_response(url=self.download_url, method="GET", contenttype="jpeg")
             if response.status_code == 200:
                 self._data = numpy_from_buffer(response.content)
             else:
                 raise ValueError(
-                    f"Unable to retrieve data for image {self}, received "
-                    f"response {response} from Intel® Geti™ server."
+                    f"Unable to retrieve data for image {self}, received response {response} from Intel® Geti™ server."
                 )
         return self._data
 
     @property
-    def numpy(self) -> Optional[np.ndarray]:
+    def numpy(self) -> np.ndarray | None:
         """
         Pixel data for the Image, as a numpy array of shape (width x heigth x 3).
         If this attribute is None, the pixel data should be downloaded from the
@@ -313,16 +301,14 @@ class Video(MediaItem):
     """
 
     media_information: VideoInformation = attr.field(kw_only=True)
-    matched_frames: Optional[int] = attr.field(kw_only=True, default=None, repr=False)
-    annotation_statistics: Optional[VideoAnnotationStatistics] = attr.field(
-        kw_only=True, default=None, repr=False
-    )
+    matched_frames: int | None = attr.field(kw_only=True, default=None, repr=False)
+    annotation_statistics: VideoAnnotationStatistics | None = attr.field(kw_only=True, default=None, repr=False)
 
     def __attrs_post_init__(self):
         """
         Initialize private attributes.
         """
-        self._data: Optional[str] = None
+        self._data: str | None = None
         self._needs_tempfile_deletion: bool = False
         self._data_lock: Lock = Lock()
 
@@ -345,25 +331,20 @@ class Video(MediaItem):
         :return: Path to the temporary video file on local disk.
         """
         if self._data is None:
-            response = session.get_rest_response(
-                url=self.download_url, method="GET", contenttype="jpeg"
-            )
+            response = session.get_rest_response(url=self.download_url, method="GET", contenttype="jpeg")
             if response.status_code == 200:
-                file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+                file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")  # noqa: SIM115
                 file.write(response.content)
                 file.close()
                 self._data = file.name
                 self._needs_tempfile_deletion = True
             else:
                 raise ValueError(
-                    f"Unable to retrieve data for image {self}, received "
-                    f"response {response} from Intel® Geti™ server."
+                    f"Unable to retrieve data for image {self}, received response {response} from Intel® Geti™ server."
                 )
         return self._data
 
-    def to_frames(
-        self, frame_stride: Optional[int] = None, include_data: bool = False
-    ) -> List["VideoFrame"]:
+    def to_frames(self, frame_stride: int | None = None, include_data: bool = False) -> list["VideoFrame"]:
         """
         Extract VideoFrames from the Video. Returns a list of VideoFrame objects.
 
@@ -375,16 +356,12 @@ class Video(MediaItem):
         if frame_stride is None:
             frame_stride = self.media_information.frame_stride
         if frame_stride < 0:
-            raise ValueError(
-                f"Invalid frame stride {frame_stride}. Frame stride cannot be negative."
-            )
-        elif frame_stride > self.media_information.frame_count:
+            raise ValueError(f"Invalid frame stride {frame_stride}. Frame stride cannot be negative.")
+        if frame_stride > self.media_information.frame_count:
             frame_stride = self.media_information.frame_count - 1
         frames_range = range(0, self.media_information.frame_count, frame_stride)
         if not include_data:
-            frames = [
-                VideoFrame.from_video(self, frame_index=index) for index in frames_range
-            ]
+            frames = [VideoFrame.from_video(self, frame_index=index) for index in frames_range]
         else:
             frames = [self.get_frame(frame_index=index) for index in frames_range]
         return frames
@@ -413,9 +390,8 @@ class Video(MediaItem):
         method is called when the Video object is deleted.
         """
         with self._data_lock:
-            if self._needs_tempfile_deletion:
-                if os.path.exists(self._data) and os.path.isfile(self._data):
-                    os.remove(self._data)
+            if self._needs_tempfile_deletion and os.path.exists(self._data) and os.path.isfile(self._data):
+                os.remove(self._data)
 
 
 @attr.define(slots=False)
@@ -430,13 +406,13 @@ class VideoFrame(MediaItem):
     """
 
     media_information: VideoFrameInformation = attr.field(kw_only=True)
-    video_name: Optional[str] = attr.field(kw_only=True, default=None)
+    video_name: str | None = attr.field(kw_only=True, default=None)
 
     def __attrs_post_init__(self):
         """
         Initialize private attributes.
         """
-        self._data: Optional[np.ndarray] = None
+        self._data: np.ndarray | None = None
 
     @classmethod
     def from_video(cls, video: Video, frame_index: int) -> "VideoFrame":
@@ -482,7 +458,7 @@ class VideoFrame(MediaItem):
         )
 
     @property
-    def numpy(self) -> Optional[np.ndarray]:
+    def numpy(self) -> np.ndarray | None:
         """
         Pixel data for the Image, as a numpy array of shape (width x heigth x 3).
         If this attribute is None, the pixel data should be downloaded from the
@@ -505,14 +481,11 @@ class VideoFrame(MediaItem):
         :return: Numpy.ndarray holding the pixel data for this VideoFrame.
         """
         if self._data is None:
-            response = session.get_rest_response(
-                url=self.download_url, method="GET", contenttype="jpeg"
-            )
+            response = session.get_rest_response(url=self.download_url, method="GET", contenttype="jpeg")
             if response.status_code == 200:
                 self._data = numpy_from_buffer(response.content)
             else:
                 raise ValueError(
-                    f"Unable to retrieve data for image {self}, received "
-                    f"response {response} from Intel® Geti™ server."
+                    f"Unable to retrieve data for image {self}, received response {response} from Intel® Geti™ server."
                 )
         return self._data

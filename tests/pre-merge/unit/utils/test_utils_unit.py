@@ -41,40 +41,28 @@ class TestUtils:
         dictionary_with_extra_key.update({"invalid_key": "invalidness"})
 
         dictionary_with_nested_extra_key = copy.deepcopy(fxt_project_dictionary)
-        dictionary_with_nested_extra_key["pipeline"].update(
-            {"invalid_key": "invalidness"}
-        )
-        dictionary_with_nested_extra_key["pipeline"]["tasks"][0].update(
-            {"another_invalid_key": "invalidness"}
-        )
+        dictionary_with_nested_extra_key["pipeline"].update({"invalid_key": "invalidness"})
+        dictionary_with_nested_extra_key["pipeline"]["tasks"][0].update({"another_invalid_key": "invalidness"})
 
         dictionary_with_missing_key = copy.deepcopy(fxt_project_dictionary)
         dictionary_with_missing_key.pop("pipeline")
 
         # Act
-        project = deserialize_dictionary(
-            input_dictionary=fxt_project_dictionary, output_type=object_type
-        )
+        project = deserialize_dictionary(input_dictionary=fxt_project_dictionary, output_type=object_type)
 
         # Assert
         assert project.name == fxt_project_dictionary["name"]
         assert project.get_trainable_tasks()[0].type == TaskType.DETECTION
 
         # Act and assert
-        deserialize_dictionary(
-            input_dictionary=dictionary_with_extra_key, output_type=object_type
-        )
+        deserialize_dictionary(input_dictionary=dictionary_with_extra_key, output_type=object_type)
 
         # Act and assert
-        deserialize_dictionary(
-            input_dictionary=dictionary_with_nested_extra_key, output_type=object_type
-        )
+        deserialize_dictionary(input_dictionary=dictionary_with_nested_extra_key, output_type=object_type)
 
         # Act and assert
         with pytest.raises(DataModelMismatchException):
-            deserialize_dictionary(
-                input_dictionary=dictionary_with_missing_key, output_type=object_type
-            )
+            deserialize_dictionary(input_dictionary=dictionary_with_missing_key, output_type=object_type)
 
     def test_generate_segmentation_labels(self):
         # Arrange
@@ -94,17 +82,13 @@ class TestUtils:
 
         # Act
         new_label_names = generate_classification_labels(label_names)
-        new_label_names_multilabel = generate_classification_labels(
-            label_names, multilabel=True
-        )
+        new_label_names_multilabel = generate_classification_labels(label_names, multilabel=True)
 
         # Assert
         assert len(new_label_names) == len(label_names)
         assert len(new_label_names_multilabel) == len(label_names)
         label_groups = [label["group"] for label in new_label_names]
-        label_groups_multilabel = [
-            label["group"] for label in new_label_names_multilabel
-        ]
+        label_groups_multilabel = [label["group"] for label in new_label_names_multilabel]
 
         assert len(set(label_groups)) == 1
         assert len(set(label_groups_multilabel)) == len(label_names)

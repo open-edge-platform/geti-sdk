@@ -17,7 +17,7 @@ import time
 from dataclasses import dataclass, field
 from multiprocessing import Value
 from queue import Empty, PriorityQueue
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -34,7 +34,7 @@ class IndexedResult:
     index: int
     prediction: Prediction = field(compare=False)
     image: np.ndarray = field(compare=False)
-    runtime_data: Optional[Any] = field(compare=False, default=None)
+    runtime_data: Any | None = field(compare=False, default=None)
 
 
 class OrderedResultBuffer:
@@ -42,7 +42,7 @@ class OrderedResultBuffer:
     A buffer for inference results, ordered according to an index
     """
 
-    def __init__(self, minsize: int = 30, maxsize: Optional[int] = None):
+    def __init__(self, minsize: int = 30, maxsize: int | None = None):
         """
         Buffer inference results and assign an index, so that they can be retrieved in
         an ordered fashion.
@@ -53,10 +53,7 @@ class OrderedResultBuffer:
             buffer contains this number of items, any attempt to add an item will be
             blocking.
         """
-        if isinstance(maxsize, int):
-            queue_args = {"maxsize": maxsize}
-        else:
-            queue_args = {}
+        queue_args = {"maxsize": maxsize} if isinstance(maxsize, int) else {}
         self._queue = PriorityQueue[IndexedResult](**queue_args)
         self._minsize = minsize
         self.__queue_args = queue_args
@@ -66,16 +63,14 @@ class OrderedResultBuffer:
         if maxsize is not None and minsize >= maxsize:
             raise ValueError("minsize must be smaller than maxsize")
 
-        logging.info(
-            f"OrderedBuffer intialized with `minsize={minsize}` and `maxsize={maxsize}`"
-        )
+        logging.info(f"OrderedBuffer intialized with `minsize={minsize}` and `maxsize={maxsize}`")
 
     def put(
         self,
         index: int,
         image: np.ndarray,
         prediction: Prediction,
-        runtime_data: Optional[Any] = None,
+        runtime_data: Any | None = None,
     ):
         """
         Add an image, prediction and corresponding runtime data as an entry to the
@@ -86,9 +81,7 @@ class OrderedResultBuffer:
         :param prediction: The prediction for the image
         :param runtime_data: Any additional data passed at runtime
         """
-        queue_item = IndexedResult(
-            index=index, image=image, prediction=prediction, runtime_data=runtime_data
-        )
+        queue_item = IndexedResult(index=index, image=image, prediction=prediction, runtime_data=runtime_data)
         self._queue.put(queue_item)
         with self._put_count.get_lock():
             self._put_count.value += 1
@@ -104,7 +97,7 @@ class OrderedResultBuffer:
             the prediction and any additional data assigned at runtime
         """
         t_start = time.time()
-        item: Optional[IndexedResult] = None
+        item: IndexedResult | None = None
         if not empty_buffer:
             while timeout == 0 or time.time() - t_start < timeout:
                 if self._queue.qsize() > self._minsize:

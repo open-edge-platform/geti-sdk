@@ -20,9 +20,7 @@ def rotate_image(image: np.ndarray, angle: float) -> np.ndarray:
     """
     center = tuple(np.array(image.shape[1::-1]) / 2)
     rotation_matrix = cv2.getRotationMatrix2D(center=center, angle=angle, scale=1.0)
-    return cv2.warpAffine(
-        src=image, M=rotation_matrix, dsize=image.shape[1::-1], flags=cv2.INTER_LINEAR
-    )
+    return cv2.warpAffine(src=image, M=rotation_matrix, dsize=image.shape[1::-1], flags=cv2.INTER_LINEAR)
 
 
 if __name__ == "__main__":
@@ -78,9 +76,7 @@ if __name__ == "__main__":
     )
     filepath = "example_prediction.jpg"
     # Save the result to a file
-    show_image_with_annotation_scene(
-        image=sc_image, annotation_scene=image_prediction, filepath=filepath
-    )
+    show_image_with_annotation_scene(image=sc_image, annotation_scene=image_prediction, filepath=filepath)
     print(f"Prediction for the example image was saved to file: '{filepath}'")
 
     # We can do the same with videos. For example, to investigate the effect image

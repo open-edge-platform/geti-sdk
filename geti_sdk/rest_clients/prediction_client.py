@@ -18,7 +18,7 @@ import json
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import cv2
 import numpy as np
@@ -54,7 +54,7 @@ class PredictionClient:
         self._labels = project.get_all_labels()
         self.__project_ready = self.__are_models_trained()
         self._mode = PredictionMode.AUTO
-        self.__override_mode: Optional[PredictionMode] = None
+        self.__override_mode: PredictionMode | None = None
 
     def __are_models_trained(self) -> bool:
         """
@@ -65,24 +65,19 @@ class PredictionClient:
         :return: True if the project has trained models and is ready to generate
             predictions, False otherwise
         """
-        response = self.session.get_rest_response(
-            url=f"{self._base_url}model_groups", method="GET"
-        )
-        model_info_array: List[Dict[str, Any]]
+        response = self.session.get_rest_response(url=f"{self._base_url}model_groups", method="GET")
+        model_info_array: list[dict[str, Any]]
 
         model_info_array = response.get("model_groups", [])
 
         task_ids = [task.id for task in self.project.get_trainable_tasks()]
-        tasks_with_models: List[str] = []
+        tasks_with_models: list[str] = []
         for item in model_info_array:
             if len(item["models"]) > 0:
                 tasks_with_models.append(item["task_id"])
 
         # It is sufficient if the FIRST task has a model trained
-        if task_ids[0] in tasks_with_models:
-            return True
-        else:
-            return False
+        return task_ids[0] in tasks_with_models
 
     @property
     def ready_to_predict(self):
@@ -93,9 +88,8 @@ class PredictionClient:
         """
         if self.__project_ready:
             return True
-        else:
-            self.__project_ready = self.__are_models_trained()
-            return self.__project_ready
+        self.__project_ready = self.__are_models_trained()
+        return self.__project_ready
 
     @property
     def mode(self) -> PredictionMode:
@@ -116,11 +110,10 @@ class PredictionClient:
         """
         if self.__override_mode is None:
             return self._mode
-        else:
-            return self.__override_mode
+        return self.__override_mode
 
     @mode.setter
-    def mode(self, new_mode: Union[str, PredictionMode]):
+    def mode(self, new_mode: str | PredictionMode):
         """
         Set the mode for the Prediction client to retrieve predictions from the
         Intel® Geti™ server.
@@ -135,10 +128,10 @@ class PredictionClient:
     def _get_prediction_for_media_item(
         self,
         media_item: MediaItem,
-        dataset: Optional[Dataset] = None,
+        dataset: Dataset | None = None,
         prediction_mode: PredictionMode = PredictionMode.AUTO,
         include_explanation: bool = False,
-    ) -> Tuple[Optional[Union[Prediction, List[Prediction]]], str]:
+    ) -> tuple[Prediction | list[Prediction] | None, str]:
         """
         Get the prediction for a media item. If a 2D media item (Image or VideoFrame)
         is passed, this method will return a single Prediction. If a Video is passed,
@@ -187,8 +180,8 @@ class PredictionClient:
                 dataset_id = dataset_id_string.split("/")[0]
         else:
             dataset_id = dataset.id
-        data: Optional[Dict[str, str]] = None
-        explain_response: Optional[dict] = None
+        data: dict[str, str] | None = None
+        explain_response: dict | None = None
 
         prediction_mode_map = {
             "auto": "auto",
@@ -218,10 +211,7 @@ class PredictionClient:
                 "frame_skip": stride,
             }
             action = "batch_predict"
-        url = (
-            f"{self._base_url}pipelines/active:{action}"
-            f"?use_cache={prediction_mode_map[str(prediction_mode)]}"
-        )
+        url = f"{self._base_url}pipelines/active:{action}?use_cache={prediction_mode_map[str(prediction_mode)]}"
         include_org_id = True
         method = "POST"
         if include_explanation:
@@ -240,16 +230,14 @@ class PredictionClient:
                 include_organization_id=include_org_id,
                 data=data,
             )
-            if isinstance(media_item, (Image, VideoFrame)):
+            if isinstance(media_item, Image | VideoFrame):
                 result = PredictionRESTConverter.from_dict(response)
                 if include_explanation:
-                    maps: List[ResultMedium] = []
+                    maps: list[ResultMedium] = []
                     for map_dict in explain_response.get("maps", []):
-                        map = ResultMedium(
-                            name="saliency_map", label_id=map_dict.get("label_id", None)
-                        )
-                        map.data = base64.b64decode(map_dict["data"])
-                        maps.append(map)
+                        saliency_map = ResultMedium(name="saliency_map", label_id=map_dict.get("label_id", None))
+                        saliency_map.data = base64.b64decode(map_dict["data"])
+                        maps.append(saliency_map)
                     result.maps = maps
                 result.resolve_labels_for_result_media(labels=self._labels)
                 result.resolve_label_names_and_colors(labels=self._labels)
@@ -260,16 +248,14 @@ class PredictionClient:
                     pred_object = PredictionRESTConverter.from_dict(prediction)
                     pred_object.resolve_label_names_and_colors(labels=self._labels)
                     if include_explanation:
-                        maps: List[ResultMedium] = []
-                        for map_dict in explain_response["explanations"][ind].get(
-                            "maps", []
-                        ):
-                            map = ResultMedium(
+                        maps: list[ResultMedium] = []
+                        for map_dict in explain_response["explanations"][ind].get("maps", []):
+                            saliency_map = ResultMedium(
                                 name="saliency_map",
                                 label_id=map_dict.get("label_id", None),
                             )
-                            map.data = map_dict["data"].encode("utf-8")
-                            maps.append(map)
+                            saliency_map.data = map_dict["data"].encode("utf-8")
+                            maps.append(saliency_map)
                         pred_object.maps = maps
                     pred_object.resolve_labels_for_result_media(labels=self._labels)
                     result.append(pred_object)
@@ -309,9 +295,7 @@ class PredictionClient:
             the project on the cluster already.
         :return: Prediction for the image
         """
-        result, msg = self._get_prediction_for_media_item(
-            media_item=image, prediction_mode=self.mode
-        )
+        result, msg = self._get_prediction_for_media_item(media_item=image, prediction_mode=self.mode)
         if result is None:
             raise ValueError(msg)
         return result
@@ -324,14 +308,12 @@ class PredictionClient:
             present in the project on the cluster already.
         :return: Prediction for the video frame
         """
-        result, msg = self._get_prediction_for_media_item(
-            media_item=video_frame, prediction_mode=self.mode
-        )
+        result, msg = self._get_prediction_for_media_item(media_item=video_frame, prediction_mode=self.mode)
         if result is None:
             raise ValueError(msg)
         return result
 
-    def get_video_predictions(self, video: Video) -> List[Prediction]:
+    def get_video_predictions(self, video: Video) -> list[Prediction]:
         """
         Get a list of predictions for a video from the Intel® Geti™ server, if available.
 
@@ -339,9 +321,7 @@ class PredictionClient:
             the project on the cluster already.
         :return: List of Predictions for the video
         """
-        result, msg = self._get_prediction_for_media_item(
-            media_item=video, prediction_mode=self.mode
-        )
+        result, msg = self._get_prediction_for_media_item(media_item=video, prediction_mode=self.mode)
         if result is None:
             raise ValueError(msg)
         return result
@@ -373,7 +353,7 @@ class PredictionClient:
         path_to_folder: str,
         include_result_media: bool = True,
         inferred_frames_only: bool = True,
-        frame_stride: Optional[int] = None,
+        frame_stride: int | None = None,
     ) -> float:
         """
         Download predictions for a list of videos from the server to a target folder
@@ -414,7 +394,7 @@ class PredictionClient:
         path_to_folder: str,
         include_result_media: bool = True,
         inferred_frames_only: bool = True,
-        frame_stride: Optional[int] = None,
+        frame_stride: int | None = None,
     ) -> float:
         """
         Download video predictions from the server to a target folder on disk.
@@ -435,24 +415,17 @@ class PredictionClient:
             predictions = self.get_video_predictions(video=video)
             frame_list = MediaList[VideoFrame](
                 [
-                    VideoFrame.from_video(
-                        video=video, frame_index=prediction.media_identifier.frame_index
-                    )
+                    VideoFrame.from_video(video=video, frame_index=prediction.media_identifier.frame_index)
                     for prediction in predictions
                 ]
             )
         else:
             stride = (
-                frame_stride
-                if frame_stride is not None and frame_stride > 0
-                else video.media_information.frame_stride
+                frame_stride if frame_stride is not None and frame_stride > 0 else video.media_information.frame_stride
             )
             frame_indices = range(0, video.media_information.frame_count, stride)
             frame_list = MediaList[VideoFrame](
-                [
-                    VideoFrame.from_video(video=video, frame_index=frame_index)
-                    for frame_index in frame_indices
-                ]
+                [VideoFrame.from_video(video=video, frame_index=frame_index) for frame_index in frame_indices]
             )
             # Set the prediction mode to online to force inference on frames that don't
             # have a prediction yet
@@ -488,7 +461,7 @@ class PredictionClient:
 
     def _download_predictions_for_2d_media_list(
         self,
-        media_list: Union[MediaList[Image], MediaList[VideoFrame]],
+        media_list: MediaList[Image] | MediaList[VideoFrame],
         path_to_folder: str,
         include_result_media: bool = True,
         verbose: bool = True,
@@ -511,10 +484,7 @@ class PredictionClient:
             media_name = "video frame"
             media_name_plural = "video frames"
         else:
-            raise ValueError(
-                "Invalid media type found in media_list, unable to download "
-                "predictions."
-            )
+            raise ValueError("Invalid media type found in media_list, unable to download predictions.")
 
         if not path_to_folder.endswith("predictions"):
             path_to_predictions_folder = os.path.join(path_to_folder, "predictions")
@@ -552,8 +522,7 @@ class PredictionClient:
                 if kind != AnnotationKind.PREDICTION:
                     if verbose:
                         logging.warning(
-                            f"Received invalid prediction of kind {kind} for {media_name} "
-                            f"with name{media_item.name}"
+                            f"Received invalid prediction of kind {kind} for {media_name} with name{media_item.name}"
                         )
                     skip_count += 1
                     continue
@@ -570,19 +539,12 @@ class PredictionClient:
                             )
                         result_media = None
                     if result_media is not None:
-                        path_to_result_media_folder = os.path.join(
-                            path_to_predictions_folder, "saliency_maps"
-                        )
-                        os.makedirs(
-                            path_to_result_media_folder, exist_ok=True, mode=0o770
-                        )
+                        path_to_result_media_folder = os.path.join(path_to_predictions_folder, "saliency_maps")
+                        os.makedirs(path_to_result_media_folder, exist_ok=True, mode=0o770)
                         for result_medium in result_media:
                             result_media_path = os.path.join(
                                 path_to_result_media_folder,
-                                media_item.name
-                                + "_"
-                                + result_medium.friendly_name
-                                + ".jpg",
+                                media_item.name + "_" + result_medium.friendly_name + ".jpg",
                             )
 
                             os.makedirs(
@@ -595,9 +557,7 @@ class PredictionClient:
 
                 # Convert prediction to json and save to file
                 export_data = PredictionRESTConverter.to_dict(prediction)
-                prediction_path = os.path.join(
-                    path_to_predictions_folder, media_item.name + ".json"
-                )
+                prediction_path = os.path.join(path_to_predictions_folder, media_item.name + ".json")
 
                 os.makedirs(os.path.dirname(prediction_path), exist_ok=True, mode=0o770)
                 with open(prediction_path, "w") as f:
@@ -620,9 +580,7 @@ class PredictionClient:
             logging.info(msg)
         return t_elapsed
 
-    def predict_image(
-        self, image: Union[Image, np.ndarray, os.PathLike, str]
-    ) -> Prediction:
+    def predict_image(self, image: Image | np.ndarray | os.PathLike | str) -> Prediction:
         """
         Push an image to the Intel® Geti™ project and receive a prediction for it.
 
@@ -633,8 +591,8 @@ class PredictionClient:
         :return: Prediction for the image
         """
         # Get image pixel data from input
-        image_data: Optional[np.ndarray]
-        image_name: Optional[str]
+        image_data: np.ndarray | None
+        image_name: str | None
         if isinstance(image, Image):
             image_data = image.numpy
             if image_data is None:
@@ -648,7 +606,7 @@ class PredictionClient:
         elif isinstance(image, np.ndarray):
             image_data = image
             image_name = "numpy_image.jpg"
-        elif isinstance(image, (os.PathLike, str)):
+        elif isinstance(image, os.PathLike | str):
             image_data = None
             image_name = None
         else:
@@ -658,7 +616,7 @@ class PredictionClient:
             )
 
         if image_data is None:
-            image_io = open(image, "rb").read()
+            image_io = open(image, "rb").read()  # noqa: SIM115
         else:
             image_io = io.BytesIO(cv2.imencode(".jpg", image_data)[1].tobytes())
             image_io.name = image_name

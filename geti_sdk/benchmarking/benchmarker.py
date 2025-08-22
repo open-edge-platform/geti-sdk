@@ -16,7 +16,8 @@ import itertools
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional, Sequence, Union
+from collections.abc import Sequence
+from typing import Any
 
 import cv2
 import numpy as np
@@ -54,13 +55,11 @@ class Benchmarker:
         self,
         geti: Geti,
         project: Project,
-        precision_levels: Optional[Sequence[str]] = None,
-        models: Optional[Sequence[Model]] = None,
-        algorithms: Optional[Sequence[str]] = None,
-        benchmark_images: Optional[
-            Sequence[Union[Image, np.ndarray, os.PathLike]]
-        ] = None,
-        benchmark_video: Optional[Union[Video, os.PathLike]] = None,
+        precision_levels: Sequence[str] | None = None,
+        models: Sequence[Model] | None = None,
+        algorithms: Sequence[str] | None = None,
+        benchmark_images: Sequence[Image | np.ndarray | os.PathLike] | None = None,
+        benchmark_video: Video | os.PathLike | None = None,
     ):
         """
         Manage benchmarking experiments to measure inference model throughput on
@@ -113,27 +112,23 @@ class Benchmarker:
         self.geti = geti
         # Update project object to get the latest project details
         self.project = self.geti.get_project(project_id=project.id)
-        logging.info(
-            f"Setting up Benchmarker for Intel® Geti™ project `{self.project.name}`."
-        )
+        logging.info(f"Setting up Benchmarker for Intel® Geti™ project `{self.project.name}`.")
         self._is_single_task = len(self.project.get_trainable_tasks()) == 1
         if precision_levels is None:
             precision_levels = ["FP32", "FP16"]
         self.precision_levels = precision_levels
-        self.model_client = ModelClient(
-            session=geti.session, workspace_id=geti.workspace_id, project=self.project
-        )
+        self.model_client = ModelClient(session=geti.session, workspace_id=geti.workspace_id, project=self.project)
         self.training_client = TrainingClient(
             session=geti.session, workspace_id=geti.workspace_id, project=self.project
         )
 
-        self._models: Optional[List[Model]] = None
-        self._task_chain_models: Optional[List[List[Model]]] = None
-        self._algorithms: Optional[List[str]] = None
-        self._task_chain_algorithms: Optional[List[List[str]]] = None
-        self._optimized_models: Optional[List[OptimizedModel]] = None
-        self._task_chain_optimized_models: Optional[List[List[OptimizedModel]]] = None
-        self._deployment_folders: List[os.PathLike] = []
+        self._models: list[Model] | None = None
+        self._task_chain_models: list[list[Model]] | None = None
+        self._algorithms: list[str] | None = None
+        self._task_chain_algorithms: list[list[str]] | None = None
+        self._optimized_models: list[OptimizedModel] | None = None
+        self._task_chain_optimized_models: list[list[OptimizedModel]] | None = None
+        self._deployment_folders: list[os.PathLike] = []
 
         if not self._is_single_task and (models is not None or algorithms is not None):
             raise ValueError(
@@ -149,10 +144,7 @@ class Benchmarker:
 
         if models is None and algorithms is None:
             if self._is_single_task:
-                logging.info(
-                    "No `models` or `algorithms` were specified, using current active "
-                    "models in the project."
-                )
+                logging.info("No `models` or `algorithms` were specified, using current active models in the project.")
             else:
                 logging.info(
                     "Models or algorithms to benchmark for a task chain project can "
@@ -167,13 +159,11 @@ class Benchmarker:
                     "No trained models were found in the project, please either "
                     "train a model first or specify an algorithm to train."
                 )
-            algorithms: List[str] = []
+            algorithms: list[str] = []
             for model in models:
                 task = self.model_client.get_task_for_model(model=model)
                 if self._is_single_task:
-                    logging.info(
-                        f"Found active model `{model.name}` for task `{task.title}`"
-                    )
+                    logging.info(f"Found active model `{model.name}` for task `{task.title}`")
                 algorithms.append(model.architecture)
             if self._is_single_task:
                 self._models = models
@@ -184,9 +174,7 @@ class Benchmarker:
             self._are_models_specified = True
 
         elif models is not None and algorithms is not None:
-            raise ValueError(
-                "Either `models` or `algorithms` could be specified, but not both."
-            )
+            raise ValueError("Either `models` or `algorithms` could be specified, but not both.")
         elif models is not None and algorithms is None:
             self._models = models
             self._are_models_specified = True
@@ -199,11 +187,8 @@ class Benchmarker:
         self.images = None
         self.video = None
         if benchmark_video is not None and benchmark_images is not None:
-            raise ValueError(
-                "Please specify either `benchmark_video` or `benchmark_images`, but "
-                "not both."
-            )
-        elif benchmark_images is not None:
+            raise ValueError("Please specify either `benchmark_video` or `benchmark_images`, but not both.")
+        if benchmark_images is not None:
             self.images = benchmark_images
         elif benchmark_video is not None:
             self.video = benchmark_video
@@ -232,9 +217,7 @@ class Benchmarker:
                         "specify either images or a video to run the benchmark on."
                     )
 
-    def set_task_chain_models(
-        self, models_task_1: Sequence[Model], models_task_2: Sequence[Model]
-    ):
+    def set_task_chain_models(self, models_task_1: Sequence[Model], models_task_2: Sequence[Model]):
         """
         Set the models to be used in the benchmark for a task-chain project. The
         benchmarking will run for all possible combinations of models for task 1
@@ -245,25 +228,17 @@ class Benchmarker:
         """
         if self._is_single_task:
             logging.warning(
-                "Method `set_task_chain_models` was called for a non-task-chain "
-                "project. This has no effect."
+                "Method `set_task_chain_models` was called for a non-task-chain project. This has no effect."
             )
             return
-        self._task_chain_models = [
-            list(pair) for pair in itertools.product(models_task_1, models_task_2)
-        ]
+        self._task_chain_models = [list(pair) for pair in itertools.product(models_task_1, models_task_2)]
         self._are_models_specified = True
-        self._task_chain_algorithms = [
-            [model.architecture for model in pair] for pair in self._task_chain_models
-        ]
+        self._task_chain_algorithms = [[model.architecture for model in pair] for pair in self._task_chain_models]
         logging.info(
-            f"Task chain models set. Found a total of "
-            f"{len(self._task_chain_models)} possible combinations to benchmark"
+            f"Task chain models set. Found a total of {len(self._task_chain_models)} possible combinations to benchmark"
         )
 
-    def set_task_chain_algorithms(
-        self, algorithms_task_1: Sequence[str], algorithms_task_2: Sequence[str]
-    ):
+    def set_task_chain_algorithms(self, algorithms_task_1: Sequence[str], algorithms_task_2: Sequence[str]):
         """
         Set the algorithms to be used in the benchmark for a task-chain project. The
         benchmarking will run for all possible combinations of algorithms for task 1
@@ -277,14 +252,10 @@ class Benchmarker:
         """
         if self._is_single_task:
             logging.warning(
-                "Method `set_task_chain_algorithms` was called for a non-task-chain "
-                "project. This has no effect."
+                "Method `set_task_chain_algorithms` was called for a non-task-chain project. This has no effect."
             )
             return
-        self._task_chain_algorithms = [
-            list(pair)
-            for pair in itertools.product(algorithms_task_1, algorithms_task_2)
-        ]
+        self._task_chain_algorithms = [list(pair) for pair in itertools.product(algorithms_task_1, algorithms_task_2)]
         self._are_models_specified = False
         self._task_chain_models = None
         logging.info(
@@ -294,7 +265,7 @@ class Benchmarker:
         )
 
     @property
-    def models(self) -> Union[List[Model], List[List[Model]]]:
+    def models(self) -> list[Model] | list[list[Model]]:
         """
         Return the models to be used in the benchmark.
         """
@@ -302,12 +273,10 @@ class Benchmarker:
             if self._is_single_task:
                 return self._models
             return self._task_chain_models
-        raise ValueError(
-            "Unable to access models, no benchmark models have been specified yet."
-        )
+        raise ValueError("Unable to access models, no benchmark models have been specified yet.")
 
     @property
-    def algorithms(self) -> Union[List[str], List[List[str]]]:
+    def algorithms(self) -> list[str] | list[list[str]]:
         """
         Return the algorithm names to be used in the benchmark
         """
@@ -318,13 +287,13 @@ class Benchmarker:
     @property
     def optimized_models(
         self,
-    ) -> Union[List[OptimizedModel], List[List[OptimizedModel]]]:
+    ) -> list[OptimizedModel] | list[list[OptimizedModel]]:
         """
         Return the optimized models to be used in deployments for the benchmark
         """
         if self._is_single_task and self._optimized_models is not None:
             return self._optimized_models
-        elif not self._is_single_task and self._task_chain_optimized_models is not None:
+        if not self._is_single_task and self._task_chain_optimized_models is not None:
             return self._task_chain_optimized_models
         raise ValueError(
             "Optimized models have not been assigned yet. Please initialize the "
@@ -345,9 +314,7 @@ class Benchmarker:
         job = self.training_client.monitor_job(job=job)
         return self.model_client.get_model_for_job(job)
 
-    def _optimize_model_for_algorithm(
-        self, model: Model, precision: str = "INT8"
-    ) -> OptimizedModel:
+    def _optimize_model_for_algorithm(self, model: Model, precision: str = "INT8") -> OptimizedModel:
         """
         Optimize a `model` with the given `precision`.
 
@@ -358,9 +325,7 @@ class Benchmarker:
         job = self.model_client.optimize_model(model=model)
         self.model_client.monitor_job(job)
         updated_model = self.model_client.update_model_detail(model)
-        return updated_model.get_optimized_model(
-            precision=precision, optimization_type="openvino"
-        )
+        return updated_model.get_optimized_model(precision=precision, optimization_type="openvino")
 
     def prepare_benchmark(self, working_directory: os.PathLike = "."):
         """
@@ -384,36 +349,25 @@ class Benchmarker:
         if not self._are_models_specified:
             if self._is_single_task:
                 logging.info(
-                    f"Checking model availability for {len(self.algorithms)} "
-                    f"different algorithms: {self.algorithms}."
+                    f"Checking model availability for {len(self.algorithms)} different algorithms: {self.algorithms}."
                 )
-                models: List[Model] = []
+                models: list[Model] = []
                 for algorithm_name in self.algorithms:
-                    model = self.model_client.get_latest_model_by_algo_name(
-                        algorithm_name
-                    )
+                    model = self.model_client.get_latest_model_by_algo_name(algorithm_name)
                     if model is None:
                         logging.info(
-                            f"No model found in project for algorithm "
-                            f"{algorithm_name}, requesting model training"
+                            f"No model found in project for algorithm {algorithm_name}, requesting model training"
                         )
-                        model = self._train_model_for_algorithm(
-                            task_index=0, algorithm_name=algorithm_name
-                        )
+                        model = self._train_model_for_algorithm(task_index=0, algorithm_name=algorithm_name)
                     models.append(model)
                 self._models = models
             else:
-                logging.info(
-                    f"Checking model availability for {len(self.algorithms)} "
-                    f"different pairs of algorithms."
-                )
-                models: List[List[Model]] = []
+                logging.info(f"Checking model availability for {len(self.algorithms)} different pairs of algorithms.")
+                models: list[list[Model]] = []
                 for algo_pair in self.algorithms:
-                    model_pair: List[Model] = []
+                    model_pair: list[Model] = []
                     for task_index, algorithm_name in enumerate(algo_pair):
-                        model = self.model_client.get_latest_model_by_algo_name(
-                            algorithm_name
-                        )
+                        model = self.model_client.get_latest_model_by_algo_name(algorithm_name)
                         if model is None:
                             model = self._train_model_for_algorithm(
                                 task_index=task_index, algorithm_name=algorithm_name
@@ -430,21 +384,17 @@ class Benchmarker:
                 f"Checking optimized model availability for {len(self.models)} "
                 f"different models and quantization levels: {self.precision_levels}"
             )
-            optimized_models: List[OptimizedModel] = []
+            optimized_models: list[OptimizedModel] = []
             for model in self.models:
                 for precision in self.precision_levels:
-                    opt_model = model.get_optimized_model(
-                        precision=precision, optimization_type="openvino"
-                    )
+                    opt_model = model.get_optimized_model(precision=precision, optimization_type="openvino")
                     if opt_model is None:
                         logging.info(
                             f"No optimized model with quantization level {precision} "
                             f"found for model {model.name}, requesting model "
                             f"optimization."
                         )
-                        opt_model = self._optimize_model_for_algorithm(
-                            model=model, precision=precision
-                        )
+                        opt_model = self._optimize_model_for_algorithm(model=model, precision=precision)
                     optimized_models.append(opt_model)
             self._optimized_models = optimized_models
         else:
@@ -453,26 +403,22 @@ class Benchmarker:
                 f"different model pairs and quantization levels: "
                 f"{self.precision_levels}"
             )
-            optimized_models: List[List[OptimizedModel]] = []
+            optimized_models: list[list[OptimizedModel]] = []
             for model_pair in self.models:
                 for precision in self.precision_levels:
-                    opt_model_pair: List[OptimizedModel] = []
+                    opt_model_pair: list[OptimizedModel] = []
                     for model in model_pair:
                         # Update model info, to take into account any
                         # optimizations made during loop execution
                         model = self.model_client.update_model_detail(model=model)
-                        opt_model = model.get_optimized_model(
-                            precision=precision, optimization_type="openvino"
-                        )
+                        opt_model = model.get_optimized_model(precision=precision, optimization_type="openvino")
                         if opt_model is None:
                             logging.info(
                                 f"No optimized model with quantization level {precision} "
                                 f"found for model {model.name}, requesting model "
                                 f"optimization."
                             )
-                            opt_model = self._optimize_model_for_algorithm(
-                                model=model, precision=precision
-                            )
+                            opt_model = self._optimize_model_for_algorithm(model=model, precision=precision)
                         opt_model_pair.append(opt_model)
                     optimized_models.append(opt_model_pair)
             self._task_chain_optimized_models = optimized_models
@@ -513,20 +459,15 @@ class Benchmarker:
         """
         logging.info(f"Initializing Benchmarker from folder `{target_folder}`")
         if len(self._deployment_folders) != 0:
-            raise ValueError(
-                "The Benchmarker appears to be already initialized. Unable to continue."
-            )
-        for object in os.listdir(target_folder):
-            object_path = os.path.join(target_folder, object)
+            raise ValueError("The Benchmarker appears to be already initialized. Unable to continue.")
+        for obj in os.listdir(target_folder):
+            object_path = os.path.join(target_folder, obj)
             if os.path.isfile(object_path):
                 continue
             try:
                 deployment = Deployment.from_folder(path_to_folder=object_path)
             except ValueError:
-                logging.info(
-                    f"Directory {object_path} does not contain a valid Deployment, "
-                    f"skipping..."
-                )
+                logging.info(f"Directory {object_path} does not contain a valid Deployment, skipping...")
                 continue
             if deployment.project.name != self.project.name:
                 raise ValueError(
@@ -550,7 +491,7 @@ class Benchmarker:
         target_device: str = "CPU",
         frames: int = 200,
         repeats: int = 3,
-    ) -> List[Dict[str, str]]:
+    ) -> list[dict[str, str]]:
         """
         Run the benchmark experiment.
 
@@ -576,9 +517,7 @@ class Benchmarker:
             )
         logging.info("Starting throughput benchmark experiments.")
 
-        logging.info(
-            f"The Benchmarker will run for {len(self._deployment_folders)} deployments"
-        )
+        logging.info(f"The Benchmarker will run for {len(self._deployment_folders)} deployments")
 
         logging.info("Loading benchmark media")
         benchmark_frames = load_benchmark_media(
@@ -591,15 +530,10 @@ class Benchmarker:
         results_file = os.path.join(working_directory, f"{results_filename}.csv")
         logging.info(f"Writing results to `{results_file}`")
 
-        logging.info(
-            f"Benchmarking inference rate for synchronous inference on {frames} frames "
-            f"with {repeats} repeats"
-        )
+        logging.info(f"Benchmarking inference rate for synchronous inference on {frames} frames with {repeats} repeats")
         with logging_redirect_tqdm(tqdm_class=tqdm):
-            results: List[Dict[str, str]] = []
-            for deployment_index, deployment_folder in enumerate(
-                tqdm(self._deployment_folders, desc="Benchmarking")
-            ):
+            results: list[dict[str, str]] = []
+            for deployment_index, deployment_folder in enumerate(tqdm(self._deployment_folders, desc="Benchmarking")):
                 success = True
                 deployment = Deployment.from_folder(deployment_folder)
                 try:
@@ -665,7 +599,7 @@ class Benchmarker:
                     model_scores.append(score)
 
                 # Update result list
-                result_row: Dict[str, str] = {}
+                result_row: dict[str, str] = {}
                 result_row["name"] = f"Deployment {deployment_index}"
                 result_row["project_name"] = self.project.name
                 result_row["target_device"] = target_device
@@ -700,7 +634,7 @@ class Benchmarker:
     def _predict_using_active_model(
         self,
         numpy_image: np.ndarray,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Predict on platform using the active model.
 
@@ -723,15 +657,11 @@ class Benchmarker:
         result["model_1"] = active_models[0].name + " " + active_models[0].precision[0]
         result["model_1_score"] = active_models[0].performance.score
         if not self._is_single_task:
-            result["model_2"] = (
-                active_models[1].name + " " + active_models[1].precision[0]
-            )
+            result["model_2"] = active_models[1].name + " " + active_models[1].precision[0]
             result["model_2_score"] = active_models[1].performance.score
         return result
 
-    def _add_header_to_comparison(
-        self, comparison_image: np.ndarray, target_device: str
-    ) -> np.ndarray:
+    def _add_header_to_comparison(self, comparison_image: np.ndarray, target_device: str) -> np.ndarray:
         """
         Add a header to the comparison image.
 
@@ -741,9 +671,7 @@ class Benchmarker:
         # Calculate text and image padding size
         text_scale = round(comparison_image.shape[1] / 1280, 1)
         thickness = int(text_scale / 1.4)
-        (_, label_height), baseline = cv2.getTextSize(
-            "Test caption", cv2.FONT_HERSHEY_SIMPLEX, text_scale, thickness
-        )
+        (_, label_height), baseline = cv2.getTextSize("Test caption", cv2.FONT_HERSHEY_SIMPLEX, text_scale, thickness)
         top_padding_per_line = label_height + baseline
         # Prepare image captions
         device_info = get_system_info(device=target_device)["device_info"]
@@ -752,11 +680,7 @@ class Benchmarker:
             f"Project: {self.project.name}",
             (
                 f"Task: {self.project.get_trainable_tasks()[0].title}"
-                + (
-                    ""
-                    if self._is_single_task
-                    else f" -> {self.project.get_trainable_tasks()[1].title}"
-                )
+                + ("" if self._is_single_task else f" -> {self.project.get_trainable_tasks()[1].title}")
             ),
             f"Device info: {device_info}",
         ]
@@ -788,11 +712,9 @@ class Benchmarker:
         working_directory: os.PathLike = ".",
         saved_image_name: str = "comparison",
         target_device: str = "CPU",
-        image: Optional[Union[np.ndarray, str, os.PathLike]] = None,
+        image: np.ndarray | str | os.PathLike | None = None,
         include_online_prediction_for_active_model: bool = True,  # the name is not finalized
-        throughput_benchmark_results: Optional[
-            Union[List[Dict[str, str]], os.PathLike]
-        ] = None,
+        throughput_benchmark_results: list[dict[str, str]] | os.PathLike | None = None,
     ) -> np.ndarray:
         """
         TODO blank image if not success
@@ -824,9 +746,7 @@ class Benchmarker:
             )
         logging.info("Starting collecting predictions for visual comparison.")
 
-        logging.info(
-            f"The Benchmarker will run for {len(self._deployment_folders)} deployments"
-        )
+        logging.info(f"The Benchmarker will run for {len(self._deployment_folders)} deployments")
 
         logging.info("Loading benchmark media")
         if isinstance(image, np.ndarray):
@@ -839,7 +759,7 @@ class Benchmarker:
                 frames=1,
             )[0]
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        elif isinstance(image, (str, os.PathLike)):
+        elif isinstance(image, str | os.PathLike):
             image = cv2.cvtColor(cv2.imread(image), cv2.COLOR_BGR2RGB)
         else:
             raise TypeError(f"Invalid image type: {type(image)}.")
@@ -848,15 +768,15 @@ class Benchmarker:
         logging.info(f"Saving visual comparison to `{saved_image_path}`")
 
         # Check the benchmark results
-        if isinstance(throughput_benchmark_results, (os.PathLike, str)):
-            with open(throughput_benchmark_results, "r") as results_file:
+        if isinstance(throughput_benchmark_results, os.PathLike | str):
+            with open(throughput_benchmark_results) as results_file:
                 throughput_benchmark_results = list(csv.DictReader(results_file))
 
         visualizer = Visualizer()
 
         # Performe inferece
         with logging_redirect_tqdm(tqdm_class=tqdm):
-            results: List[List[np.ndarray]] = []
+            results: list[list[np.ndarray]] = []
             model_name_to_row: dict[str, int] = {}
             for deployment_index, deployment_folder in enumerate(
                 tqdm(self._deployment_folders, desc="Collecting predictions")
@@ -886,9 +806,7 @@ class Benchmarker:
                         )
                 if success:
                     image_with_prediction = visualizer.draw(image, prediction)
-                    image_with_prediction = cv2.cvtColor(
-                        image_with_prediction, cv2.COLOR_BGR2RGB
-                    )
+                    image_with_prediction = cv2.cvtColor(image_with_prediction, cv2.COLOR_BGR2RGB)
                 else:
                     # Replace the image with an empty one in case of no prediction
                     image_with_prediction = np.zeros_like(image)
@@ -930,9 +848,7 @@ class Benchmarker:
                         }
                     )
                 # Pad the image and put captions on it
-                image_with_prediction = pad_image_and_put_caption(
-                    image=image_with_prediction, **model_info
-                )
+                image_with_prediction = pad_image_and_put_caption(image=image_with_prediction, **model_info)
 
                 # Image is ready, now we add it to the results array
                 # Determine result's position on the grid
@@ -946,17 +862,11 @@ class Benchmarker:
         if include_online_prediction_for_active_model:
             logging.info("Predicting on the platform using the active model")
             online_prediction_result = self._predict_using_active_model(image)
-            image_with_prediction = visualizer.draw(
-                image, online_prediction_result["prediction"]
-            )
-            image_with_prediction = cv2.cvtColor(
-                image_with_prediction, cv2.COLOR_BGR2RGB
-            )
+            image_with_prediction = visualizer.draw(image, online_prediction_result["prediction"])
+            image_with_prediction = cv2.cvtColor(image_with_prediction, cv2.COLOR_BGR2RGB)
 
             del online_prediction_result["prediction"]
-            image_with_prediction = pad_image_and_put_caption(
-                image=image_with_prediction, **online_prediction_result
-            )
+            image_with_prediction = pad_image_and_put_caption(image=image_with_prediction, **online_prediction_result)
             # Add online prediction to a separate row
             results.append(
                 [
@@ -964,12 +874,8 @@ class Benchmarker:
                 ]
             )
         image_grid = concat_prediction_results(results=results)
-        image_with_header = self._add_header_to_comparison(
-            image_grid, target_device=target_device
-        )
+        image_with_header = self._add_header_to_comparison(image_grid, target_device=target_device)
 
         # Save image to file
-        cv2.imwrite(
-            saved_image_path, cv2.cvtColor(image_with_header, cv2.COLOR_RGB2BGR)
-        )
+        cv2.imwrite(saved_image_path, cv2.cvtColor(image_with_header, cv2.COLOR_RGB2BGR))
         return image_with_header

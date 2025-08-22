@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import logging
-from typing import List, Optional, Sequence
+from collections.abc import Sequence
 
 from geti_sdk.data_models import Dataset, Job, Model, Project, TestResult
 from geti_sdk.http_session import GetiSession
@@ -37,8 +37,8 @@ class TestingClient:
         self,
         model: Model,
         datasets: Sequence[Dataset],
-        name: Optional[str] = None,
-        metric: Optional[str] = None,
+        name: str | None = None,
+        metric: str | None = None,
     ) -> Job:
         """
         Start a model testing job for a specific `model` and `dataset`
@@ -63,15 +63,10 @@ class TestingClient:
         }
         if metric is not None:
             if metric not in SUPPORTED_METRICS:
-                raise ValueError(
-                    f"Invalid metric received! Only `{SUPPORTED_METRICS}` are "
-                    f"supported currently."
-                )
+                raise ValueError(f"Invalid metric received! Only `{SUPPORTED_METRICS}` are supported currently.")
             test_data.update({"metric": metric})
 
-        response = self.session.get_rest_response(
-            url=self.base_url, method="POST", data=test_data
-        )
+        response = self.session.get_rest_response(url=self.base_url, method="POST", data=test_data)
         job = get_job_with_timeout(
             job_id=response["job_id"],
             session=self.session,
@@ -90,13 +85,8 @@ class TestingClient:
         :return: TestResult instance containing the test results
         """
         response = self.session.get_rest_response(url=self.base_url, method="GET")
-        test_results = [
-            TestResultRESTConverter.from_dict(result)
-            for result in response["test_results"]
-        ]
-        result_for_job = next(
-            (result for result in test_results if result.job_info.id == job.id), None
-        )
+        test_results = [TestResultRESTConverter.from_dict(result) for result in response["test_results"]]
+        result_for_job = next((result for result in test_results if result.job_info.id == job.id), None)
         if result_for_job is None:
             raise ValueError(
                 f"Unable to find test result for job `{job.name}`, please make sure "
@@ -104,9 +94,7 @@ class TestingClient:
             )
         return result_for_job
 
-    def monitor_jobs(
-        self, jobs: List[Job], timeout: int = 10000, interval: int = 15
-    ) -> List[Job]:
+    def monitor_jobs(self, jobs: list[Job], timeout: int = 10000, interval: int = 15) -> list[Job]:
         """
         Monitor and print the progress of all jobs in the list `jobs`. Execution is
         halted until all jobs have either finished, failed or were cancelled.
@@ -119,9 +107,7 @@ class TestingClient:
             the server to update the status of the jobs. Defaults to 15 seconds
         :return: List of finished (or failed) jobs with their status updated
         """
-        return monitor_jobs(
-            session=self.session, jobs=jobs, timeout=timeout, interval=interval
-        )
+        return monitor_jobs(session=self.session, jobs=jobs, timeout=timeout, interval=interval)
 
     def monitor_job(self, job: Job, timeout: int = 10000, interval: int = 15) -> Job:
         """
@@ -136,6 +122,4 @@ class TestingClient:
             the server to update the status of the jobs. Defaults to 15 seconds
         :return: Job with its status updated
         """
-        return monitor_job(
-            session=self.session, job=job, timeout=timeout, interval=interval
-        )
+        return monitor_job(session=self.session, job=job, timeout=timeout, interval=interval)

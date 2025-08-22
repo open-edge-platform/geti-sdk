@@ -14,7 +14,7 @@
 
 import abc
 import math
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import attr
 import cv2
@@ -63,9 +63,7 @@ class Shape:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def to_normalized_coordinates(
-        self, image_width: int, image_height: int
-    ) -> Dict[str, Any]:
+    def to_normalized_coordinates(self, image_width: int, image_height: int) -> dict[str, Any]:
         """
         Convert the Shape to a normalized coordinate system, such that all
         coordinates are represented as floats in the interval [0, 1].
@@ -108,13 +106,9 @@ class Rectangle(Shape):
     y: int = attr.field(converter=coordinate_converter)
     width: int = attr.field(converter=coordinate_converter)
     height: int = attr.field(converter=coordinate_converter)
-    type: str = attr.field(
-        converter=str_to_shape_type, default=ShapeType.RECTANGLE, kw_only=True
-    )
+    type: str = attr.field(converter=str_to_shape_type, default=ShapeType.RECTANGLE, kw_only=True)
 
-    def to_normalized_coordinates(
-        self, image_width: int, image_height: int
-    ) -> Dict[str, float]:
+    def to_normalized_coordinates(self, image_width: int, image_height: int) -> dict[str, float]:
         """
         Get the normalized coordinates of the rectangle, with respect to the image
         with dimensions `image_width` x `image_height`.
@@ -126,13 +120,13 @@ class Rectangle(Shape):
         :return: Dictionary containing the rectangle, represented in normalized
             coordinates
         """
-        return dict(
-            x=self.x / image_width,
-            y=self.y / image_height,
-            width=self.width / image_width,
-            height=self.height / image_height,
-            type=str(self.type),
-        )
+        return {
+            "x": self.x / image_width,
+            "y": self.y / image_height,
+            "width": self.width / image_width,
+            "height": self.height / image_height,
+            "type": str(self.type),
+        }
 
     def is_full_box(self, image_width: int, image_height: int) -> bool:
         """
@@ -142,12 +136,7 @@ class Rectangle(Shape):
         :param image_height: Height of the image to check for
         :return: True if the Rectangle encompasses the full image, False otherwise
         """
-        return (
-            self.x == 0
-            and self.y == 0
-            and int(self.width) == image_width
-            and int(self.height) == image_height
-        )
+        return self.x == 0 and self.y == 0 and int(self.width) == image_width and int(self.height) == image_height
 
     def to_roi(self) -> "Rectangle":
         """
@@ -229,9 +218,7 @@ class Ellipse(Shape):
     y: int = attr.field(converter=coordinate_converter)
     width: int = attr.field(converter=coordinate_converter)
     height: int = attr.field(converter=coordinate_converter)
-    type: str = attr.field(
-        converter=str_to_shape_type, default=ShapeType.ELLIPSE, kw_only=True
-    )
+    type: str = attr.field(converter=str_to_shape_type, default=ShapeType.ELLIPSE, kw_only=True)
 
     def to_roi(self) -> "Rectangle":
         """
@@ -254,9 +241,7 @@ class Ellipse(Shape):
         y_min = parent_roi.y + self.y
         return Ellipse(x=x_min, y=y_min, width=self.width, height=self.height)
 
-    def to_normalized_coordinates(
-        self, image_width: int, image_height: int
-    ) -> Dict[str, float]:
+    def to_normalized_coordinates(self, image_width: int, image_height: int) -> dict[str, float]:
         """
         Get the normalized coordinates of the ellipse, with respect to the image
         with dimensions `image_width` x `image_height`.
@@ -268,15 +253,15 @@ class Ellipse(Shape):
         :return: Dictionary containing the ellipse, represented in normalized
             coordinates
         """
-        return dict(
-            x=self.x / image_width,
-            y=self.y / image_height,
-            width=self.width / image_width,
-            height=self.height / image_height,
-            type=str(self.type),
-        )
+        return {
+            "x": self.x / image_width,
+            "y": self.y / image_height,
+            "width": self.width / image_width,
+            "height": self.height / image_height,
+            "type": str(self.type),
+        }
 
-    def get_center_point(self) -> Tuple[int, int]:
+    def get_center_point(self) -> tuple[int, int]:
         """
         Return the coordinates of the center of the ellipse.
 
@@ -329,7 +314,7 @@ class Point:
     x: int = attr.field(converter=coordinate_converter)
     y: int = attr.field(converter=coordinate_converter)
 
-    def as_int_tuple(self) -> Tuple[int, int]:
+    def as_int_tuple(self) -> tuple[int, int]:
         """
         Return the coordinates of the point as a tuple of integers.
 
@@ -347,18 +332,16 @@ class Polygon(Shape):
     :var points: List of Points that make up the polygon
     """
 
-    points: List[Point]
-    type: str = attr.field(
-        converter=str_to_shape_type, default=ShapeType.POLYGON, kw_only=True
-    )
+    points: list[Point]
+    type: str = attr.field(converter=str_to_shape_type, default=ShapeType.POLYGON, kw_only=True)
 
     def __attrs_post_init__(self):
         """
         Initialize private attributes.
         """
-        self._contour: Optional[np.ndarray] = None
-        self._x_max: Optional[int] = None
-        self._y_max: Optional[int] = None
+        self._contour: np.ndarray | None = None
+        self._x_max: int | None = None
+        self._y_max: int | None = None
 
     def points_as_contour(self) -> np.ndarray:
         """
@@ -372,9 +355,7 @@ class Polygon(Shape):
         :return: Numpy array containing the contour
         """
         if self._contour is None:
-            self._contour = np.array(
-                [(int(point.x), int(point.y)) for point in self.points]
-            )
+            self._contour = np.array([(int(point.x), int(point.y)) for point in self.points])
         return self._contour
 
     def to_roi(self) -> "Rectangle":
@@ -403,15 +384,10 @@ class Polygon(Shape):
         :param parent_roi: Region of interest containing the polygon
         :return: Polygon converted to the coordinate system of it's parent ROI
         """
-        absolute_points = [
-            Point(x=parent_roi.x + point.x, y=parent_roi.y + point.y)
-            for point in self.points
-        ]
+        absolute_points = [Point(x=parent_roi.x + point.x, y=parent_roi.y + point.y) for point in self.points]
         return Polygon(points=absolute_points)
 
-    def to_normalized_coordinates(
-        self, image_width: int, image_height: int
-    ) -> Dict[str, Union[List[Dict[str, float]], str]]:
+    def to_normalized_coordinates(self, image_width: int, image_height: int) -> dict[str, list[dict[str, float]] | str]:
         """
         Get the normalized coordinates of the polygon, with respect to the image
         with dimensions `image_width` x `image_height`.
@@ -423,12 +399,10 @@ class Polygon(Shape):
         :return: Dictionary containing the polygon, represented in normalized
             coordinates
         """
-        normalized_points: List[Dict[str, float]] = []
+        normalized_points: list[dict[str, float]] = []
         for point in self.points:
-            normalized_points.append(
-                {"x": point.x / image_width, "y": point.y / image_height}
-            )
-        return dict(points=normalized_points, type=str(self.type))
+            normalized_points.append({"x": point.x / image_width, "y": point.y / image_height})
+        return {"points": normalized_points, "type": str(self.type)}
 
     @property
     def area(self) -> float:
@@ -476,9 +450,7 @@ class Polygon(Shape):
         :return: RotatedRectangle object with minimal area, which encloses the Polygon
         """
         center, (width, height), angle = cv2.minAreaRect(self.points_as_contour())
-        return RotatedRectangle(
-            angle=angle, x=center[0], y=center[1], width=width, height=height
-        )
+        return RotatedRectangle(angle=angle, x=center[0], y=center[1], width=width, height=height)
 
 
 @attr.define(slots=False)
@@ -501,9 +473,7 @@ class RotatedRectangle(Shape):
     y: int = attr.field(converter=coordinate_converter)
     width: int = attr.field(converter=coordinate_converter)
     height: int = attr.field(converter=coordinate_converter)
-    type: str = attr.field(
-        converter=str_to_shape_type, default=ShapeType.ROTATED_RECTANGLE, kw_only=True
-    )
+    type: str = attr.field(converter=str_to_shape_type, default=ShapeType.ROTATED_RECTANGLE, kw_only=True)
 
     @property
     def _angle_x_radian(self) -> float:
@@ -692,9 +662,7 @@ class RotatedRectangle(Shape):
 
         return Polygon(points=[point0, point1, point2, point3])
 
-    def to_normalized_coordinates(
-        self, image_width: int, image_height: int
-    ) -> Dict[str, Union[float, str]]:
+    def to_normalized_coordinates(self, image_width: int, image_height: int) -> dict[str, float | str]:
         """
         Get the normalized coordinates of the rotated rectangle, with respect to the
         image with dimensions `image_width` x `image_height`.
@@ -706,14 +674,14 @@ class RotatedRectangle(Shape):
         :return: Dictionary containing the rotated rectangle, represented in normalized
             coordinates
         """
-        return dict(
-            angle=self.angle,
-            x=self.x / image_width,
-            y=self.y / image_height,
-            width=self.width / image_width,
-            height=self.height / image_height,
-            type=str(self.type),
-        )
+        return {
+            "angle": self.angle,
+            "x": self.x / image_width,
+            "y": self.y / image_height,
+            "width": self.width / image_width,
+            "height": self.height / image_height,
+            "type": str(self.type),
+        }
 
     @property
     def area(self) -> float:
@@ -741,13 +709,9 @@ class Keypoint(Shape):
     x: int = attr.field(converter=coordinate_converter)
     y: int = attr.field(converter=coordinate_converter)
     is_visible: bool = True
-    type: str = attr.field(
-        converter=str_to_shape_type, default=ShapeType.KEYPOINT, kw_only=True
-    )
+    type: str = attr.field(converter=str_to_shape_type, default=ShapeType.KEYPOINT, kw_only=True)
 
-    def to_normalized_coordinates(
-        self, image_width: int, image_height: int
-    ) -> Dict[str, Union[float, bool, str]]:
+    def to_normalized_coordinates(self, image_width: int, image_height: int) -> dict[str, float | bool | str]:
         """
         Get the normalized coordinates of the keypoint, with respect to the image
         with dimensions `image_width` x `image_height`.
@@ -759,12 +723,12 @@ class Keypoint(Shape):
         :return: Dictionary containing the keypoint, represented in normalized
             coordinates
         """
-        return dict(
-            x=self.x / image_width,
-            y=self.y / image_height,
-            is_visible=self.is_visible,
-            type=str(self.type),
-        )
+        return {
+            "x": self.x / image_width,
+            "y": self.y / image_height,
+            "is_visible": self.is_visible,
+            "type": str(self.type),
+        }
 
     def to_absolute_coordinates(self, parent_roi: "Rectangle") -> "Keypoint":
         """

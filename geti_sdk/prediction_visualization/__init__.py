@@ -19,9 +19,9 @@ Introduction
 The `prediction_visualization` package provides classes for visualizing models predictions and media annotations.
 Aditionally, shortend interface to this package is available through the :py:mod:`~geti_sdk.utils.plot_helpers` module.
 
-The main :py:class:`~geti_sdk.prediction_visualization.visualizer.Visualizer` class is a flexible utility class for working
-with Geti-SDK Prediction and Annotation object. You can initialize the Visualizer with the desired settings and then use it to draw
-the annotations on the input image.
+The main :py:class:`~geti_sdk.prediction_visualization.visualizer.Visualizer` class is a flexible utility class to work
+with Geti-SDK Prediction and Annotation object. You can initialize the Visualizer with the desired settings and
+then use it to draw the annotations on the input image.
 
 .. code-block:: python
 
@@ -45,8 +45,8 @@ the annotations on the input image.
    )
    visualizer.show_in_notebook(result)
 
-In case the Prediction was generated with a model that supports explainable AI functionality, the Visualizer can also display
-the explanation for the prediction.
+In case the Prediction was generated with a model that supports explainable AI functionality,
+the Visualizer can also display the explanation for the prediction.
 
 .. code-block:: python
    image_with_saliency_map = visualizer.explain_label(

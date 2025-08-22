@@ -16,7 +16,6 @@ import logging
 import os
 import zipfile
 from enum import Enum
-from typing import Optional, Tuple
 
 from geti_sdk.demos.constants import DEFAULT_DATA_PATH
 
@@ -45,7 +44,7 @@ class COCOSubset(Enum):
         """
         return self.value
 
-    def get_annotations(self) -> Optional[str]:
+    def get_annotations(self) -> str | None:
         """
         Return the name of the annotation folder for the subset, if any.
 
@@ -54,17 +53,18 @@ class COCOSubset(Enum):
         """
         if self == COCOSubset.VAL2017 or self == COCOSubset.TRAIN2017:
             return "trainval2017"
-        elif self == COCOSubset.VAL2014 or self == COCOSubset.TRAIN2014:
+        if self == COCOSubset.VAL2014 or self == COCOSubset.TRAIN2014:
             return "trainval2014"
-        elif (
+        if (
             self == COCOSubset.TEST2017
             or self == COCOSubset.TEST2015
             or self == COCOSubset.TEST2014
             or self == COCOSubset.UNLABELED2017
         ):
             return None
+        return None
 
-    def get_hashes(self) -> Tuple[Optional[str], Optional[str]]:
+    def get_hashes(self) -> tuple[str | None, str | None]:
         """
         Return the expected sha256 hashes for the .zip files containing the images
         and the annotations of the dataset
@@ -80,8 +80,7 @@ class COCOSubset(Enum):
                 "9ea554bcf9e6f88876b1157ab38247eb7c1c57564c05c7345a06ac479c6e7a3b9c3825150c189d7d3f2e807c95fd0e07fe90161c563591038e697c846ac76007",
                 "3f00c90323ee745b37a9ac040d00f170d49695ed9ffc1d8e0fbd4c5e2d8e9c697fd822b2022df552da5f1892dbcaeb68788416a347b05a20035ed0686f0e1f66",
             )
-        else:
-            return None, None
+        return None, None
 
 
 def directory_has_coco_subset(target_folder: str, coco_subset: COCOSubset) -> bool:
@@ -109,16 +108,13 @@ def directory_has_coco_subset(target_folder: str, coco_subset: COCOSubset) -> bo
         annotations_dir_content = os.listdir(os.path.join(target_folder, "annotations"))
         if len(annotations_dir_content) == 0:
             return False
-        for filename in annotations_dir_content:
-            if f"instances_{str(coco_subset)}" in filename:
-                return True
-        return False
+        return any(f"instances_{str(coco_subset)}" in filename for filename in annotations_dir_content)
     return True
 
 
 def get_coco_dataset_from_path(
     target_folder: str = "data",
-    coco_subset: Optional[COCOSubset] = None,
+    coco_subset: COCOSubset | None = None,
     verbose: bool = False,
 ) -> str:
     """
@@ -139,9 +135,7 @@ def get_coco_dataset_from_path(
 
     if coco_subset is None:
         for subset in COCOSubset:
-            if subset.get_annotations() is not None and directory_has_coco_subset(
-                target_folder, subset
-            ):
+            if subset.get_annotations() is not None and directory_has_coco_subset(target_folder, subset):
                 found_subset = subset
                 break
         if found_subset is None:
@@ -151,38 +145,23 @@ def get_coco_dataset_from_path(
 
     if directory_has_coco_subset(target_folder=target_folder, coco_subset=found_subset):
         if verbose:
-            logging.info(
-                f"COCO dataset (subset: {str(found_subset)}) found at path "
-                f"{target_folder}"
-            )
+            logging.info(f"COCO dataset (subset: {str(found_subset)}) found at path {target_folder}")
         return target_folder
-    else:
-        logging.info(
-            f"COCO dataset was not found at path {target_folder}, making an "
-            f"attempt to download the data."
-        )
+    logging.info(f"COCO dataset was not found at path {target_folder}, making an attempt to download the data.")
 
     image_url = f"http://images.cocodataset.org/zips/{str(found_subset)}.zip"
     annotations_name = found_subset.get_annotations()
     if annotations_name is not None:
-        annotations_url = (
-            f"http://images.cocodataset.org/annotations/"
-            f"annotations_{annotations_name}.zip"
-        )
+        annotations_url = f"http://images.cocodataset.org/annotations/annotations_{annotations_name}.zip"
     else:
         if verbose:
-            logging.info(
-                f"Unable to download annotations for COCO subset {found_subset}. "
-                f"Downloading images only"
-            )
+            logging.info(f"Unable to download annotations for COCO subset {found_subset}. Downloading images only")
         annotations_url = None
 
     # Download the zip files
     image_zip = download_file(image_url, target_folder, check_valid_archive=True)
     if annotations_url is not None:
-        annotations_zip = download_file(
-            annotations_url, target_folder, check_valid_archive=True
-        )
+        annotations_zip = download_file(annotations_url, target_folder, check_valid_archive=True)
     else:
         annotations_zip = None
 
@@ -190,16 +169,12 @@ def get_coco_dataset_from_path(
     image_dir = os.path.join(target_folder, "images")
     os.makedirs(image_dir, exist_ok=True, mode=0o770)
     hashes = found_subset.get_hashes()
-    zip_to_extraction_mapping = {
-        image_zip: {"directory": image_dir, "expected_hash": hashes[0]}
-    }
+    zip_to_extraction_mapping = {image_zip: {"directory": image_dir, "expected_hash": hashes[0]}}
 
     if annotations_zip is not None:
         annotations_dir = os.path.join(target_folder, "annotations")
         os.makedirs(annotations_dir, exist_ok=True, mode=0o770)
-        zip_to_extraction_mapping.update(
-            {annotations_zip: {"directory": target_folder, "expected_hash": hashes[1]}}
-        )
+        zip_to_extraction_mapping.update({annotations_zip: {"directory": target_folder, "expected_hash": hashes[1]}})
     else:
         annotations_dir = None
 
@@ -230,7 +205,7 @@ def get_coco_dataset_from_path(
     return target_folder
 
 
-def get_coco_dataset(dataset_path: Optional[str] = None, verbose: bool = False) -> str:
+def get_coco_dataset(dataset_path: str | None = None, verbose: bool = False) -> str:
     """
     Check if the COCO dataset is present at the specified path. If not,
     this method will attempt to download the dataset to the path specified.

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 
-from typing import List
 
 import pytest
 
@@ -26,9 +25,7 @@ class TestConfigurationClient:
         reason="ConfigurationClient is deprecated. "
         "This test is disabled because VCR cassettes conflicts with the new configuration clients."
     )
-    def test_get_and_set_configuration(
-        self, fxt_project_service: ProjectService, fxt_default_labels: List[str]
-    ):
+    def test_get_and_set_configuration(self, fxt_project_service: ProjectService, fxt_default_labels: list[str]):
         """
         Verifies that getting and setting the configuration for a single task project
         works as expected

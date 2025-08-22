@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import attr
 
@@ -30,7 +30,7 @@ class StatusSummary:
     """
 
     progress: float
-    message: Optional[str] = None
+    message: str | None = None
 
     def __attrs_post_init__(self):
         """
@@ -39,7 +39,7 @@ class StatusSummary:
         self._user_friendly_message = "Unknown status"
 
     @classmethod
-    def from_dict(cls, status_dict: Dict[str, Any]) -> "StatusSummary":
+    def from_dict(cls, status_dict: dict[str, Any]) -> "StatusSummary":
         """
         Create a StatusSummary object from a dictionary.
 
@@ -56,8 +56,7 @@ class StatusSummary:
         """
         if self.message is not None:
             return self.message
-        else:
-            return self._user_friendly_message
+        return self._user_friendly_message
 
     @user_friendly_message.setter
     def user_friendly_message(self, message: str):
@@ -95,7 +94,7 @@ class AnnotationRequirements:
     :var details: Required annotations per label
     """
 
-    details: List[LabelAnnotationRequirements]
+    details: list[LabelAnnotationRequirements]
     value: int
 
 
@@ -121,8 +120,8 @@ class TaskStatus:
     required_annotations: AnnotationRequirements
     status: StatusSummary
     title: str
-    n_new_annotations: Optional[int] = None  # Added in Geti v1.1
-    ready_to_train: Optional[bool] = None  # Added in Geti v1.4
+    n_new_annotations: int | None = None  # Added in Geti v1.1
+    ready_to_train: bool | None = None  # Added in Geti v1.4
 
     def __attrs_post_init__(self):
         """
@@ -153,11 +152,11 @@ class ProjectStatus:
     is_training: bool
     n_required_annotations: int
     status: StatusSummary
-    tasks: List[TaskStatus]
-    n_new_annotations: Optional[int] = None  # Added in Geti v1.1
-    project_performance: Optional[Performance] = None
-    n_running_jobs: Optional[int] = None
-    n_running_jobs_project: Optional[int] = None
+    tasks: list[TaskStatus]
+    n_new_annotations: int | None = None  # Added in Geti v1.1
+    project_performance: Performance | None = None
+    n_running_jobs: int | None = None
+    n_running_jobs_project: int | None = None
 
     def __attrs_post_init__(self):
         """
@@ -177,14 +176,9 @@ class ProjectStatus:
         """
         summary_str = f"Project status:\n  {self.status.user_friendly_message}\n"
         for task in self.tasks:
-            summary_str += (
-                f"    Task: {task.title}\n"
-                f"      State: {task.status.user_friendly_message}\n"
-            )
+            summary_str += f"    Task: {task.title}\n      State: {task.status.user_friendly_message}\n"
             if task.is_training or task.status.progress != -1.0:
                 summary_str += f"      Progress: {task.status.progress:.1f}%\n"
         if self.project_performance.score is not None:
-            summary_str += (
-                f"  Latest score: {self.project_performance.score * 100:.1f}%\n"
-            )
+            summary_str += f"  Latest score: {self.project_performance.score * 100:.1f}%\n"
         return summary_str

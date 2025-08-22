@@ -14,7 +14,7 @@
 import json
 import os
 import shutil
-from typing import Callable, List
+from collections.abc import Callable
 
 import pytest
 
@@ -140,9 +140,7 @@ def fxt_annotation_reader(fxt_blocks_dataset) -> DatumAnnotationReader:
     This fixture returns a Datumaro Annotation Reader which can read annotations for
     the 'blocks' dataset
     """
-    yield DatumAnnotationReader(
-        base_data_folder=fxt_blocks_dataset, annotation_format="coco"
-    )
+    yield DatumAnnotationReader(base_data_folder=fxt_blocks_dataset, annotation_format="coco")
 
 
 @pytest.fixture(scope="function")
@@ -152,9 +150,7 @@ def fxt_annotation_reader_grouped(fxt_blocks_dataset) -> DatumAnnotationReader:
     the 'blocks' dataset. All labels in this reader have been grouped to a single
     'blocks' label.
     """
-    reader = DatumAnnotationReader(
-        base_data_folder=fxt_blocks_dataset, annotation_format="coco"
-    )
+    reader = DatumAnnotationReader(base_data_folder=fxt_blocks_dataset, annotation_format="coco")
     reader.group_labels(labels_to_group=["cube", "cylinder"], group_name="block")
     yield reader
 
@@ -165,9 +161,7 @@ def fxt_annotation_reader_keypoint(fxt_human_pose_dataset) -> DatumAnnotationRea
     This fixture returns a Datumaro Annotation Reader which can read annotations for
     the 'keypoint' dataset
     """
-    yield DatumAnnotationReader(
-        base_data_folder=fxt_human_pose_dataset, annotation_format="datumaro"
-    )
+    yield DatumAnnotationReader(base_data_folder=fxt_human_pose_dataset, annotation_format="datumaro")
 
 
 @pytest.fixture(scope="function")
@@ -179,9 +173,7 @@ def fxt_annotation_reader_grouped_keypoint(
     the 'keypoint' dataset. All labels in this reader have been grouped to a single
     'blocks' label.
     """
-    reader = DatumAnnotationReader(
-        base_data_folder=fxt_human_pose_dataset, annotation_format="datumaro"
-    )
+    reader = DatumAnnotationReader(base_data_folder=fxt_human_pose_dataset, annotation_format="datumaro")
     reader.group_labels(labels_to_group=["cube", "cylinder"], group_name="block")
     yield reader
 
@@ -197,9 +189,7 @@ def fxt_annotation_reader_factory(
     """
 
     def _create_annotation_reader() -> DatumAnnotationReader:
-        return DatumAnnotationReader(
-            base_data_folder=fxt_blocks_dataset, annotation_format="coco"
-        )
+        return DatumAnnotationReader(base_data_folder=fxt_blocks_dataset, annotation_format="coco")
 
     yield _create_annotation_reader
 
@@ -210,7 +200,7 @@ def fxt_project_dictionary(fxt_base_test_path: str) -> dict:
     Return a dictionary representing a project.
     """
     project_datafile = os.path.join(fxt_base_test_path, "data", "mock_project.json")
-    with open(project_datafile, "r") as file:
+    with open(project_datafile) as file:
         project_dict = json.load(file)
     yield project_dict
 
@@ -228,16 +218,14 @@ def fxt_geti_annotation_reader(fxt_light_bulbs_dataset) -> GetiAnnotationReader:
     """
     Return a GetiAnnotationReader instance to load the `light-bulbs` test dataset
     """
-    yield GetiAnnotationReader(
-        base_data_folder=os.path.join(fxt_light_bulbs_dataset, "annotations")
-    )
+    yield GetiAnnotationReader(base_data_folder=os.path.join(fxt_light_bulbs_dataset, "annotations"))
 
 
 @pytest.fixture()
 def fxt_classification_to_detection_annotation_readers(
     fxt_annotation_reader: DatumAnnotationReader,
     fxt_annotation_reader_grouped: DatumAnnotationReader,
-) -> List[DatumAnnotationReader]:
+) -> list[DatumAnnotationReader]:
     """
     Return a list of DatumAnnotationReader objects that can be used to create a
     `classification_to_detection` project, for the `blocks` dataset.

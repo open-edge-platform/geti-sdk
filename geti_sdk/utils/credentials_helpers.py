@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions
 # and limitations under the License.
 import os
-from typing import Optional, Union
 
 from dotenv import dotenv_values
 
@@ -22,9 +21,7 @@ from geti_sdk.http_session.server_config import (
 )
 
 
-def convert_boolean_env_variable(
-    value: Optional[str], default_value: bool = False
-) -> bool:
+def convert_boolean_env_variable(value: str | None, default_value: bool = False) -> bool:
     """
     Convert a string that was extracted from environment variables to a
     boolean.
@@ -51,7 +48,7 @@ def convert_boolean_env_variable(
 
 def get_server_details_from_env(
     env_file_path: str = ".env", use_global_variables: bool = False
-) -> Union[ServerTokenConfig, ServerCredentialConfig]:
+) -> ServerTokenConfig | ServerCredentialConfig:
     """
     Retrieve the server information (hostname and authentication details) from
     environment variables.
@@ -124,21 +121,15 @@ def get_server_details_from_env(
     hostname = retrieval_func(host_key, None)
     if hostname is None:
         raise ValueError(
-            f"Unable to find Geti hostname in the {env_name}. Please make sure "
-            f"that the variable {host_key} is defined."
+            f"Unable to find Geti hostname in the {env_name}. Please make sure that the variable {host_key} is defined."
         )
 
     # Extract certificate validation. Defaults to True
-    verify_certificate = convert_boolean_env_variable(
-        value=retrieval_func(cert_key, None), default_value=True
-    )
+    verify_certificate = convert_boolean_env_variable(value=retrieval_func(cert_key, None), default_value=True)
 
     # Extract https proxy configuration
     https_proxy = retrieval_func(https_proxy_key, None)
-    if https_proxy is not None:
-        proxies = {"https": https_proxy}
-    else:
-        proxies = None
+    proxies = {"https": https_proxy} if https_proxy is not None else None
 
     # Extract token/credentials
     token = retrieval_func(token_key, None)

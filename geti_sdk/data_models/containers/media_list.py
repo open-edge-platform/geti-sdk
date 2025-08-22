@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import os
 from collections import UserList
-from typing import Any, Dict, Generic, List, Type, TypeVar
+from typing import Any, Generic, TypeVar
 
 from geti_sdk.data_models.media import Image, MediaItem, Video, VideoFrame
 from geti_sdk.utils.serialization_helpers import deserialize_dictionary
@@ -30,14 +30,14 @@ class MediaList(UserList, Generic[MediaTypeVar]):
     """
 
     @property
-    def ids(self) -> List[str]:
+    def ids(self) -> list[str]:
         """
         Return a list of unique database IDs for all media items in the media list.
         """
         return [item.id for item in self.data]
 
     @property
-    def names(self) -> List[str]:
+    def names(self) -> list[str]:
         """
         Return a list of filenames for all media items in the media list.
         """
@@ -59,24 +59,19 @@ class MediaList(UserList, Generic[MediaTypeVar]):
         for item in self.data:
             if item.name == filename:
                 return item
-        raise ValueError(
-            f"Media list {self} does not contain item with filename {filename}."
-        )
+        raise ValueError(f"Media list {self} does not contain item with filename {filename}.")
 
     @property
-    def media_type(self) -> Type[MediaTypeVar]:
+    def media_type(self) -> type[MediaTypeVar]:
         """
         Return the type of the media contained in this list.
         """
         if self.data:
             return type(self.data[0])
-        else:
-            raise ValueError("Cannot deduce media type from empty MediaList")
+        raise ValueError("Cannot deduce media type from empty MediaList")
 
     @staticmethod
-    def from_rest_list(
-        rest_input: List[Dict[str, Any]], media_type: Type[MediaTypeVar]
-    ) -> MediaList[MediaTypeVar]:
+    def from_rest_list(rest_input: list[dict[str, Any]], media_type: type[MediaTypeVar]) -> MediaList[MediaTypeVar]:
         """
         Create a MediaList instance from a list of media entities obtained from the
         Intel® Geti™ /media endpoints.
@@ -89,10 +84,7 @@ class MediaList(UserList, Generic[MediaTypeVar]):
             where each entity is of type `media_type`
         """
         return MediaList[MediaTypeVar](
-            [
-                deserialize_dictionary(media_dict, output_type=media_type)
-                for media_dict in rest_input
-            ]
+            [deserialize_dictionary(media_dict, output_type=media_type) for media_dict in rest_input]
         )
 
     @property

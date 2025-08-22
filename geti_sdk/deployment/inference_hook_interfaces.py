@@ -15,14 +15,14 @@ import datetime
 import inspect
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
 from geti_sdk.data_models import Prediction
 
 
-class PostInferenceObject(object, metaclass=ABCMeta):
+class PostInferenceObject(metaclass=ABCMeta):
     """
     Base interface class for post inference triggers, actions and hooks
     """
@@ -40,7 +40,7 @@ class PostInferenceObject(object, metaclass=ABCMeta):
     def __init__(self):
         self._constructor_arguments_ = self.__get_constructor_arguments()
 
-    def __get_constructor_arguments(self) -> Dict[str, Any]:
+    def __get_constructor_arguments(self) -> dict[str, Any]:
         """
         Return the arguments used for constructing the PostInferenceAction object
 
@@ -48,25 +48,25 @@ class PostInferenceObject(object, metaclass=ABCMeta):
             parameter values as values
         """
         constructor_argument_params = inspect.signature(self.__init__).parameters
-        parameters: Dict[str, Any] = {}
+        parameters: dict[str, Any] = {}
         args = self._argument_dict_.get("args", ())
         kwargs = self._argument_dict_.get("kwargs", {})
         for index, (pname, parameter) in enumerate(constructor_argument_params.items()):
             if index + 1 <= len(args):
                 parameters.update({pname: args[index]})
-            elif pname in kwargs.keys():
+            elif pname in kwargs:
                 parameters.update({pname: kwargs[pname]})
             else:
                 parameters.update({pname: parameter.default})
         return parameters
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return a dictionary representation of the PostInferenceObject
 
         :return: Dictionary representing the class name and its constructor parameters
         """
-        constructor_args: Dict[str, Any] = {}
+        constructor_args: dict[str, Any] = {}
         for key, value in self._constructor_arguments_.items():
             if isinstance(value, PostInferenceObject):
                 constructor_args.update({key: value.to_dict()})
@@ -75,7 +75,7 @@ class PostInferenceObject(object, metaclass=ABCMeta):
         return {type(self).__name__: constructor_args}
 
     @classmethod
-    def from_dict(cls, input_dict: Dict[str, Any]) -> "PostInferenceObject":
+    def from_dict(cls, input_dict: dict[str, Any]) -> "PostInferenceObject":
         """
         Construct a PostInferenceObject from an input dictionary `input_dict`
 
@@ -83,7 +83,7 @@ class PostInferenceObject(object, metaclass=ABCMeta):
         :return: Instantiated PostInferenceObject, according to the input dictionary
         """
         available_objects = {subcls.__name__: subcls for subcls in cls.__subclasses__()}
-        pi_objects: List["PostInferenceObject"] = []
+        pi_objects: list[PostInferenceObject] = []
         for object_name, object_args in input_dict.items():
             target_object = available_objects[object_name]
             if target_object._override_from_dict_:
@@ -157,9 +157,7 @@ class PostInferenceAction(PostInferenceObject):
         elif log_level.lower() == "info":
             self.log_function = logging.info
         else:
-            raise ValueError(
-                f"Unsupported log_level `{log_level}`, options are 'info' or 'debug'."
-            )
+            raise ValueError(f"Unsupported log_level `{log_level}`, options are 'info' or 'debug'.")
         self._repr_info_: str = ""
 
     @abstractmethod
@@ -167,9 +165,9 @@ class PostInferenceAction(PostInferenceObject):
         self,
         image: np.ndarray,
         prediction: Prediction,
-        score: Optional[float] = None,
-        name: Optional[str] = None,
-        timestamp: Optional[datetime.datetime] = None,
+        score: float | None = None,
+        name: str | None = None,
+        timestamp: datetime.datetime | None = None,
     ):
         """
         Execute the action for the given `image` with corresponding `prediction` and an
@@ -214,8 +212,8 @@ class PostInferenceHookInterface(PostInferenceObject):
         self,
         image: np.ndarray,
         prediction: Prediction,
-        name: Optional[str] = None,
-        timestamp: Optional[datetime.datetime] = None,
+        name: str | None = None,
+        timestamp: datetime.datetime | None = None,
     ) -> None:
         """
         Execute the post inference hook. This will first evaluate the `trigger`, and

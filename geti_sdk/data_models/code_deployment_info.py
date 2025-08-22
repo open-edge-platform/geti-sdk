@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import Dict, List, Optional
 
 import attr
 
@@ -34,7 +33,7 @@ class DeploymentModelIdentifier:
     model_id: str
     model_group_id: str
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         """
         Return the dictionary representation of the model identifier.
 
@@ -70,7 +69,7 @@ class CodeDeploymentInformation:
     id: str
     progress: float
     state: DeploymentState
-    models: List[DeploymentModelIdentifier]
+    models: list[DeploymentModelIdentifier]
     creator_id: str
-    creation_time: Optional[str] = attr.field(default=None, converter=str_to_datetime)
+    creation_time: str | None = attr.field(default=None, converter=str_to_datetime)
     message: str = ""

@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions
 # and limitations under the License.
-from typing import List, Optional
 
 import numpy as np
 
@@ -34,7 +33,7 @@ class ConfidenceTrigger(PostInferenceTrigger):
         confidences for the specified labels will be considered.
     """
 
-    def __init__(self, threshold: float = 0.5, label_names: Optional[List[str]] = None):
+    def __init__(self, threshold: float = 0.5, label_names: list[str] | None = None):
         super().__init__(threshold=threshold)
         self.label_names = label_names
 
@@ -53,9 +52,8 @@ class ConfidenceTrigger(PostInferenceTrigger):
         min_confidence: float = 1
         for predicted_object in prediction.annotations:
             for label in predicted_object.labels:
-                if self.label_names is not None:
-                    if label.name not in self.label_names:
-                        continue
+                if self.label_names is not None and label.name not in self.label_names:
+                    continue
                 if label.probability < min_confidence:
                     min_confidence = label.probability
         return min_confidence
