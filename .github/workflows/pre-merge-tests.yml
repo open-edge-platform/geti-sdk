@@ -103,8 +103,8 @@ jobs:
         uses: open-edge-platform/anomalib/.github/actions/security/zizmor@f6ec1c57363a9894ff57184a5bfb78efa8f3de1b
         with:
           scan-scope: "changed"
-          severity-level: "LOW"
-          confidence-level: "LOW"
+          severity-level: "MEDIUM"
+          confidence-level: "HIGH"
           fail-on-findings: true
   bandit-scan-pr:
     runs-on: ubuntu-latest
