@@ -9,6 +9,7 @@
 ![Nightly Tests [Geti develop] Status](https://img.shields.io/github/actions/workflow/status/openvinotoolkit/geti-sdk/nightly-tests-geti-develop.yaml?label=nightly%20tests%20%5BGeti%20develop%5D&link=https%3A%2F%2Fgithub.com%2Fopenvinotoolkit%2Fgeti-sdk%2Factions%2Fworkflows%2Fnightly-tests-geti-develop.yaml)
 
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8329/badge)](https://www.bestpractices.dev/projects/8329)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-edge-platform/geti-sdk/badge)](https://scorecard.dev/viewer/?uri=github.com/open-edge-platform/geti-sdk)
 
 </div>
 
@@ -48,7 +49,7 @@ feeling for use cases for the package.
 > Python environment is highly recommended if you are starting a new project
 > or installing the SDK as standalone. This will help you avoid potential
 > dependency conflicts with other Python packages you may have installed on your system.
-> 
+>
 > If you have installed multiple versions of Python,
 > use `py -3.10 venv -m <env_name>` when creating your virtual environment to specify
 > a supported version (in this case 3.10). Once you activate the
@@ -89,7 +90,7 @@ for example if you want to try out the latest changes before the official releas
    git checkout <branch_or_tag_name>
    ```
 3. **Base installation** Within this directory, install the SDK using `pip install .` This command will install the
-   package and its base dependencies in your environment.  
+   package and its base dependencies in your environment.
 4. (optional) **Notebooks installation (Optional)** If you want to be able to run the notebooks, make sure to
    install the extra requirements using `pip install .[notebooks]` This will install both the
    SDK and all other dependencies needed to run the notebooks in your environment.
