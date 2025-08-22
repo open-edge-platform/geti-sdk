@@ -51,18 +51,8 @@ class TestDetectionToClassification(TestNightlyProject):
             benchmark_images=images,
         )
         benchmarker.set_task_chain_algorithms(
-            [
-                algo.name
-                for algo in fxt_project_service_no_vcr._training_client.get_algorithms_for_task(
-                    0
-                )
-            ][:2],
-            [
-                algo.name
-                for algo in fxt_project_service_no_vcr._training_client.get_algorithms_for_task(
-                    1
-                )
-            ][:2],
+            [algo.name for algo in fxt_project_service_no_vcr._training_client.get_algorithms_for_task(0)][:2],
+            [algo.name for algo in fxt_project_service_no_vcr._training_client.get_algorithms_for_task(1)][:2],
         )
         benchmarker.prepare_benchmark(working_directory=fxt_temp_directory)
         results = benchmarker.run_throughput_benchmark(
@@ -73,6 +63,4 @@ class TestDetectionToClassification(TestNightlyProject):
             repeats=2,
         )
         pd.DataFrame(results)
-        benchmarker.compare_predictions(
-            working_directory=fxt_temp_directory, throughput_benchmark_results=results
-        )
+        benchmarker.compare_predictions(working_directory=fxt_temp_directory, throughput_benchmark_results=results)

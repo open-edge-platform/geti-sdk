@@ -41,9 +41,7 @@ def fxt_artifact_directory() -> str:
 
     :return: Path to the directory for test artifacts
     """
-    default_dir = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "artifacts"
-    )
+    default_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "artifacts")
     if os.environ.get("GITHUB_ACTIONS", False):
         yield os.environ.get("ARTIFACT_DIRECTORY", default_dir)
     else:

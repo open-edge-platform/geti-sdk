@@ -53,7 +53,5 @@ class ROI(Annotation):
         return ROI(
             labels=self.labels,
             shape=self.shape.to_absolute_coordinates(parent_roi.shape),
-            original_shape=self.original_shape.to_absolute_coordinates(
-                parent_roi.shape
-            ),
+            original_shape=self.original_shape.to_absolute_coordinates(parent_roi.shape),
         )

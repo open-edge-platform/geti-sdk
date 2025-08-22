@@ -26,13 +26,9 @@ class TestAnomaly(TestNightlyProject):
                 project=existing_project,
                 project_client=fxt_project_client_no_vcr,
             )
-        assert project_name not in [
-            project.name for project in fxt_project_client_no_vcr.get_all_projects()
-        ]
+        assert project_name not in [project.name for project in fxt_project_client_no_vcr.get_all_projects()]
 
-        project = ensure_trained_anomaly_project(
-            geti=fxt_geti_no_vcr, project_name=project_name
-        )
+        project = ensure_trained_anomaly_project(geti=fxt_geti_no_vcr, project_name=project_name)
         fxt_project_service_no_vcr._project = project
 
         assert fxt_project_service_no_vcr.prediction_client.ready_to_predict
@@ -50,9 +46,7 @@ class TestAnomaly(TestNightlyProject):
         fxt_image_path: str,
         fxt_geti_no_vcr: Geti,
     ):
-        super().test_upload_and_predict_image(
-            fxt_project_service_no_vcr, fxt_image_path, fxt_geti_no_vcr
-        )
+        super().test_upload_and_predict_image(fxt_project_service_no_vcr, fxt_image_path, fxt_geti_no_vcr)
 
     def test_deployment(
         self,
