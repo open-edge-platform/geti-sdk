@@ -204,7 +204,8 @@ class GetiAnnotationReader(AnnotationReader):
         """
         filenames = self.get_data_filenames()
         n_sample = min(len(filenames), 50)
-        list_to_check = sample(filenames, n_sample) if n_sample == 50 else filenames
+        # nosec: is not used for security/cryptographic purposes
+        list_to_check = sample(filenames, n_sample) if n_sample == 50 else filenames  # nosec B311
 
         NORMALIZED_KEY = "normalized"
         PIXEL_KEY = "pixel"
