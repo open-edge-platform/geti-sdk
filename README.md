@@ -1,63 +1,71 @@
 <div align="center">
 
 [![python](https://img.shields.io/badge/python-3.10%2B-green)]()
-[![openvino](https://img.shields.io/badge/openvino-2023.2.0%2B-purple)](https://github.com/openvinotoolkit/openvino)
-![Intel Geti](https://img.shields.io/badge/Intel%C2%AE%20Geti%E2%84%A2-1.14%2B-blue?link=https%3A%2F%2Fgeti.intel.com%2F)
+![Intel Geti](https://img.shields.io/badge/Intel%C2%AE%20Geti%E2%84%A2-2.12-blue?link=https%3A%2F%2Fgeti.intel.com%2F)
+[![openvino](https://img.shields.io/badge/openvino-2025.2-purple)](https://github.com/openvinotoolkit/openvino)
 
 ![Pre-merge Tests Status](https://img.shields.io/github/actions/workflow/status/openvinotoolkit/geti-sdk/pre-merge-tests.yml?label=pre-merge%20tests&link=https%3A%2F%2Fgithub.com%2Fopenvinotoolkit%2Fgeti-sdk%2Factions%2Fworkflows%2Fpre-merge-tests.yml)
-![Nightly Tests [Geti latest] Status](https://img.shields.io/github/actions/workflow/status/openvinotoolkit/geti-sdk/nightly-tests-geti-latest.yaml?label=nightly%20tests%20%5BGeti%20latest%5D&link=https%3A%2F%2Fgithub.com%2Fopenvinotoolkit%2Fgeti-sdk%2Factions%2Fworkflows%2Fnightly-tests-geti-latest.yaml)
-![Nightly Tests [Geti develop] Status](https://img.shields.io/github/actions/workflow/status/openvinotoolkit/geti-sdk/nightly-tests-geti-develop.yaml?label=nightly%20tests%20%5BGeti%20develop%5D&link=https%3A%2F%2Fgithub.com%2Fopenvinotoolkit%2Fgeti-sdk%2Factions%2Fworkflows%2Fnightly-tests-geti-develop.yaml)
-
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8329/badge)](https://www.bestpractices.dev/projects/8329)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-edge-platform/geti-sdk/badge)](https://scorecard.dev/viewer/?uri=github.com/open-edge-platform/geti-sdk)
 
 </div>
 
 ---
 
-# Introduction
+# Geti SDK
 
-Welcome to the Intel® Geti™ SDK! The [Intel® Geti™ platform](https://geti.intel.com) enables
-teams to rapidly develop AI models. The platform reduces the time needed to build
-models by easing the complexities of model development and harnessing greater
-collaboration between teams. Most importantly, the platform unlocks faster
-time-to-value for digitization initiatives with AI.
+Geti SDK is a Python client for programmatically interacting with an [Intel® Geti™](https://github.com/open-edge-platform/geti) server via its [REST API](https://docs.geti.intel.com/docs/rest-api/openapi-specification).
+With Geti SDK, you can automate and streamline computer vision workflows, making it easy to manage datasets, train models, and deploy solutions directly from your Python environment.
 
-The Intel® Geti™ SDK is a python package which contains tools to interact with an
-Intel® Geti™ server via the REST API. It provides functionality for:
+### What is Intel® Geti™?
 
-- Project creation from annotated datasets on disk
-- Project downloading (images, videos, configuration, annotations, predictions and models)
-- Project creation and upload from a previous download
-- Deploying a project for local inference with OpenVINO
-- Getting and setting project and model configuration
-- Launching and monitoring training jobs
-- Media upload and prediction
+[Intel® Geti™](https://github.com/open-edge-platform/geti) is an AI platform designed to help anyone build state-of-the-art computer vision models quickly and efficiently, even with minimal data.
+It provides an end-to-end workflow for preparing, training, deploying, and running computer vision models at the edge. Geti™ supports the full AI model lifecycle, including dataset preparation, model training, and deployment of [OpenVINO™](https://docs.openvino.ai/)-optimized models.
 
-This repository also contains a set of (tutorial style) Jupyter
-[notebooks](https://github.com/openvinotoolkit/geti-sdk/tree/main/notebooks)
-that demonstrate how to use the SDK. We highly recommend checking them out to get a
-feeling for use cases for the package.
+### What can you do with Geti SDK?
 
-# Getting started
+With Geti SDK, you can:
+- Create projects from annotated datasets or from scratch
+- Upload and manage images, videos, and annotations
+- Configure and update project and training settings
+- Export and import datasets and projects, including models and configuration
+- Deploy projects for local inference with OpenVINO
+- Launch and monitor training, optimization, and evaluation workflows
+- Run inference on images and videos
+- And much more! See [Supported features](#supported-features) for more details.
 
-## Installation
+### Tutorials and Examples
 
-> [!TIP]
-> Using an environment manager such as [miniforge](https://github.com/conda-forge/miniforge) or
-[venv](https://docs.python.org/3/library/venv.html) to create a new
-> Python environment is highly recommended if you are starting a new project
-> or installing the SDK as standalone. This will help you avoid potential
-> dependency conflicts with other Python packages you may have installed on your system.
-> 
-> If you have installed multiple versions of Python,
-> use `py -3.10 venv -m <env_name>` when creating your virtual environment to specify
-> a supported version (in this case 3.10). Once you activate the
-> virtual environment <venv_path>/Scripts/activate, make sure to upgrade pip
-> to the latest version `python -m pip install --upgrade pip wheel setuptools`.
+The ['Code examples'](#code-examples) sections below contains short snippets that demonstrate
+how to perform several common tasks. This also shows how to configure the SDK to connect to your Intel® Geti™ server.
 
-### Python version compatibility
-Make sure to set up your environment using one of the supported Python versions for your
-operating system, as indicated in the table below.
+For more comprehensive examples, see the [Jupyter notebooks](https://github.com/openvinotoolkit/geti-sdk/tree/main/notebooks).
+These tutorials demonstrate how to use the SDK for various computer vision tasks and workflows, from basic project creation 
+to advanced inference scenarios.
+
+
+## Install the SDK
+
+Choose the installation method that best fits your use case:
+
+### From PyPI
+
+The easiest way to install the SDK is via [PyPI](https://pypi.org/project/geti-sdk).
+This is the recommended method for most users who want to integrate Geti SDK into their own Python applications:
+
+```bash
+pip install geti-sdk
+```
+
+> [!IMPORTANT]
+> Make sure to install a version of the SDK that matches your Geti server version. For example, if you're using Geti server version 2.12, install SDK version 2.12:
+> ```bash
+> pip install geti-sdk==2.12
+> ```
+
+#### Python and OS compatibility
+
+Geti SDK currently supports the following operating systems and Python versions:
 
 |             | Python <= 3.9 |    Python 3.10     | Python 3.11        | Python 3.12        | Python 3.13 |
 |:------------|:-------------:|:------------------:|:------------------:|:------------------:|:-----------:|
@@ -65,374 +73,293 @@ operating system, as indicated in the table below.
 | **Windows** |      :x:      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |     :x:     |
 | **MacOS**   |      :x:      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |     :x:     |
 
-Once you have created and activated a new environment, follow the steps below to install
-the package.
+### From source
 
-### Install from PyPI
+You can also choose to install the SDK from source by cloning the Git repository.
+This option is useful for users who want to experiment with the SDK and notebooks,
+or test the latest features before release, or for developers contributing to the project.
 
-The SDK can be installed from [PyPI](https://pypi.org/project/geti-sdk/) like a normal Python package: `pip install geti-sdk`.
-To install a specific version (for instance v2.10.0), use the command
-`pip install geti-sdk==2.10.0`
+#### Install from a custom branch
 
-### Install from source
+Follow these steps to install the SDK from a specific branch or commit:
 
-It is also possible to install the SDK directly from the source (Git repo),
-for example if you want to try out the latest changes before the official release.
-
-1. Clone the repository and navigate to the root directory of the repo
+1. Clone the repository:
    ```bash
-   git clone https://github.com/open-edge-platform/geti-sdk.git
+   git clone https://github.com/openvinotoolkit/geti-sdk.git
+   cd geti-sdk
    ```
-2. (optional) If you want to install a specific branch or tag, you can do so by
-   checking out the branch or tag after cloning the repository:
+
+2. Checkout the desired branch or commit (e.g., for the 2.12 release):
    ```bash
-   git checkout <branch_or_tag_name>
+   git checkout release-2.12
    ```
-3. **Base installation** Within this directory, install the SDK using `pip install .` This command will install the
-   package and its base dependencies in your environment.  
-4. (optional) **Notebooks installation (Optional)** If you want to be able to run the notebooks, make sure to
-   install the extra requirements using `pip install .[notebooks]` This will install both the
-   SDK and all other dependencies needed to run the notebooks in your environment.
+   Or use the develop branch for the latest changes:
+   ```bash
+   git checkout develop
+   ```
 
-### Install for development
+3. Install the SDK:
+   ```bash
+   pip install .
+   ```
 
-If you are a developer who wants to contribute to the SDK,
-the recommended way to install the SDK is through [uv](https://docs.astral.sh/uv/).
+#### Try the notebooks
 
-1. Clone the repo (see above).
-2. Install uv following the official [uv documentation](https://docs.astral.sh/uv/getting-started/installation/).
-3. Run `uv sync` to initialize the virtual environment and install the SDK and its dependencies.
-Optionally, you can pass the `--extra <TARGET>` argument to install extra requirements for specific functionalities:
-`notebooks` to run the Juypter notebooks in the `notebooks/` folder in this repository,
-`docs` to build the documentation for the SDK from source
+To explore the SDK features through Jupyter notebooks, please see the detailed setup instructions in [notebooks/README.md](notebooks/README.md).
 
-## Using the SDK
-The SDK contains example code in various forms to help you get familiar with the package.
+#### For developers
 
-- [Code examples](#code-examples) are short snippets that demonstrate
-  how to perform several common tasks. This also shows how to configure the SDK to
-  connect to your Intel® Geti™ server.
+Developers who want to modify the SDK source code should set up a development environment as follows:
 
-- [Jupyter notebooks](#jupyter-notebooks) are tutorial style notebooks that cover
-  pretty much the full SDK functionality. **These are the recommended way to get started
-  with the SDK.**
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/openvinotoolkit/geti-sdk.git
+   cd geti-sdk
+   ```
 
-- [Example scripts](#example-scripts) are more extensive scripts that cover more
-  advanced usage than the code examples, have a look at these if you don't like Jupyter.
+2. Checkout the desired branch or commit
 
-### Code examples
-The package provides a main class `Geti` that can be used for the following use cases
+3. Install uv following the official [uv documentation](https://docs.astral.sh/uv/getting-started/installation/).
 
-#### Connecting to the Intel® Geti™ platform
-To establish a connection between the SDK running on your local machine, and the
-Intel® Geti™ platform running on a remote server, the `Geti` class needs to know the
-hostname or IP address for the server and it needs to have some form of authentication.
+4. Set up the development environment with all dependencies:
+   ```bash
+   uv sync --all-extras
+   ```
 
-Instantiating the `Geti` class will establish the connection and perform authentication.
+## Code examples
 
-- **Personal Access Token**
+The package provides a main class `Geti` that can be used for the following use cases:
 
-  The recommended authentication method is the 'Personal Access Token'. The token can be
-  obtained by following the steps below:
+### Connect to the Intel® Geti™ platform
 
-    1. Open the Intel® Geti™ user interface in your browser
-    2. Click on the `User` menu, in the top right corner of the page. The menu is
-       accessible from any page inside the Intel® Geti™ interface.
-    3. In the dropdown menu that follows, click on `Personal access token`, as shown in
-       the image below.
-    4. In the screen that follows, go through the steps to create a token.
-    5. Make sure to copy the token value!
+To establish a connection between the SDK and the Intel® Geti™ platform, the `Geti` class needs to know the hostname or IP address for the server and requires authentication.
 
-   ![Personal access token menu](docs/source/images/personal_access_token.png)
+#### Personal Access Token (Recommended)
 
-  Once you created a personal access token, it can be passed to the `Geti` class as follows:
-  ```python
-  from geti_sdk import Geti
+The recommended authentication method is the 'Personal Access Token'. To obtain a token:
 
-  geti = Geti(
-      host="https://your_server_hostname_or_ip_address",
-      token="your_personal_access_token"
-  )
-  ```
+1. Open the Intel® Geti™ user interface in your browser
+2. Click on the `User` menu in the top right corner
+3. Select `Personal access token` from the dropdown menu
+4. Follow the steps to create a token and copy the token value
 
-- **User Credentials**
-  > **NOTE**: For optimal security, using the token method outlined above is recommended.
-
-  In addition to the token, your username and password can also be used to connect to
-  the server. They can be passed as follows:
-
-  ```python
-  from geti_sdk import Geti
-
-  geti = Geti(
-      host="https://your_server_hostname_or_ip_address", username="dummy_user", password="dummy_password"
-  )
-
-  ```
-  Here, `"dummy_user"` and `"dummy_password"` should be replaced by your username and
-  password for the Geti server.
-
-
-- **SSL certificate validation**
-
-  By default, the SDK verifies the SSL certificate of your server before establishing
-  a connection over HTTPS. If the certificate can't be validated, this will results in
-  an error and the SDK will not be able to connect to the server.
-
-  However, this may not be appropriate or desirable in all cases, for instance if your
-  Geti server does not have a certificate because you are running it in a private
-  network environment. In that case, certificate validation can be disabled by passing
-  `verify_certificate=False` to the `Geti` constructor. Please only disable certificate
-  validation in a secure environment!
-
-#### Downloading and uploading projects
-
-- **Project download** The following python snippet is a minimal example of how to
-  download a project using `Geti`:
-
-  ```python
-  from geti_sdk import Geti
-
-  geti = Geti(
-    host="https://your_server_hostname_or_ip_address", token="your_personal_access_token"
-  )
-
-  geti.download_project_data(project_name="dummy_project")
-  ```
-
-  Here, it is assumed that the project with name 'dummy_project' exists on the cluster.
-  The `Geti` instance will create a folder named 'dummy_project' in your current working
-  directory, and download the project parameters, images, videos, annotations,
-  predictions and the active model for the project (including optimized models derived
-  from it) to that folder.
-
-  The method takes
-  the following optional parameters:
-
-    - `target_folder` -- Can be specified to change the directory to which the
-      project data is saved.
-
-    - `include_predictions` -- Set to True to download the predictions for all images
-      and videos in the project. Set to False to not download any predictions.
-
-    - `include_active_model` -- Set to True to download the active model for the
-      project, and any optimized models derived from it. If set to False, no models
-      are downloaded. False by default.
-
-  > **NOTE**: During project downloading the Geti SDK stores data on local disk. If
-  > necessary, please apply additional security control to protect downloaded files
-  > (e.g., enforce access control, delete sensitive data securely).
-
-- **Project upload** The following python snippet is a minimal example of how to
-  re-create a project on an Intel® Geti™ server using the data from a previously
-  downloaded project:
-
-  ```python
-  from geti_sdk import Geti
-
-  geti = Geti(
-    host="https://your_server_hostname_or_ip_address", token="your_personal_access_token"
-  )
-
-  geti.upload_project_data(target_folder="dummy_project")
-  ```
-
-  The parameter `target_folder` must be a valid path to the directory holding the
-  project data. If you want to create the project using a different name than the
-  original project, you can pass an additional parameter `project_name` to the upload
-  method.
-
-The `Geti` instance can be used to either back-up a project (by downloading it and later
-uploading it again to the same cluster), or to migrate a project to a different cluster
-(download it, and upload it to the target cluster).
-
-#### Up- or downloading all projects
-To up- or download all projects from a cluster, simply use the
-`geti.download_all_projects` and `geti.upload_all_projects` methods instead of
-the single project methods in the code snippets above.
-
-#### Deploying a project
-
-The following code snippet shows how to create a deployment for local inference with
-OpenVINO:
+![Personal access token menu](docs/source/images/personal_access_token.png)
 
 ```python
-import cv2
-
 from geti_sdk import Geti
 
 geti = Geti(
-host="https://your_server_hostname_or_ip_address", token="your_personal_access_token"
+    host="https://your_server_hostname_or_ip_address",
+    token="your_personal_access_token"
 )
-
-# Download the model data and create a `Deployment`
-deployment = geti.deploy_project(project_name="dummy_project")
-
-# Load the inference models for all tasks in the project, for CPU inference
-deployment.load_inference_models(device='CPU')
-
-# Run inference
-dummy_image = cv2.imread('dummy_image.png')
-prediction = deployment.infer(image=dummy_image)
-
-# Save the deployment to disk
-deployment.save(path_to_folder="dummy_project")
 ```
 
-The `deployment.infer` method takes a numpy image as input.
+#### User Credentials
 
-The `deployment.save` method will save the deployment to the folder named
-'dummy_project', on the local disk. The deployment can be reloaded again later using
-`Deployment.from_folder('dummy_project')`.
+It is also possible to authenticate using a username and password:
 
-### Example scripts
-The [examples](https://github.com/openvinotoolkit/geti-sdk/tree/main/examples)
-folder contains example scripts, showing various use cases for the package. They can
-be run by navigating to the `examples` directory in your terminal, and simply running
-the scripts like any other python script.
+```python
+from geti_sdk import Geti
 
-### Jupyter Notebooks
-In addition, the [notebooks](https://github.com/openvinotoolkit/geti-sdk/tree/main/notebooks)
-folder contains Jupyter notebooks with example use cases for the `geti_sdk`. To run
-the notebooks, make sure that the requirements for the notebooks are installed in your
-Python environment. If you have not installed these when you were installing the SDK,
-you can install them at any time using
-`pip install -r requirements/requirements-notebooks.txt`
+geti = Geti(
+    host="https://your_server_hostname_or_ip_address",
+    username="your_username",
+    password="your_password"
+)
+```
 
-Once the notebook requirements are installed, navigate to the `notebooks` directory in
-your terminal. Then, launch JupyterLab by typing `jupyter lab`. This should open your
-browser and take you to the JupyterLab landing page, with the SDK notebooks open (see
-the screenshot below).
+> [!NOTE]
+> By default, the SDK verifies SSL certificates. To disable certificate validation (only in secure environments),
+pass the `verify_certificate=False` argument to the `Geti` constructor.
 
-> **NOTE**: Both the example scripts and the notebooks require access to a server
-> running the Intel® Geti™ platform.
+### Manage projects
 
-![Jupyter lab landing page](docs/source/images/jupyter_lab_landing_page.png)
+#### Create a new project
 
-## High level API reference
-The `Geti` class provides the following methods:
+```python
+from geti_sdk import Geti
+from geti_sdk.rest_clients import ProjectClient
 
-- `download_project_data` -- Downloads a project by project name (Geti-SDK representation), returns an interactive object.
+geti = Geti(host="https://your_server", token="your_token")
+project_client = ProjectClient(session=geti.session, workspace_id=geti.workspace_id)
+
+# Create a detection project
+project = project_client.create_project(
+    project_name="My Detection Project",
+    project_type="detection",
+    labels=[["person", "car", "bicycle"]]
+)
+```
+
+#### Get an existing project
+
+```python
+from geti_sdk.rest_clients import ProjectClient
+
+project_client = ProjectClient(session=geti.session, workspace_id=geti.workspace_id)
+
+# Get project by name
+project = project_client.get_project_by_name("My Detection Project")
+
+# List all projects
+projects = project_client.list_projects()
+```
+
+### Upload and annotate media
+
+#### Upload an image
+
+```python
+import cv2
+from geti_sdk.rest_clients import ImageClient, AnnotationClient
+
+# Set up clients
+image_client = ImageClient(session=geti.session, workspace_id=geti.workspace_id, project=project)
+annotation_client = AnnotationClient(session=geti.session, workspace_id=geti.workspace_id, project=project)
+
+# Upload image
+image = cv2.imread("path/to/your/image.jpg")
+uploaded_image = image_client.upload_image(image)
+```
+
+#### Annotate an image
+
+```python
+from geti_sdk.data_models import Rectangle, Annotation
+
+# Create a bounding box annotation
+bbox = Rectangle(x=100, y=100, width=200, height=150)
+annotation = Annotation(
+    shape=bbox,
+    labels=[project.get_trainable_tasks()[0].labels[0]]  # Use first label
+)
+
+# Upload annotation
+annotation_client.upload_annotation_for_image(uploaded_image, annotation)
+```
+
+#### List media
+
+```python
+from geti_sdk.rest_clients import ImageClient
+
+image_client = ImageClient(session=geti.session, workspace_id=geti.workspace_id, project=project)
+
+# Get all images in a project
+images = image_client.get_all_images()
+print(f"Found {len(images)} images in the project")
+
+# Get images from specific dataset
+dataset = project.datasets[0]  # Get first dataset
+images_in_dataset = image_client.get_images_in_dataset(dataset)
+```
+
+### Train a project
+
+```python
+from geti_sdk.rest_clients import TrainingClient
+import time
+
+training_client = TrainingClient(session=geti.session, workspace_id=geti.workspace_id, project=project)
+
+# Start training
+job = training_client.train_project()
+print(f"Training job started with ID: {job.id}")
+
+# Monitor training progress
+while not job.is_finished:
+    time.sleep(30)  # Wait 30 seconds
+    job = training_client.get_job_by_id(job.id)
+    print(f"Training status: {job.status}")
+
+print("Training completed!")
+```
+
+### Run inference on an image
+
+```python
+from geti_sdk.rest_clients import ImageClient, PredictionClient
+
+image_client = ImageClient(session=geti.session, workspace_id=geti.workspace_id, project=project)
+prediction_client = PredictionClient(session=geti.session, workspace_id=geti.workspace_id, project=project)
+
+# Upload image and get prediction
+image = cv2.imread('path/to/test_image.jpg')
+uploaded_image = image_client.upload_image(image)
+prediction = prediction_client.get_image_prediction(uploaded_image)
+```
+
+### Import/export
+
+**Export and import a project**
+
+```python
+from geti_sdk.import_export import GetiIE
+
+# Set up the import/export client
+geti_ie = GetiIE(workspace_id=geti.workspace_id, session=geti.session, project_client=project_client)
+
+# Get the project to export
+project = project_client.get_project_by_name("My Detection Project")
+
+# Export project as zip archive
+geti_ie.export_project(
+    project_id=project.id,
+    filepath="./my_project_export.zip",
+    include_models="all"  # Options: 'all', 'none', 'latest_active'
+)
+
+# Import project from zip archive
+imported_project = geti_ie.import_project(
+    filepath="./my_project_export.zip",
+    project_name="Imported Project"  # Optional: specify new name
+)
+```
+
+**Export and import a dataset**
+
+```python
+from geti_sdk.import_export import GetiIE
+from geti_sdk.data_models.enums import DatasetFormat
+
+# Set up the import/export client
+geti_ie = GetiIE(session=geti.session, workspace_id=geti.workspace_id, project_client=project_client)
+
+# Export dataset in Datumaro format
+dataset = project.datasets[0]  # Get first dataset
+geti_ie.export_dataset(
+    project=project,
+    dataset=dataset,
+    filepath="./dataset_export.zip",
+    export_format=DatasetFormat.DATUMARO,
+    include_unannotated_media=False
+)
+
+# Import dataset as new project
+imported_project = geti_ie.import_dataset_as_new_project(
+    filepath="./dataset_export.zip",
+    project_name="Project from Dataset",
+    project_type="detection"
+)
+```
 
 
-- `upload_project_data` -- Uploads project (Geti-SDK representation) from a folder.
+## Supported features
 
+Geti SDK supports most of the operations that are exposed via the [Geti REST API](https://docs.geti.intel.com/docs/rest-api/openapi-specification),
+although some advanced features may not be available yet due to technical and security reasons.
 
-- `download_all_projects` -- Downloads all projects found on the server.
-
-
-- `upload_all_projects` -- Uploads all projects found in a specified folder to the
-  server.
-
-- `export_project` -- Exports a project to an archive on disk. This method is useful for
-  creating a backup of a project, or for migrating a project to a different cluster.
-
-- `import_project` -- Imports a project from an archive on disk. This method is useful for
-  restoring a project from a backup, or for migrating a project to a different cluster.
-
-- `export_dataset` -- Exports a dataset to an archive on disk. This method is useful for
-  creating a backup of a dataset, or for migrating a dataset to a different cluster.
-
-- `import_dataset` -- Imports a dataset from an archive on disk. A new project will
-  be created for the dataset. This method is useful for restoring a project from a dataset
-  backup, or for migrating a dataset to a different cluster.
-
-- `upload_and_predict_image` -- Uploads a single image to an existing project on the
-  server, and requests a prediction for that image. Optionally, the prediction can
-  be visualized as an overlay on the image.
-
-
-- `upload_and_predict_video` -- Uploads a single video to an existing project on the
-  server, and requests predictions for the frames in the video. As with
-  upload_and_predict_image, the predictions can be visualized on the frames. The
-  parameter `frame_stride` can be used to control which frames are extracted for
-  prediction.
-
-
-- `upload_and_predict_media_folder` -- Uploads all media (images and videos) from a
-  folder on local disk to an existing project on the server, and download
-  predictions for all uploaded media.
-
-
-- `deploy_project` -- Downloads the active model for all tasks in the project as an
-  OpenVINO inference model. The resulting `Deployment` can be used to run inference
-  for the project on a local machine. Pipeline inference is also supported.
-
-
-- `create_project_single_task_from_dataset` -- Creates a single task project on the
-  server, potentially using labels and uploading annotations from an external dataset.
-
-
-- `create_task_chain_project_from_dataset` -- Creates a task chain project on the
-  server, potentially using labels and uploading annotations from an external dataset.
-
-For further details regarding these methods, please refer to the method documentation,
-the [code snippets](#downloading-and-uploading-projects), and
-[example scripts](https://github.com/openvinotoolkit/geti-sdk/tree/main/examples) provided in this repo.
-
-Please visit the full documentation for a complete API reference.
-
-# Supported features
-## What is supported
-
-- **Creating projects**. You can pass a variable `project_type` to control what kind of
-  tasks will be created in the project pipeline. For example, if you want to create a
-  single task segmentation project, you'd pass `project_type='segmentation'`. For a
-  detection -> segmentation task chain, you can pass
-  `project_type=detection_to_segmentation`. Please see the scripts in the `examples`
-  folder for examples on how to do this.
-
-
-- **Creating datasets** and retrieving dataset statistics.
-
-
-- **Uploading** images, videos, annotations for images and video frames and configurations
-  to a project.
-
-
-- **Downloading** images, videos, annotations, models and predictions for all images and
-  videos/video frames in a project. Also downloading the full project configuration
-  is supported.
-
-
-- **Setting configuration for a project**, like turning auto train on/off and
-  setting number of iterations for all tasks.
-
-
-- **Deploying a project** to load OpenVINO inference models for all tasks in the pipeline,
-  and running the full pipeline inference on a local machine.
-
-
-- **Creating and restoring a backup of an existing project**, using the code
-  snippets provided [above](#downloading-and-uploading-projects). Only
-  annotations, media and configurations are backed up, models are not.
-
-
-- **Launching and monitoring training jobs** is straightforward with the `TrainingClient`.
-  Please refer to the notebook `007_train_project` for instructions.
-
-
-- **Authorization via Personal Access Token** is available for both On-Prem and SaaS users.
-
-
-- **Fetching the active dataset**
-
-
-- **Triggering (post-training) model optimization** for model quantization and
-  changing models precision.
-
-
-- **Running model tests**
-
-
-- **Benchmarking models** to measure inference throughput on different hardware.
-  It allows for quick and easy comparison of inference framerates for different
-  model architectures and precision levels for the specified project.
-
-
-## What is not supported
-
-- Model upload
-- Prediction upload
-- Importing datasets to an existing project: For this, you can use the import
-  functionality from the Intel® Geti™ user interface instead.
+- [x] **Manage projects and their configuration** - Create, delete, and reconfigure projects of any type, including multi-task pipelines
+- [x] **Upload media** - Upload images and videos with various formats and resolutions
+- [x] **Annotate media** - Create annotations for images and video frames
+- [x] **Train, optimize and evaluate models** - Launch training jobs, trigger post-training optimization (quantization) and evaluate models on custom datasets
+- [x] **Monitor long-running workflows** - Track the status and progress of training, optimization, and evaluation jobs
+- [x] **Generate predictions with a trained model** - Upload media and get predictions, with support for both single images and batch processing
+- [x] **Active learning** - Get suggestions for the most informative samples to annotate next
+- [x] **Get statistics about datasets and models** - Retrieve comprehensive statistics and metrics for datasets and models
+- [x] **Deploy and benchmark models locally** - Export OpenVINO inference models, run full pipeline inference on local machines, and measure inference throughput on your hardware configurations
+- [x] **Download and upload datasets** - Export datasets to archives and import them to create new projects
+- [x] **Download and upload full projects** - Create complete backups of projects, including datasets, models and configurations, and restore them
+- [ ] **Upload trained models** - Intel® Geti™ does not allow to import external models
+- [ ] **Import datasets to existing projects** - currently, this feature is only available through the Intel® Geti™ UI and API
+- [ ] **Manage users and roles** - currently, this feature is only available through the Intel® Geti™ UI and API
