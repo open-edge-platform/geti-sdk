@@ -1,177 +1,73 @@
 name: "Security scan"
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+    # Run security checks every day at 2 AM UTC
+    - cron: "0 2 * * *"
+  workflow_dispatch:
   push:
     branches:
       - main
       - "releases/**"
 
-permissions: {}
+permissions: {} # No permissions by default
 
 jobs:
-  Trivy-Scan-Vuln:
-    runs-on: ubuntu-24.04
+  zizmor-scan:
+    runs-on: ubuntu-latest
     permissions:
-      security-events: write
+      contents: read
+      security-events: write # Needed to upload the results to code-scanning dashboard
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@002fdce3c6a235733a90a27c80493a3241e56863 # v2.12.1
         with:
           egress-policy: audit
-
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Run Zizmor scan
+        uses: open-edge-platform/geti-ci/actions/zizmor@db5335076dfe564b039b5a7480b8f6b6ae38370a
         with:
-          persist-credentials: false
+          scan-scope: "all"
+          severity-level: "LOW"
+          confidence-level: "LOW"
+          fail-on-findings: false # reports only
 
-      - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+  bandit-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # Needed to upload the results to code-scanning dashboard
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@002fdce3c6a235733a90a27c80493a3241e56863 # v2.12.1
         with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: python -m pip install pip-tools
-
-      - name: Run Trivy Scan (vuln)
-        uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37 # v0.31.0
+          egress-policy: audit
+      - name: Run Bandit scan
+        uses: open-edge-platform/geti-ci/actions/bandit@db5335076dfe564b039b5a7480b8f6b6ae38370a
         with:
-          scan-type: fs
+          scan-scope: "all"
+          severity-level: "LOW"
+          confidence-level: "LOW"
+          config_file: "pyproject.toml"
+          fail-on-findings: false # reports only
+
+  trivy-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # Needed to upload the results to code-scanning dashboard
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@002fdce3c6a235733a90a27c80493a3241e56863 # v2.12.1
+        with:
+          egress-policy: audit
+      - name: Run Trivy scan
+        id: trivy
+        uses: open-edge-platform/geti-ci/actions/trivy@db5335076dfe564b039b5a7480b8f6b6ae38370a
+        with:
+          scan_type: "fs"
+          scan-scope: all
+          severity: LOW
+          scanners: "vuln,secret,config"
           format: "sarif"
-          scan-ref: uv.lock
-          scanners: vuln
-          output: trivy-results-vuln.sarif
-
-      - name: Upload SARIF file
-        if: ${{ always() }}
-        uses: github/codeql-action/upload-sarif@ce28f5bb42b7a9f2c824e633a3f6ee835bab6858 # v3.28.8
-        with:
-          sarif_file: "trivy-results-vuln.sarif"
-
-      - name: Run Trivy Scan (spdx)
-        uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37 # v0.31.0
-        with:
-          scan-type: fs
-          format: "spdx-json"
-          scan-ref: uv.lock
-          output: trivy-results-spdx.json
-
-      - name: Upload Trivy results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
-        with:
-          name: trivy-vuln-results
-          path: "${{ github.workspace }}/trivy-results-*"
-          retention-days: 7
-
-      - name: Upload deps list
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: python-deps-list
-          path: "${{ github.workspace }}/uv.lock"
-          retention-days: 7
-
-  Trivy-Scan-Misconfig:
-    runs-on: ubuntu-24.04
-    permissions:
-      security-events: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-
-      - name: Run Trivy Scan (dockerfile and secrets)
-        uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37 # v0.31.0
-        with:
-          scan-type: fs
-          format: "sarif"
-          scan-ref: .
-          scanners: misconfig,secret
-          output: trivy-results-misconfig.sarif
-
-      - name: Upload SARIF file
-        if: ${{ always() }}
-        uses: github/codeql-action/upload-sarif@ce28f5bb42b7a9f2c824e633a3f6ee835bab6858 # v3.28.8
-        with:
-          sarif_file: "trivy-results-misconfig.sarif"
-
-      - name: Upload Trivy results artifact
-        if: ${{ always() }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: trivy-misconfig-results
-          path: "${{ github.workspace }}/trivy-results-misconfig.sarif"
-          retention-days: 7
-
-  Bandit:
-    runs-on: ubuntu-24.04
-    permissions:
-      security-events: write
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@002fdce3c6a235733a90a27c80493a3241e56863 # v2.12.1
-        with:
-          egress-policy: audit
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-      - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
-        with:
-          python-version: "3.12"
-
-      - name: Install Bandit
-        run: pip install bandit[sarif]
-
-      - name: Bandit Scanning
-        run: bandit -c pyproject.toml -f sarif -o bandit-results.sarif -r --exit-zero . # report generation only
-
-      - name: Upload SARIF file
-        if: ${{ always() }}
-        uses: github/codeql-action/upload-sarif@ce28f5bb42b7a9f2c824e633a3f6ee835bab6858 # v3.28.8
-        with:
-          sarif_file: bandit-results.sarif
-
-      - name: Upload Bandit artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
-        with:
-          name: bandit-results
-          path: bandit-results.sarif
-          retention-days: 7
-
-  Summarize:
-    needs: [Trivy-Scan-Vuln, Trivy-Scan-Misconfig, Bandit]
-    if: always()
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@002fdce3c6a235733a90a27c80493a3241e56863 # v2.12.1
-        with:
-          egress-policy: audit
-
-      # Create directory first
-      - name: Create results directory
-        run: mkdir -p all-results
-
-      # Download artifacts with error handling
-      - name: Download all results
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        continue-on-error: true # Don't fail if some tools didn't generate results
-        with:
-          pattern: "*-results"
-          merge-multiple: true
-          path: all-results
-
-      # Only upload if there are files
-      - name: Upload combined results
-        if: hashFiles('all-results/**/*') != ''
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: security-scan-results
-          path: all-results
-          retention-days: 7
+          timeout: "15m"
+          ignore_unfixed: "false"
