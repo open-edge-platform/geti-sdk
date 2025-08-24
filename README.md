@@ -109,22 +109,7 @@ To explore the SDK features through Jupyter notebooks, please see the detailed s
 
 #### For developers
 
-Developers who want to modify the SDK source code should set up a development environment as follows:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/openvinotoolkit/geti-sdk.git
-   cd geti-sdk
-   ```
-
-2. Checkout the desired branch or commit
-
-3. Install uv following the official [uv documentation](https://docs.astral.sh/uv/getting-started/installation/).
-
-4. Set up the development environment with all dependencies:
-   ```bash
-   uv sync --all-extras
-   ```
+Developers who want to modify the SDK source code should follow the development setup instructions in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Code examples
 
@@ -363,3 +348,7 @@ although some advanced features may not be available yet due to technical and se
 - [ ] **Upload trained models** - Intel® Geti™ does not allow to import external models
 - [ ] **Import datasets to existing projects** - currently, this feature is only available through the Intel® Geti™ UI and API
 - [ ] **Manage users and roles** - currently, this feature is only available through the Intel® Geti™ UI and API
+
+Are you looking for a specific feature that is not listed here?
+Please check if it is implemented by one of the clients in the [rest_clients](geti_sdk/rest_clients) module,
+else feel free to open an issue or contribute a pull request (see the [CONTRIBUTING](CONTRIBUTING.md) guidelines).
