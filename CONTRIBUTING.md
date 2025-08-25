@@ -5,18 +5,26 @@ requests and issues, please feel free to create a GitHub Issue in this repositor
 # Development and pull requests
 To set up your development environment, please follow the steps below:
 
-1. Fork the repo.
-2. Install the requirements for running the test suite
-   using `pip install -r requirements/requirements-dev.txt`.
+1. Clone the repository or a fork (for external contributors):
+   ```bash
+   git clone https://github.com/openvinotoolkit/geti-sdk.git
+   cd geti-sdk
+   ```
+2. Checkout the desired branch or commit based off the `main` branch.
+3. Install uv following the official [uv documentation](https://docs.astral.sh/uv/getting-started/installation/).
 
-3. Create your branch based off the `main` branch.
-4. Make sure that `git lfs` is configured for your Git account, by following the
+4. Set up the development environment with all dependencies:
+   ```bash
+   uv sync --all-extras
+   ```
+
+5. Make sure that `git lfs` is configured for your Git account, by following the
    steps [here](https://git-lfs.github.com/). Git LFS (Large File Storage) is used in
    this repo to manage certain data files used in the tests.
 
-5. Run `git lfs pull` to download the test data.
-6. Verify that the integration tests now run locally by executing `pytest tests/integration`
-7. Set up the pre-commit hooks in the repo by running `pre-commit install`. Several pre-commit
+6. Run `git lfs pull` to download the test data.
+7. Verify that the integration tests now run locally by executing `pytest tests/integration`
+8. Set up the pre-commit hooks in the repo by running `pre-commit install`. Several pre-commit
    hooks are used in the repo to lint and format the code. The `pre-commit install`
    command sets up all of these hooks so that the checks will be performed on each
    commit you make.
