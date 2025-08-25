@@ -65,7 +65,10 @@ class ModelClient:
         model_groups = [ModelRESTConverter.model_group_from_dict(group) for group in response_array]
         # Update algorithm details
         for group in model_groups:
-            group.algorithm = self.supported_algos.get_by_model_manifest_id(model_manifest_id=group.model_template_id)
+            if group.learning_approach == "fully_supervised":  # only fully supervised models have a manifest
+                group.algorithm = self.supported_algos.get_by_model_manifest_id(
+                    model_manifest_id=group.model_template_id
+                )
             for model in group.models:
                 # set the model storage id, to link models to their parent group
                 model.model_storage_id = group.id
