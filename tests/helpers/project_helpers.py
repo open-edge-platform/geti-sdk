@@ -48,7 +48,7 @@ def get_or_create_annotated_project_for_test_class(
     :param annotation_requirements_first_training: The required amount of annotations for first training.
     :param keypoint_structure: The structure of the keypoints to be used for the project,
         represented as a graph of nodes and edges.
-    :return: Project instance corresponding to the project on the Intel® Geti™ server
+    :return: Project instance corresponding to the project on the Geti™ server
     """
     project_exists = project_service.has_project
     labels = [reader.get_all_label_names() for reader in annotation_readers]

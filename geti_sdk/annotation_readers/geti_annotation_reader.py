@@ -33,7 +33,7 @@ from .base_annotation_reader import AnnotationReader
 
 class GetiAnnotationReader(AnnotationReader):
     """
-    AnnotationReader for loading annotation files in Intel® Geti™ format.
+    AnnotationReader for loading annotation files in Geti™ format.
     """
 
     def __init__(
@@ -53,7 +53,7 @@ class GetiAnnotationReader(AnnotationReader):
             when reading annotation data. This can be used to filter the annotations
             for certain labels.
         :param anomaly_reduction: True to reduce all anomaly tasks to the single anomaly task.
-            This is done in accordance with the Intel Geti 2.5 Anomaly Reduction effort.
+            This is done in accordance with the Geti 2.5 Anomaly Reduction effort.
             All pixel level annotations are converted to full rectangles. All anomaly tasks
             are mapped to th new "Anomaly Detection" task wich corresponds to the old "Anomaly Classification".
         """
@@ -123,7 +123,7 @@ class GetiAnnotationReader(AnnotationReader):
             (e.g. width, height) about the media item to upload the annotation for
         :param preserve_shape_for_global_labels: False to convert shapes for global
             tasks to full rectangles (required for classification like tasks in
-            Intel® Geti™ projects), True to preserve such shapes. This parameter
+            Geti™ projects), True to preserve such shapes. This parameter
             should be:
 
              - False when uploading annotations to a single task project
@@ -154,8 +154,8 @@ class GetiAnnotationReader(AnnotationReader):
                     annotation_object.pop_label_by_name(label_name=label_dict["name"])
             new_annotations.append(annotation_object)
             if self.anomaly_reduction and annotation_object.labels[0].name.lower() == "anomalous":
-                # Part of anomaly task reduction in Intel Geti 2.5 -> all anomaly tasks combined into one.
-                # Intel Geti now only accepts full rectangles for anomaly tasks.
+                # Part of anomaly task reduction in Geti 2.5 -> all anomaly tasks combined into one.
+                # Geti now only accepts full rectangles for anomaly tasks.
                 new_annotations = [
                     Annotation(
                         labels=[annotation_object.labels[0]],
@@ -228,8 +228,8 @@ class GetiAnnotationReader(AnnotationReader):
             logging.info(
                 "Legacy annotation format detected. The annotations you are trying to "
                 "upload were most likely downloaded from a pre-production version of "
-                "the Intel Geti software. They will be converted to the latest "
-                "annotation format upon upload to the Intel Geti platform. "
+                "the Geti software. They will be converted to the latest "
+                "annotation format upon upload to the Geti platform. "
             )
             return True
         raise ValueError(

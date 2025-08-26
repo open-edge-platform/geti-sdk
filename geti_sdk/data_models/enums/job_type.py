@@ -17,7 +17,7 @@ from enum import Enum
 
 class JobType(Enum):
     """
-    Enum representing the type of a job on the Intel® Geti™ cluster.
+    Enum representing the type of a job on the Geti™ cluster.
     """
 
     UNDEFINED = "undefined"

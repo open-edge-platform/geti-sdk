@@ -41,7 +41,7 @@ from .utils import (
 @attr.define(slots=False)
 class Deployment:
     """
-    Representation of a deployed Intel® Geti™ project that can be used to run
+    Representation of a deployed Geti™ project that can be used to run
     inference locally
     """
 

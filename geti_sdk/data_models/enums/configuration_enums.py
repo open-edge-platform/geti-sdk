@@ -17,7 +17,7 @@ from enum import Enum
 
 class ConfigurationEntityType(Enum):
     """
-    Enum representing the different configuration types on the Intel® Geti™ platform.
+    Enum representing the different configuration types on the Geti™ platform.
     """
 
     HYPER_PARAMETER_GROUP = "HYPER_PARAMETER_GROUP"
@@ -33,7 +33,7 @@ class ConfigurationEntityType(Enum):
 class ParameterDataType(Enum):
     """
     Enum representing the different data types for configurable parameters on the
-    Intel® Geti™ platform.
+    Geti™ platform.
     """
 
     BOOLEAN = "boolean"
@@ -51,7 +51,7 @@ class ParameterDataType(Enum):
 class ParameterInputType(Enum):
     """
     Enum representing the different input types for configurable parameters on the
-    Intel® Geti™ platform.
+    Geti™ platform.
     """
 
     INPUT = "input"
@@ -67,7 +67,7 @@ class ParameterInputType(Enum):
 class ConfigurableParameterType(Enum):
     """
     Enum representing the different types of configurable parameters on the
-    Intel® Geti™ platform.
+    Geti™ platform.
     """
 
     CONFIGURABLE_PARAMETERS = "CONFIGURABLE_PARAMETERS"

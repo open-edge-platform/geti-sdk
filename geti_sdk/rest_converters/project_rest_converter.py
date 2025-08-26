@@ -22,7 +22,7 @@ from geti_sdk.utils import deserialize_dictionary
 
 class ProjectRESTConverter:
     """
-    Class that handles conversion of Intel® Geti™ REST output for project entities to
+    Class that handles conversion of Geti™ REST output for project entities to
     objects and vice versa.
     """
 
@@ -30,10 +30,10 @@ class ProjectRESTConverter:
     def from_dict(cls, project_input: dict[str, Any]) -> Project:
         """
         Create a Project from a dictionary representing a project, as
-        returned by the /projects endpoint on the Intel® Geti™ platform.
+        returned by the /projects endpoint on the Geti™ platform.
 
         :param project_input: Dictionary representing a project, as returned by the
-            Intel® Geti™ server
+            Geti™ server
         :return: Project object representing the project given in `project_input`
         """
         prepared_project = copy.deepcopy(project_input)

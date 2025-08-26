@@ -20,7 +20,7 @@ These pages contain the documentation for the main SDK class,
 :py:class:`~geti_sdk.geti.Geti`.
 
 The :py:class:`~geti_sdk.geti.Geti` class implements convenience
-methods for common operations that can be performed on the Intel® Geti™ cluster, such as
+methods for common operations that can be performed on the Geti™ cluster, such as
 creating a project from a pre-existing dataset, downloading or uploading a project,
 uploading an image and getting a prediction for it and creating a deployment for a
 project.
@@ -38,20 +38,20 @@ For example, to download a project, simply do:
    geti.download_project_data(project_name="dummy_project")
 
 The :py:class:`~geti_sdk.geti.Geti` class provides a high-level interface for
-import-export operations in Intel® Geti™ platform. Here is a list of these operations:
+import-export operations in Geti™ platform. Here is a list of these operations:
 * Project download
    :py:meth:`~geti_sdk.geti.Geti.download_project_data` method fetches the project data
    and creates a local Python object that supports a range of operations with the project.
 * Project upload
    :py:meth:`~geti_sdk.geti.Geti.upload_project_data` method uploads the project data
-   from a local Python object to the Intel® Geti™ platform.
+   from a local Python object to the Geti™ platform.
 * Batched project download and upload
    :py:meth:`~geti_sdk.geti.Geti.download_all_projects` and
    :py:meth:`~geti_sdk.geti.Geti.upload_all_projects` methods download and upload
    multiple projects at once.
 * Project export
    :py:meth:`~geti_sdk.geti.Geti.export_project` method exports the project snapshot
-   to a zip archive. The archive can be used to import the project to another or the same Intel® Geti™
+   to a zip archive. The archive can be used to import the project to another or the same Geti™
    instance.
 * Project import
    :py:meth:`~geti_sdk.geti.Geti.import_project` method imports the project from a zip archive.

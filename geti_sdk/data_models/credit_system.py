@@ -34,7 +34,7 @@ from geti_sdk.data_models.utils import (
 @attr.define
 class CreditBalance:
     """
-    Representation of the Credit Balance in Intel Geti
+    Representation of the Credit Balance in Geti
     """
 
     incoming: int
@@ -45,7 +45,7 @@ class CreditBalance:
 @attr.define
 class CreditAccount:
     """
-    Representation of the Credit Account in Intel Geti
+    Representation of the Credit Account in Geti
     """
 
     _identifier_fields = [
@@ -96,7 +96,7 @@ class CreditAccount:
 @attr.define
 class Subscription:
     """
-    Representation of the Subscription in Intel Geti
+    Representation of the Subscription in Geti
     """
 
     _identifier_fields = [

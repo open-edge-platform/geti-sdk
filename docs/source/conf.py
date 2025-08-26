@@ -25,7 +25,7 @@ with open(f"{root_path}/geti_sdk/_version.py", encoding="utf-8") as init_file:
 
 # -- Project information -----------------------------------------------------
 
-project = "Intel® Geti™ SDK"
+project = "Geti™ SDK"
 copyright = "2024 Intel Corporation"  # noqa: A001
 author = "Ludo Cornelissen"
 

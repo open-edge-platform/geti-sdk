@@ -36,7 +36,7 @@ class DirectoryTreeAnnotationReader(AnnotationReader):
         that should not be considered as labels, but should be used to acquire the
         data. For example ['train', 'validation', 'test'] for a dataset that is split
         into three subsets.
-    :param task_type: TaskType for the task in the Intel® Geti™ platform to which the
+    :param task_type: TaskType for the task in the Geti™ platform to which the
         annotations should be uploaded
     """
 

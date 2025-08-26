@@ -33,7 +33,7 @@ from geti_sdk.platform_versions import GetiVersion
 @attr.define(slots=False)
 class JobStatus(StatusSummary):
     """
-    Current status of a job on the Intel® Geti™ server.
+    Current status of a job on the Geti™ server.
 
     :var state: Current state of the job
     """
@@ -46,7 +46,7 @@ class JobStatus(StatusSummary):
         Create a JobStatus object from a dictionary.
 
         :param status_dict: Dictionary representing a status, as returned by the
-            Intel® Geti™ /status and /jobs endpoints
+            Geti™ /status and /jobs endpoints
         :return: JobStatus object holding the status data contained in `status_dict`
         """
         return cls(**status_dict)
@@ -55,7 +55,7 @@ class JobStatus(StatusSummary):
 @attr.define
 class TaskMetadata:
     """
-    Metadata related to a task on the Intel® Geti™ cluster.
+    Metadata related to a task on the Geti™ cluster.
 
     :var name: Name of the task
     :var model_template_id: Identifier of the model template used by the task
@@ -200,7 +200,7 @@ class JobMetadata:
 @attr.define
 class JobCancellationInfo:
     """
-    Information relating to the cancellation of a Job in Intel Geti
+    Information relating to the cancellation of a Job in Geti
 
     :var is_cancelled: True if the job is cancelled, False otherwise
     :var user_uid: Unique ID of the User who cancelled the Job
@@ -216,7 +216,7 @@ class JobCancellationInfo:
 @attr.define
 class JobCost:
     """
-    Information relating to the cost of a Job in Intel Geti.
+    Information relating to the cost of a Job in Geti.
     """
 
     requests: list
@@ -443,9 +443,9 @@ class Job:
     @property
     def geti_version(self) -> GetiVersion:
         """
-        Return the version of the Intel Geti instance from which the job originates.
+        Return the version of the Geti instance from which the job originates.
 
-        :return: Version of the Intel Geti instance from which the job originates
+        :return: Version of the Geti instance from which the job originates
         """
         if self._geti_version is None:
             raise ValueError(f"Geti version for job {self} is unknown, it was never set.")
@@ -454,8 +454,8 @@ class Job:
     @geti_version.setter
     def geti_version(self, geti_version: GetiVersion):
         """
-        Set the version of the Intel Geti instance for the job.
+        Set the version of the Geti instance for the job.
 
-        :param geti_version: Version of the Intel Geti instance from which the job originates
+        :param geti_version: Version of the Geti instance from which the job originates
         """
         self._geti_version = geti_version

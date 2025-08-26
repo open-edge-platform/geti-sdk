@@ -31,7 +31,7 @@ from geti_sdk.data_models.utils import deidentify, str_to_datetime
 @attr.define
 class Annotation:
     """
-    Representation of a single annotation for a media item on the Intel® Geti™ platform.
+    Representation of a single annotation for a media item on the Geti™ platform.
 
     :var labels: List of labels belonging to the annotation
     :var modified: Date and time of the last modification made to this annotation

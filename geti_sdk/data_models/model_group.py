@@ -26,7 +26,7 @@ from geti_sdk.data_models.utils import str_to_datetime
 @attr.define
 class ModelSummary:
     """
-    Representation of a Model on the Intel® Geti™ platform, containing only the
+    Representation of a Model on the Geti™ platform, containing only the
     minimal information about the model.
 
     :var name: Name of the model
@@ -62,7 +62,7 @@ class ModelSummary:
 @attr.define(slots=False)
 class ModelGroup:
     """
-    Representation of a ModelGroup on the Intel® Geti™ server. A model group is a
+    Representation of a ModelGroup on the Geti™ server. A model group is a
     collection of models that all share the same neural network architecture, but may
     have been trained with different training datasets or hyper parameters.
     """
@@ -142,7 +142,7 @@ class ModelGroup:
         """
         Return the details for the algorithm corresponding to the ModelGroup
         This property will return None unless the `get_algorithm_details` method is
-        called to retrieve the algorithm information from the Intel® Geti™ server
+        called to retrieve the algorithm information from the Geti™ server
 
         :return: Algorithm details, if available
         """

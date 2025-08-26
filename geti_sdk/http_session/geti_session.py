@@ -50,7 +50,7 @@ class GetiSession(requests.Session):
     handles authentication and authorization.
 
     :param server_config: Server configuration holding the hostname (or ip address) of
-        the Intel® Geti™ server, as well as the details required for authentication
+        the Geti™ server, as well as the details required for authentication
         (either username and password or personal access token)
     """
 
@@ -77,7 +77,7 @@ class GetiSession(requests.Session):
         if not server_config.has_valid_certificate:
             warnings.warn(
                 "You have disabled TLS certificate validation, HTTPS requests made to "
-                "the Intel® Geti™ server may be compromised. For optimal security, "
+                "the Geti™ server may be compromised. For optimal security, "
                 "please enable certificate validation.",
                 InsecureRequestWarning,
             )
@@ -93,7 +93,7 @@ class GetiSession(requests.Session):
             if self.platform_serving_mode == SAAS_MODE:
                 raise ValueError(
                     "Authentication via username and password is not supported for "
-                    "Intel® Geti™ SaaS instances. Please use a personal access token."
+                    "Geti™ SaaS instances. Please use a personal access token."
                 )
             logging.warning(
                 "Authentication via username and password is deprecated and will be "
@@ -135,9 +135,9 @@ class GetiSession(requests.Session):
     @property
     def version(self) -> GetiVersion:
         """
-        Return the version of the Intel® Geti™ platform that is running on the server.
+        Return the version of the Geti™ platform that is running on the server.
 
-        :return: Version object holding the Intel® Geti™ version number
+        :return: Version object holding the Geti™ version number
         """
         if "build-version" in self._product_info:
             version_string = self._product_info.get("build-version")
@@ -187,18 +187,18 @@ class GetiSession(requests.Session):
             login_path = self._get_initial_login_url()
         except requests.exceptions.SSLError as error:
             raise requests.exceptions.SSLError(
-                f"Connection to Intel® Geti™ server at '{self.config.host}' failed, "
+                f"Connection to Geti™ server at '{self.config.host}' failed, "
                 f"the server address can be resolved but the SSL certificate could not "
                 f"be verified. \n Full error description: {error.args[-1]}"
             )
         except requests.exceptions.ConnectionError as error:
             if "dummy" in self.config.password or "dummy" in self.config.username:
                 raise ValueError(
-                    "Connection to the Intel® Geti™ server failed, please make sure to "
-                    "update the user login information for the Intel® Geti™ instance."
+                    "Connection to the Geti™ server failed, please make sure to "
+                    "update the user login information for the Geti™ instance."
                 ) from error
             raise ValueError(
-                f"Connection to the Intel® Geti™ server at host '{self.config.host}' "
+                f"Connection to the Geti™ server at host '{self.config.host}' "
                 f"failed, please provide a valid cluster hostname or ip address as"
                 f" well as valid login details."
             ) from error
@@ -273,7 +273,7 @@ class GetiSession(requests.Session):
             else:
                 raise ValueError(
                     f"Making a POST request with content of type {contenttype} is "
-                    f"currently not supported through the Intel Geti SDK."
+                    f"currently not supported through the Geti SDK."
                 )
         else:
             kw_data_arg = {}
@@ -303,7 +303,7 @@ class GetiSession(requests.Session):
                 break
             except requests.exceptions.SSLError as error:
                 raise requests.exceptions.SSLError(
-                    f"Connection to Intel® Geti™ server at '{self.config.host}' failed, "
+                    f"Connection to Geti™ server at '{self.config.host}' failed, "
                     f"the server address can be resolved but the SSL certificate could not "
                     f"be verified. \n Full error description: {error.args[-1]}"
                 )
@@ -385,7 +385,7 @@ class GetiSession(requests.Session):
 
     def _get_product_info_and_set_api_version(self) -> dict[str, str]:
         """
-        Return the product info as retrieved from the Intel® Geti™ server.
+        Return the product info as retrieved from the Geti™ server.
 
         This method will also attempt to set the API version correctly, based on the
         retrieved product info.
@@ -396,7 +396,7 @@ class GetiSession(requests.Session):
 
     def __exit__(self, exc_type, exc_value, traceback):
         """
-        Log out of the Intel® Geti™ server. This method is called when exiting the
+        Log out of the Geti™ server. This method is called when exiting the
         runtime context related to the session, in case the session is used as a context
         manager.
         """
@@ -409,7 +409,7 @@ class GetiSession(requests.Session):
 
     def __del__(self):
         """
-        Log out of the Intel® Geti™ server. This method is called when the session is
+        Log out of the Geti™ server. This method is called when the session is
         deleted from memory.
         """
         if self.logged_in:
@@ -515,7 +515,7 @@ class GetiSession(requests.Session):
     @property
     def base_url(self) -> str:
         """
-        Return the base URL to the Intel Geti server. If the server is running
+        Return the base URL to the Geti server. If the server is running
         Geti v1.9 or later, the organization ID will be included in the URL
         """
         return f"{self.config.base_url}organizations/{self.organization_id}/"
@@ -559,7 +559,7 @@ class GetiSession(requests.Session):
 
         if org_id is None:
             raise ValueError(
-                f"Unable to retrieve organization ID from the Intel Geti server. Server responded with: `{result}`"
+                f"Unable to retrieve organization ID from the Geti server. Server responded with: `{result}`"
             )
         return org_id
 
@@ -605,11 +605,11 @@ class GetiSession(requests.Session):
             )
         elif response.status_code == 404:
             raise ValueError(
-                "Unable to authenticate with the Intel Geti server. The authentication "
+                "Unable to authenticate with the Geti server. The authentication "
                 "mechanism you are trying to use is no longer supported. This error "
-                "indicates that the Intel® Geti™ server version is not supported by "
-                "this version of the Intel Geti SDK package. Please update the "
-                "Intel® Geti™ server to version 2.0 or later, or use a previous "
+                "indicates that the Geti™ server version is not supported by "
+                "this version of the Geti SDK package. Please update the "
+                "Geti™ server to version 2.0 or later, or use a previous "
                 "version of the SDK."
             )
         else:

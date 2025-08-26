@@ -1,7 +1,7 @@
 # Deploying Geti models with OpenVINO Model Server (OVMS)
 > Note: This feature is deprecated and is not recommended for use.
 
-This README describes how to set up an OpenVINO Model Server for any Intel® Geti™
+This README describes how to set up an OpenVINO Model Server for any Geti™
 project. Please note that it is meant as an example only, and the configuration used
 may not be optimal for a production environment.
 
@@ -23,7 +23,7 @@ docker pull openvino/model_server:latest
 ```
 
 ## Firing up the OVMS container
-Follow the steps below to run the OVMS container with your Intel® Geti™ trained
+Follow the steps below to run the OVMS container with your Geti™ trained
 model(s):
 
     1. In your terminal, navigate to the directory containing the deployment you want to
@@ -39,7 +39,7 @@ model(s):
         for inference requests on port 9000.
 
 ## Running inference with Geti SDK and OVMS
-The following python snippet can be used to run inference for your Intel® Geti™ project
+The following python snippet can be used to run inference for your Geti™ project
 on the OVMS instance that you just launched:
 ```python
 from geti_sdk.deployment import Deployment

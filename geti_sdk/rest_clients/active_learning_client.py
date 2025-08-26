@@ -19,7 +19,7 @@ from geti_sdk.rest_converters import MediaRESTConverter
 
 class ActiveLearningClient:
     """
-    Class to manage the active learning for a certain Intel® Geti™ project.
+    Class to manage the active learning for a certain Geti™ project.
     """
 
     def __init__(self, workspace_id: str, project: Project, session: GetiSession):

@@ -152,7 +152,7 @@ class Pipeline:
 @attr.define
 class Project:
     """
-    Representation of a project in Intel® Geti™.
+    Representation of a project in Geti™.
 
     :var id: Unique database ID of the project
     :var name: Name of the project

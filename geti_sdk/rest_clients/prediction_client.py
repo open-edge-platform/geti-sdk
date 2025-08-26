@@ -44,7 +44,7 @@ from geti_sdk.rest_converters.prediction_rest_converter import PredictionRESTCon
 
 class PredictionClient:
     """
-    Class to download predictions from an existing Intel® Geti™ project.
+    Class to download predictions from an existing Geti™ project.
     """
 
     def __init__(self, session: GetiSession, project: Project, workspace_id: str):
@@ -116,7 +116,7 @@ class PredictionClient:
     def mode(self, new_mode: str | PredictionMode):
         """
         Set the mode for the Prediction client to retrieve predictions from the
-        Intel® Geti™ server.
+        Geti™ server.
 
         :param new_mode: PredictionMode (or string representing a prediction mode) to
             set
@@ -285,7 +285,7 @@ class PredictionClient:
 
     def get_image_prediction(self, image: Image) -> Prediction:
         """
-        Get a prediction for an image from the Intel® Geti™ server, if available.
+        Get a prediction for an image from the Geti™ server, if available.
 
         NOTE: This method is only available for images that are already existing on
         the server! For getting predictions on a 'new' image, please see the
@@ -302,7 +302,7 @@ class PredictionClient:
 
     def get_video_frame_prediction(self, video_frame: VideoFrame) -> Prediction:
         """
-        Get a prediction for a video frame from the Intel® Geti™ server, if available.
+        Get a prediction for a video frame from the Geti™ server, if available.
 
         :param video_frame: VideoFrame to get the prediction for. The frame has to be
             present in the project on the cluster already.
@@ -315,7 +315,7 @@ class PredictionClient:
 
     def get_video_predictions(self, video: Video) -> list[Prediction]:
         """
-        Get a list of predictions for a video from the Intel® Geti™ server, if available.
+        Get a list of predictions for a video from the Geti™ server, if available.
 
         :param video: Video to get the predictions for. The video has to be present in
             the project on the cluster already.
@@ -582,7 +582,7 @@ class PredictionClient:
 
     def predict_image(self, image: Image | np.ndarray | os.PathLike | str) -> Prediction:
         """
-        Push an image to the Intel® Geti™ project and receive a prediction for it.
+        Push an image to the Geti™ project and receive a prediction for it.
 
         Note that this method will not save the image to the project.
 

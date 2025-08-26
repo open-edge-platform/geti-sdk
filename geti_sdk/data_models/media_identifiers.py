@@ -22,7 +22,7 @@ from geti_sdk.data_models.utils import attr_value_serializer, str_to_media_type
 @attr.define
 class MediaIdentifier:
     """
-    Representation of media identification data as output by the Intel® Geti™
+    Representation of media identification data as output by the Geti™
     /annotations REST endpoints.
 
     :var type: Type of the media to which the annotation belongs
@@ -42,8 +42,8 @@ class MediaIdentifier:
 @attr.define
 class ImageIdentifier(MediaIdentifier):
     """
-    Representation of image identification data used by the Intel® Geti™ /annotations
-    endpoints. This object uniquely identifies an Image on the Intel® Geti™ server.
+    Representation of image identification data used by the Geti™ /annotations
+    endpoints. This object uniquely identifies an Image on the Geti™ server.
 
     :var image_id: unique database ID of the image
     """
@@ -56,9 +56,9 @@ class ImageIdentifier(MediaIdentifier):
 @attr.define
 class VideoFrameIdentifier(MediaIdentifier):
     """
-    Representation of video frame identification data used by the Intel® Geti™
+    Representation of video frame identification data used by the Geti™
     /annotations endpoints. This object uniquely identifies a VideoFrame on the
-    Intel® Geti™ server.
+    Geti™ server.
 
     :var frame_index: Index of the video frame in the full video
     :var video_id: unique database ID of the video to which the frame belongs
@@ -75,8 +75,8 @@ class VideoFrameIdentifier(MediaIdentifier):
 @attr.define
 class VideoIdentifier(MediaIdentifier):
     """
-    Representation of video identification data used by the Intel® Geti™ /annotations
-    endpoints. This object uniquely identifiers a Video on the Intel® Geti™ server.
+    Representation of video identification data used by the Geti™ /annotations
+    endpoints. This object uniquely identifiers a Video on the Geti™ server.
 
     :var video_id: unique database ID of the video
     """

@@ -67,7 +67,7 @@ class Benchmarker:
         framerates for different model architectures and precision levels for the
         specified project.
 
-        The Benchmarker will fetch models from Intel Geti and measure the
+        The Benchmarker will fetch models from Geti and measure the
         throughput for local inference for these models. It requires an existing Geti
         Project to work. The project does not need to be trained yet, but must have
         sufficient annotations to be able to start training.
@@ -112,7 +112,7 @@ class Benchmarker:
         self.geti = geti
         # Update project object to get the latest project details
         self.project = self.geti.get_project(project_id=project.id)
-        logging.info(f"Setting up Benchmarker for Intel® Geti™ project `{self.project.name}`.")
+        logging.info(f"Setting up Benchmarker for Geti™ project `{self.project.name}`.")
         self._is_single_task = len(self.project.get_trainable_tasks()) == 1
         if precision_levels is None:
             precision_levels = ["FP32", "FP16"]

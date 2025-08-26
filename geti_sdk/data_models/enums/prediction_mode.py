@@ -17,7 +17,7 @@ from enum import Enum
 
 class PredictionMode(Enum):
     """
-    Enum representing the mode used to generate predictions on the Intel® Geti™
+    Enum representing the mode used to generate predictions on the Geti™
     platform.
     """
 

@@ -17,7 +17,7 @@ import attr
 @attr.define
 class User:
     """
-    Representation of a User in the Intel Geti platform
+    Representation of a User in the Geti platform
 
     :var name: name of the user
     :var uid: Unique ID of the user

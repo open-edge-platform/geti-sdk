@@ -306,7 +306,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
 
     def upload_annotation(self, media_item: Image | VideoFrame, annotation_scene: AnnotationScene) -> AnnotationScene:
         """
-        Upload an annotation for an image or video frame to the Intel® Geti™ server.
+        Upload an annotation for an image or video frame to the Geti™ server.
 
         :param media_item: Image or VideoFrame to apply and upload the annotation to
         :param annotation_scene: AnnotationScene to upload
@@ -324,7 +324,7 @@ class AnnotationClient(BaseAnnotationClient, Generic[AnnotationReaderType]):
     def get_annotation(self, media_item: Image | VideoFrame) -> AnnotationScene | None:
         """
         Retrieve the latest annotations for an image or video frame from the
-        Intel® Geti™ platform.
+        Geti™ platform.
         If no annotation is available, this method returns None.
 
         :param media_item: Image or VideoFrame to retrieve the annotations for

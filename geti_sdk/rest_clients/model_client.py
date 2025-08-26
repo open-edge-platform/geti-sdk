@@ -192,7 +192,7 @@ class ModelClient:
         task: Task | None = None,
     ) -> Model | None:
         """
-        Retrieve a Model from the Intel® Geti™ server, corresponding to a specific
+        Retrieve a Model from the Geti™ server, corresponding to a specific
         algorithm and model version. If no version is passed, this method will
         retrieve the latest model for the algorithm.
 
@@ -327,7 +327,7 @@ class ModelClient:
 
         :param task: Task object containing details of the task to get the model for
         :return: Model object representing the currently active model in the
-            Intel® Geti™ project, if any
+            Geti™ project, if any
         """
         model_groups = self.get_all_model_groups()
         model_id: str | None = None
@@ -429,7 +429,7 @@ class ModelClient:
         the index of that task will be None
 
         :return: Model object representing the currently active model for the task in
-            the Intel® Geti™ project, if any
+            the Geti™ project, if any
         """
         return [self.get_active_model_for_task(task=task) for task in self.project.get_trainable_tasks()]
 
@@ -443,7 +443,7 @@ class ModelClient:
         :param path_to_folder: Path to the target folder in which to save the active
             models, and all optimized models derived from them.
         :return: List of Model objects representing the currently active models
-            (if any) for all tasks in the Intel® Geti™ project. The index of the
+            (if any) for all tasks in the Geti™ project. The index of the
             Model in the list corresponds to the index of the task in the list of
             trainable tasks for the project.
         """
@@ -454,7 +454,7 @@ class ModelClient:
 
     def get_model_for_job(self, job: Job, check_status: bool = True) -> Model:
         """
-        Return the model that was created by the `job` from the Intel® Geti™ server.
+        Return the model that was created by the `job` from the Geti™ server.
 
         :param job: Job to retrieve the model for
         :param check_status: True to first update the status of the job, to make sure
@@ -544,7 +544,7 @@ class ModelClient:
         :param optimization_type: DEPRECATED. Type of optimization to run. Currently
             supported values: ["pot"]. Case insensitive. Defaults to "pot"
         :return: Job object referring to the optimization job running on the
-            Intel® Geti™ server.
+            Geti™ server.
         """
         if isinstance(model, OptimizedModel):
             raise ValueError(
@@ -569,10 +569,10 @@ class ModelClient:
 
     def purge_model(self, model: Model | ModelSummary) -> None:
         """
-        Purge the model from the Intel® Geti™ server.
+        Purge the model from the Geti™ server.
 
         This will permanently delete all the files related to the model including base model weights,
-        optimized model weights and exportable code for the Intel® Geti™ server.
+        optimized model weights and exportable code for the Geti™ server.
 
         :param model: Model to archive. Only base models are accepted, not optimized models.
             Note: the model must not be the latest in the model group or be the active model.

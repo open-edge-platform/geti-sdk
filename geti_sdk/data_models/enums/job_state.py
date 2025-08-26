@@ -17,7 +17,7 @@ from enum import Enum
 
 class JobState(Enum):
     """
-    Enum representing the state of a job on the Intel® Geti™ server.
+    Enum representing the state of a job on the Geti™ server.
     """
 
     IDLE = "idle"

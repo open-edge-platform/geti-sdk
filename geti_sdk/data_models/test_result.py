@@ -91,7 +91,7 @@ class Score:
 class TestResult:
     """
     Representation of the results of a model test job that was run for a specific
-    model and dataset in an Intel® Geti™ project
+    model and dataset in an Geti™ project
     """
 
     datasets_info: list[DatasetInfo]

@@ -21,7 +21,7 @@ The `annotation_readers` package contains the
 base class, which provides an interface for implementing custom annotation readers.
 
 Annotation readers server to load annotation files in custom formats and convert them
-to Intel® Geti™ format, such that they can be uploaded to an Intel® Geti™ project.
+to Geti™ format, such that they can be uploaded to an Geti™ project.
 
 Module contents
 ---------------

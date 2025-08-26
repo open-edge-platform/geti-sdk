@@ -37,9 +37,9 @@ from geti_sdk.rest_clients.project_client.project_client import ProjectClient
 class GetiDataCollection(PostInferenceAction):
     """
     Post inference action that will send an image to a specified `project` and `dataset`
-    on the Intel® Geti™ server addressed by `session`.
+    on the Geti™ server addressed by `session`.
 
-    :param session: Geti session representing the connecting to the Intel® Geti™ server
+    :param session: Geti session representing the connecting to the Geti™ server
     :param workspace_id: unique ID of the workspace in which the project to collect
         the data resides.
     :param project: Project or name of the project to whicht the image data should be
@@ -67,8 +67,8 @@ class GetiDataCollection(PostInferenceAction):
             project = project_client.get_project_by_name(project_name=project_name)
             if project is None:
                 raise ValueError(
-                    f"Project `{project_name}` does not exist on the Intel® Geti™ "
-                    f"server, unable to initialize the Intel® Geti™ data collection "
+                    f"Project `{project_name}` does not exist on the Geti™ "
+                    f"server, unable to initialize the Geti™ data collection "
                     f"action"
                 )
         dataset_client = DatasetClient(session=session, workspace_id=workspace_id, project=project)
@@ -103,7 +103,7 @@ class GetiDataCollection(PostInferenceAction):
         timestamp: datetime | None = None,
     ):
         """
-        Execute the action, upload the given `image` to the Intel® Geti™ server.
+        Execute the action, upload the given `image` to the Geti™ server.
 
         The parameters `prediction`, `score`, `name` and `timestamp` are not used in
         this specific action.
@@ -154,7 +154,7 @@ class GetiDataCollection(PostInferenceAction):
         """
         warnings.warn(
             "GetiDataCollection post inference action contains sensitive information "
-            "used for authentication on the Intel® Geti™ platform. Be careful when "
+            "used for authentication on the Geti™ platform. Be careful when "
             "saving this information to disk or sharing with others!"
         )
         return super().to_dict()

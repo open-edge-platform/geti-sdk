@@ -66,7 +66,7 @@ def get_default_algorithm_info(
     Return the names of the default algorithms for the tasks in the `project`. The
     returned response is a map of TaskType to the default algorithm name for that task
 
-    :param session: GetiSession to the Intel Geti server
+    :param session: GetiSession to the Geti server
     :param workspace_id: Workspace ID in which the project to retrieve the default
         algorithms for lives.
     :param project: Project to retrieve the default algorithms for

@@ -16,7 +16,7 @@ from enum import Enum
 
 class DeploymentState(Enum):
     """
-    Enum representing the status of a deployment creation process for an Intel® Geti™
+    Enum representing the status of a deployment creation process for an Geti™
     project.
     """
 

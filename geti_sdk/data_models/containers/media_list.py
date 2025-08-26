@@ -26,7 +26,7 @@ MediaTypeVar = TypeVar("MediaTypeVar", Image, Video, VideoFrame)
 
 class MediaList(UserList, Generic[MediaTypeVar]):
     """
-    A list containing Intel® Geti™ media entities
+    A list containing Geti™ media entities
     """
 
     @property
@@ -74,9 +74,9 @@ class MediaList(UserList, Generic[MediaTypeVar]):
     def from_rest_list(rest_input: list[dict[str, Any]], media_type: type[MediaTypeVar]) -> MediaList[MediaTypeVar]:
         """
         Create a MediaList instance from a list of media entities obtained from the
-        Intel® Geti™ /media endpoints.
+        Geti™ /media endpoints.
 
-        :param rest_input: List of dictionaries representing media entities in Intel® Geti™
+        :param rest_input: List of dictionaries representing media entities in Geti™
         :param media_type: Image or Video, type of the media entities that are to be
             converted.
 

@@ -17,7 +17,7 @@ Introduction
 ------------
 
 The `demos` package contains useful functions for setting up demo projects on any
-Intel® Geti™ server.
+Geti™ server.
 
 Module contents
 ---------------

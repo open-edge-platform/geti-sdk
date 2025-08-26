@@ -67,7 +67,7 @@ OVMS_TIMEOUT = 10  # Max time to wait for OVMS models to become available
 @attr.define
 class DeployedModel(OptimizedModel):
     """
-    Representation of an Intel® Geti™ model that has been deployed for inference. It
+    Representation of an Geti™ model that has been deployed for inference. It
     can be loaded onto a device to generate predictions.
     """
 
@@ -112,7 +112,7 @@ class DeployedModel(OptimizedModel):
         Load the model weights from a data source. The `source` can be one of the
         following:
 
-          1. The Intel® Geti™ platform (if an GetiSession instance is passed). In this
+          1. The Geti™ platform (if an GetiSession instance is passed). In this
             case the weights will be downloaded, and extracted to a temporary directory
           2. A zip file on local disk, in this case the weights will be extracted to a
              temporary directory

@@ -24,7 +24,7 @@ from geti_sdk.data_models.media import MediaInformation
 class AnnotationReader:
     """
     Base class for annotation reading, to handle loading and converting annotations
-    to Intel Geti format
+    to Geti format
     """
 
     def __init__(

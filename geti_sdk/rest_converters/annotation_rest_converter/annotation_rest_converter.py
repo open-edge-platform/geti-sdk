@@ -144,7 +144,7 @@ class AnnotationRESTConverter:
     def from_dict(annotation_scene: dict[str, Any]) -> AnnotationScene:
         """
         Create an AnnotationScene object from a dictionary returned by the
-        /annotations REST endpoint in the Intel® Geti™ platform.
+        /annotations REST endpoint in the Geti™ platform.
 
         :param annotation_scene: dictionary representing an AnnotationScene, which
             contains all annotations for a certain media entity

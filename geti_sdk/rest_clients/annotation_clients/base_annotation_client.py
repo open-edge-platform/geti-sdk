@@ -135,7 +135,7 @@ class BaseAnnotationClient:
             if label.is_empty:
                 # We perform a casefold on the label name to ensure that we can match
                 # the empy labels from projects created in older versions of the
-                # Intel Geti platform.
+                # Geti platform.
                 label_name = label.name.casefold()
             else:
                 label_name = label.name
@@ -324,7 +324,7 @@ class BaseAnnotationClient:
         self, response_dict: dict[str, Any], media_information: MediaInformation
     ) -> AnnotationScene:
         """
-        Convert a dictionary with annotation data obtained from the Intel® Geti™
+        Convert a dictionary with annotation data obtained from the Geti™
         /annotations rest endpoint into an annotation scene.
 
         :param response_dict: Dictionary containing the annotation data

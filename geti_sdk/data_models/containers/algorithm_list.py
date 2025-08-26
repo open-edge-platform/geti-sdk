@@ -36,7 +36,7 @@ DEFAULT_ALGORITHMS = {
 
 class AlgorithmList(UserList):
     """
-    A list containing the algorithms supported in Intel® Geti™.
+    A list containing the algorithms supported in Geti™.
     """
 
     def __init__(self, data: Sequence[Algorithm] | None = None):
@@ -48,11 +48,11 @@ class AlgorithmList(UserList):
     def from_rest(rest_input: dict[str, Any], geti_version: GetiVersion) -> "AlgorithmList":
         """
         Create an AlgorithmList from the response of the /supported_algorithms REST
-        endpoint in Intel® Geti™.
+        endpoint in Geti™.
 
         :param rest_input: Dictionary retrieved from the /supported_algorithms REST endpoint
-        :param geti_version: Version of Intel® Geti™ platform
-        :return: AlgorithmList holding the information related to the supported algorithms in Intel® Geti™
+        :param geti_version: Version of Geti™ platform
+        :return: AlgorithmList holding the information related to the supported algorithms in Geti™
         """
         algorithm_list = AlgorithmList([])
         if "items" in rest_input:

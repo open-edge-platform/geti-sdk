@@ -37,7 +37,7 @@ class NormalizedPredictionRESTConverter(PredictionRESTConverter):
     def normalized_prediction_from_dict(prediction: dict[str, Any], image_width: int, image_height: int) -> Prediction:
         """
         Legacy method that creates an AnnotationScene object from a dictionary
-        returned by the /annotations REST endpoint in Intel® Geti™ versions 1.1 or
+        returned by the /annotations REST endpoint in Geti™ versions 1.1 or
         below
 
         :param prediction: dictionary representing a Prediction, which

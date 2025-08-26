@@ -20,7 +20,7 @@ from geti_sdk.utils import deserialize_dictionary
 
 class MediaRESTConverter:
     """
-    Class that handles conversion of Intel® Geti™ REST output for media entities to
+    Class that handles conversion of Geti™ REST output for media entities to
     objects and vice versa.
     """
 
@@ -28,7 +28,7 @@ class MediaRESTConverter:
     def from_dict(input_dict: dict[str, Any], media_type: type[MediaTypeVar]) -> MediaTypeVar:
         """
         Create an instance of type `media_type` representing a media entity on the
-        Intel® Geti™ server from a dictionary returned by the GETi /media REST
+        Geti™ server from a dictionary returned by the GETi /media REST
         endpoints.
 
         :param input_dict: Dictionary representing the media entity

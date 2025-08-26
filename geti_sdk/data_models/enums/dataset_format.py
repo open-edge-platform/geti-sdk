@@ -18,7 +18,7 @@ from enum import Enum
 class DatasetFormat(Enum):
     """
     Enum representing the different annotation formats for datasets within an
-    Intel® Geti™ platform.
+    Geti™ platform.
     """
 
     COCO = "coco"

@@ -37,7 +37,7 @@ from geti_sdk.utils.job_helpers import get_job_with_timeout, monitor_job, monito
 
 class TrainingClient:
     """
-    Class to manage training jobs for a certain Intel® Geti™ project.
+    Class to manage training jobs for a certain Geti™ project.
     """
 
     def __init__(self, workspace_id: str, project: Project, session: GetiSession):
@@ -51,7 +51,7 @@ class TrainingClient:
 
     def get_status(self) -> ProjectStatus:
         """
-        Get the current status of the project from the Intel® Geti™ server.
+        Get the current status of the project from the Geti™ server.
 
         :return: ProjectStatus object reflecting the current project status
         """
@@ -66,7 +66,7 @@ class TrainingClient:
 
     def get_jobs(self, project_only: bool = True, running_only: bool = False) -> list[Job]:
         """
-        Return a list of all jobs on the Intel® Geti™ server.
+        Return a list of all jobs on the Geti™ server.
 
         If `project_only = True` (the default), only those jobs related to the project
         managed by this TrainingClient will be returned. If set to False, all jobs in
@@ -74,7 +74,7 @@ class TrainingClient:
 
         :param project_only: True to return only those jobs pertaining to the project
             for which the TrainingClient is active. False to return all jobs in the
-            Intel® Geti™ workspace.
+            Geti™ workspace.
         :param running_only: If set to True, only return those jobs that are still
             running. Completed or Scheduled jobs will not be included in that case
         :return: List of Jobs

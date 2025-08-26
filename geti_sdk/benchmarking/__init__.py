@@ -18,7 +18,7 @@ Introduction
 
 The `benchmarking` package contains the
 :py:class:`~geti_sdk.benchmarking.benchmarker.Benchmarker` class, which provides
-methods for benchmarking models that are trained and deployed with Intel® Geti™.
+methods for benchmarking models that are trained and deployed with Geti™.
 
 For example, benchmarking local inference rates for your project can help in selecting
 the model architecture to use for your project, or in assessing the performance of the

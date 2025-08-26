@@ -49,7 +49,7 @@ def create_anomaly_classification_demo_project(
         the dataset is not found in the target folder, this method will attempt to
         download it from the internet.
     :return: Project object, holding detailed information about the project that was
-        created on the Intel® Geti™ server.
+        created on the Geti™ server.
     """
     project_client = ProjectClient(session=geti.session, workspace_id=geti.workspace_id)
     data_path = get_mvtec_dataset(dataset_path)
@@ -106,7 +106,7 @@ def ensure_trained_anomaly_project(geti: Geti, project_name: str = "Transistor a
     If the project does not exist, this method will create an anomaly detection
     project based on the MVTec AD `transistor` dataset.
 
-    :param geti: Geti instance pointing to the Intel® Geti™ server
+    :param geti: Geti instance pointing to the Geti™ server
     :param project_name: Name of the project to look for or create
     :return: Project object representing the project on the server
     """

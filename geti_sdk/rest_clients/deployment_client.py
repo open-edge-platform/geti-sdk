@@ -37,7 +37,7 @@ from geti_sdk.utils import get_supported_algorithms
 
 class DeploymentClient:
     """
-    Class to manage model deployment for a certain Intel® Geti™ project.
+    Class to manage model deployment for a certain Geti™ project.
     """
 
     def __init__(self, workspace_id: str, project: Project, session: GetiSession):
@@ -62,7 +62,7 @@ class DeploymentClient:
         """
         Return the base URL for the deployment group of endpoints
 
-        :return: URL for the deployment endpoints for the Intel® Geti™ project
+        :return: URL for the deployment endpoints for the Geti™ project
         """
         return self.base_url + "/deployment_package"
 

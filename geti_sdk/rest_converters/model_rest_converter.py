@@ -21,7 +21,7 @@ from geti_sdk.utils import deserialize_dictionary
 
 class ModelRESTConverter:
     """
-    Class that handles conversion of Intel® Geti™ REST output for media entities to
+    Class that handles conversion of Geti™ REST output for media entities to
     objects and vice versa.
     """
 
@@ -31,7 +31,7 @@ class ModelRESTConverter:
         Convert a dictionary representing a model group to a ModelGroup object.
 
         :param input_dict: Dictionary representing a model group, as returned by the
-            Intel® Geti™ /model_groups REST endpoint
+            Geti™ /model_groups REST endpoint
         :return: ModelGroup object corresponding to the data in `input_dict`
         """
         return deserialize_dictionary(input_dict, output_type=ModelGroup)
@@ -42,7 +42,7 @@ class ModelRESTConverter:
         Convert a dictionary representing a model to a Model object.
 
         :param input_dict: Dictionary representing a model, as returned by the
-            Intel® Geti™ /model_groups/models REST endpoint
+            Geti™ /model_groups/models REST endpoint
         :return: Model object corresponding to the data in `input_dict`
         """
         model_group_id = input_dict.pop("model_group_id", None)
@@ -56,7 +56,7 @@ class ModelRESTConverter:
         Convert a dictionary representing an optimized model to a OptimizedModel object.
 
         :param input_dict: Dictionary representing an optimized model, as returned by
-            the Intel® Geti™ /model_groups/models REST endpoint
+            the Geti™ /model_groups/models REST endpoint
         :return: OptimizedModel object corresponding to the data in `input_dict`
         """
         model_group_id = input_dict.pop("model_group_id", None)
