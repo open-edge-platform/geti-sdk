@@ -1,10 +1,22 @@
 <div align="center">
 
+<p>
+<a align="center" href="https://docs.geti.intel.com/">
+  <img
+    width="120%"
+    src="docs/geti-logo.png?raw=true"
+    alt="Intel® Geti™ enables anyone from domain experts to data scientists to rapidly develop production-ready AI models."
+  >
+</a>
+</p>
+
+<br>
+
 [![python](https://img.shields.io/badge/python-3.10%2B-green)]()
 ![Intel Geti](https://img.shields.io/badge/Intel%C2%AE%20Geti%E2%84%A2-2.12-blue?link=https%3A%2F%2Fgeti.intel.com%2F)
 [![openvino](https://img.shields.io/badge/openvino-2025.2-purple)](https://github.com/openvinotoolkit/openvino)
 
-![Pre-merge Tests Status](https://img.shields.io/github/actions/workflow/status/openvinotoolkit/geti-sdk/pre-merge-tests.yml?label=pre-merge%20tests&link=https%3A%2F%2Fgithub.com%2Fopenvinotoolkit%2Fgeti-sdk%2Factions%2Fworkflows%2Fpre-merge-tests.yml)
+![Pre-merge Tests Status](https://img.shields.io/github/actions/workflow/status/open-edge-platform/geti-sdk/pre-merge-tests.yml?label=pre-merge%20tests&link=https%3A%2F%2Fgithub.com%2Fopen-edge-platform%2Fgeti-sdk%2Factions%2Fworkflows%2Fpre-merge-tests.yml)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8329/badge)](https://www.bestpractices.dev/projects/8329)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/open-edge-platform/geti-sdk/badge)](https://scorecard.dev/viewer/?uri=github.com/open-edge-platform/geti-sdk)
 
@@ -16,6 +28,25 @@
 
 Geti SDK is a Python client for programmatically interacting with an [Intel® Geti™](https://github.com/open-edge-platform/geti) server via its [REST API](https://docs.geti.intel.com/docs/rest-api/openapi-specification).
 With Geti SDK, you can automate and streamline computer vision workflows, making it easy to manage datasets, train models, and deploy solutions directly from your Python environment.
+
+<!-- toc -->
+
+- [About Intel® Geti™](#what-is-intel-geti)
+- [Install the SDK](#install-the-sdk)
+  * [From PyPI](#from-pypi)
+  * [From source](#from-source)
+- [Code examples](#code-examples)
+  * [Connect to Geti](#connect-to-the-intel%C2%AE-geti%E2%84%A2-platform)
+  * [Manage projects](#manage-projects)
+  * [Upload and annotate media](#upload-and-annotate-media)
+  * [Train a project](#train-a-project)
+  * [Run inference on an image](#run-inference-on-an-image)
+  * [Import/export](#importexport)
+- [Supported features](#supported-features)
+- [Try the notebooks](#try-the-notebooks)
+- [For developers](#for-developers)
+
+<!-- tocstop -->
 
 ### What is Intel® Geti™?
 
@@ -39,10 +70,9 @@ With Geti SDK, you can:
 The ['Code examples'](#code-examples) sections below contains short snippets that demonstrate
 how to perform several common tasks. This also shows how to configure the SDK to connect to your Intel® Geti™ server.
 
-For more comprehensive examples, see the [Jupyter notebooks](https://github.com/openvinotoolkit/geti-sdk/tree/main/notebooks).
+For more comprehensive examples, see the [Jupyter notebooks](https://github.com/open-edge-platform/geti-sdk/tree/main/notebooks).
 These tutorials demonstrate how to use the SDK for various computer vision tasks and workflows, from basic project creation 
 to advanced inference scenarios.
-
 
 ## Install the SDK
 
@@ -65,13 +95,13 @@ pip install geti-sdk
 
 #### Python and OS compatibility
 
-Geti SDK currently supports the following operating systems and Python versions:
+Geti SDK supports the following operating systems and Python versions:
 
-|             | Python <= 3.9 |    Python 3.10     | Python 3.11        | Python 3.12        | Python 3.13 |
-|:------------|:-------------:|:------------------:|:------------------:|:------------------:|:-----------:|
-| **Linux**   |      :x:      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |     :x:     |
-| **Windows** |      :x:      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |     :x:     |
-| **MacOS**   |      :x:      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |     :x:     |
+| Operating System                                                                                                  | Supported Python Versions |
+|-------------------------------------------------------------------------------------------------------------------|---------------------------|
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" width="18"/> Linux         | 3.10 – 3.12               |
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/windows8/windows8-original.svg" width="18"/> Windows | 3.10 – 3.12               |
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg" width="18"/> macOS         | 3.10 – 3.12               |
 
 ### From source
 
@@ -85,7 +115,7 @@ Follow these steps to install the SDK from a specific branch or commit:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/openvinotoolkit/geti-sdk.git
+   git clone https://github.com/open-edge-platform/geti-sdk.git
    cd geti-sdk
    ```
 
@@ -102,14 +132,6 @@ Follow these steps to install the SDK from a specific branch or commit:
    ```bash
    pip install .
    ```
-
-#### Try the notebooks
-
-To explore the SDK features through Jupyter notebooks, please see the detailed setup instructions in [notebooks/README.md](notebooks/README.md).
-
-#### For developers
-
-Developers who want to modify the SDK source code should follow the development setup instructions in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Code examples
 
@@ -328,7 +350,6 @@ imported_project = geti_ie.import_dataset_as_new_project(
 )
 ```
 
-
 ## Supported features
 
 Geti SDK supports most of the operations that are exposed via the [Geti REST API](https://docs.geti.intel.com/docs/rest-api/openapi-specification),
@@ -351,4 +372,12 @@ although some advanced features may not be available yet due to technical and se
 
 Are you looking for a specific feature that is not listed here?
 Please check if it is implemented by one of the clients in the [rest_clients](geti_sdk/rest_clients) module,
-else feel free to open an issue or contribute a pull request (see the [CONTRIBUTING](CONTRIBUTING.md) guidelines).
+else feel free to open an issue or [contribute](CONTRIBUTING.md) a pull request.
+
+## Try the notebooks
+
+To explore the SDK features through Jupyter notebooks, please see the detailed setup instructions in [notebooks/README.md](notebooks/README.md).
+
+## For developers
+
+Developers who want to modify the SDK source code should follow the development setup instructions in [CONTRIBUTING.md](CONTRIBUTING.md).
