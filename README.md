@@ -99,9 +99,9 @@ Geti SDK supports the following operating systems and Python versions:
 
 | Operating System                                                                                                  | Supported Python Versions |
 |-------------------------------------------------------------------------------------------------------------------|---------------------------|
-| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" width="18"/> Linux         | 3.10 – 3.12               |
-| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/windows8/windows8-original.svg" width="18"/> Windows | 3.10 – 3.12               |
-| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg" width="18"/> macOS         | 3.10 – 3.12               |
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" width="18"/> Linux         | 3.10 – 3.13               |
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/windows8/windows8-original.svg" width="18"/> Windows | 3.10 – 3.13               |
+| <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg" width="18"/> macOS         | 3.10 – 3.13               |
 
 ### From source
 
