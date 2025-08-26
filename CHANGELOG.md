@@ -1,3 +1,99 @@
+# v2.12.0 Intel® Geti™ SDK
+
+## What's Changed
+
+### ✨ Features
+* New clients to update the configuration by @maxxgx in https://github.com/open-edge-platform/geti-sdk/pull/643
+  * `ProjectConfigurationClient` allows to reconfigure project-level settings, such as auto-training
+  * `TrainingConfigurationClient` allows to reconfigure training parameters (hyperparameters, subset split, ...)
+* Added parameter `include_models` to `GetiIE.export_project` by @JortBergfeld in https://github.com/open-edge-platform/geti-sdk/pull/648
+  * This option allows users to choose what set of models to include in the archive (supported values: `all`, `none` or `latest_active`)
+* Updated notebooks scenarios to cover the new features by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/654
+
+### 🐞 Bugfixes
+* Fixed issue where `GetiIE.import_project` would sometimes fail to retrieve the project right after importing it by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/644
+* Fixed issue where `ModelClient.get_all_model_groups` would fail with visual prompting models by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/661
+* Fixed missing attribute in algorithm summary by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/652
+
+### 🔒 Security
+* Updated security CI workflows by @AlexanderBarabanov in https://github.com/open-edge-platform/geti-sdk/pull/659
+* Enabled Renovate in CI by @AlexanderBarabanov in https://github.com/open-edge-platform/geti-sdk/pull/636
+* Updated several dependencies
+  * urllib3 and numpy by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/658
+  * pathvalidate by @oep-renovate[bot] in https://github.com/open-edge-platform/geti-sdk/pull/641
+  * pydantic by @oep-renovate[bot] in https://github.com/open-edge-platform/geti-sdk/pull/650 
+  * certifi by @oep-renovate[bot] in https://github.com/open-edge-platform/geti-sdk/pull/653
+  * pillow by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/627
+
+### 🦖 Deprecation
+* Dropped support for Python 3.9 by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/656
+  * Python 3.9 is due to reach its scheduled upstream EOL in October 2025
+* Deprecated the old `ConfigurationClient`
+
+### ➕ Extra
+* Rewritten README from scratch by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/660
+  * Updated instructions to install and use the SDK
+  * Updated instructions to run the notebooks
+  * Extended code samples to cover more use cases
+* Significantly reduced the number of required runtime dependencies by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/654
+  * This should also solve some installation problems on Windows/MacOS
+* Updated `DeploymentClient` to use the new deployment endpoints by @AlbertvanHouten in https://github.com/open-edge-platform/geti-sdk/pull/621
+* Removed legacy check on deployed model version by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/646
+* Updated ruff configuration & fixed linting issues by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/657
+
+## New Contributors
+* @AlbertvanHouten made their first contribution in https://github.com/open-edge-platform/geti-sdk/pull/621
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.11.0...v2.12.0
+
+
+# v2.11.0 Intel® Geti™ SDK (15-07-2025)
+
+## What's Changed
+
+### ✨ Features
+* Added support for asyncronous preprocessing of media uploaded in Geti by @warrkan in https://github.com/open-edge-platform/geti-sdk/pull/612
+
+### 🔒 Security
+* Hardened GHA workflows by @AlexanderBarabanov in https://github.com/open-edge-platform/geti-sdk/pull/603
+
+### 🦖 Deprecation
+* Deprecated Datumaro dataset and annotation reader by @JortBergfeld in https://github.com/open-edge-platform/geti-sdk/pull/616
+  * The classes now raise a deprecation warning, and will be removed in the following release
+
+### ➕ Extra
+* Adopted uv for dependency management by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/609
+* Replaced most linters with ruff by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/607
+* Replaced call to deprecated deployment endpoint by @AlbertvanHouten in https://github.com/open-edge-platform/geti-sdk/pull/621
+* Removed legacy payload from optimization requests by @JortBergfeld in https://github.com/open-edge-platform/geti-sdk/pull/605
+* Removed some unnecessary dependencies by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/610
+  * More deps will be removed in the next releases
+
+## New Contributors
+* @JortBergfeld made their first contribution in https://github.com/open-edge-platform/geti-sdk/pull/605
+* @warrkan made their first contribution in https://github.com/open-edge-platform/geti-sdk/pull/612
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.2...v2.11.0
+
+
+# v2.10.2 Intel® Geti™ SDK (04-07-2025)
+## What's Changed
+
+Bugfixes:
+* Keypoints would not be displayed correctly in demo code by @A-Artemis in https://github.com/open-edge-platform/geti-sdk/pull/617
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.1...v2.10.2
+
+
+# v2.10.1 Intel® Geti™ SDK (30-06-2025)
+## What's Changed
+
+Bugfixes:
+* Fixed problem that would make keypoint deployment crash after label renaming by @maxxgx in https://github.com/open-edge-platform/geti-sdk/pull/613
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.0...v2.10.1
+
+
 # v2.10.0 Intel® Geti™ SDK (30-05-2025)
 ## What's Changed
 
