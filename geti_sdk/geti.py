@@ -267,9 +267,7 @@ class Geti:
         """
         project = self.project_client.get_project(project_name=project_name, project_id=project_id, project=project)
         if project is None:
-            raise KeyError(
-                f"Project '{project_name}' was not found in the current workspace on the Geti™ server."
-            )
+            raise KeyError(f"Project '{project_name}' was not found in the current workspace on the Geti™ server.")
         return project
 
     def download_project_data(

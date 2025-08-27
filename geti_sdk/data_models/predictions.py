@@ -81,8 +81,7 @@ class ResultMedium:
                 self.data = response.content
             else:
                 raise ValueError(
-                    f"Unable to retrieve data for result medium {self}, received "
-                    f"response {response} from Geti™ server."
+                    f"Unable to retrieve data for result medium {self}, received response {response} from Geti™ server."
                 )
         return self.data
 
