@@ -24,7 +24,7 @@ SUPPORTED_METRICS = ["global", "local"]
 
 class TestingClient:
     """
-    Class to manage testing jobs for a certain Intel® Geti™ project.
+    Class to manage testing jobs for a certain Geti™ project.
     """
 
     def __init__(self, workspace_id: str, project: Project, session: GetiSession):
@@ -78,7 +78,7 @@ class TestingClient:
 
     def get_test_result(self, job: Job) -> TestResult:
         """
-        Retrieve the result of the model testing job from the Intel® Geti™
+        Retrieve the result of the model testing job from the Geti™
         server
 
         :param job: Job instance representing the model testing job

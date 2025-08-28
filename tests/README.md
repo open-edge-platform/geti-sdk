@@ -1,7 +1,7 @@
-This directory contains the test suite for the Intel® Geti™ SDK. The tests are grouped
+This directory contains the test suite for the Geti™ SDK. The tests are grouped
 into two categories:
 
-1. **Pre-merge tests** These are executed for every Pull Request to the Intel® Geti™
+1. **Pre-merge tests** These are executed for every Pull Request to the Geti™
    SDK `main` branch. The suite contains both integration and unit tests, the main focus
    being the integration tests. The test code can be found in
    the [pre-merge](pre-merge) folder.
@@ -16,7 +16,7 @@ into two categories:
 The integration tests for the SDK leverage the recording of HTTP requests and responses,
 relying on the VCR.py package. All integration tests are defined in the
 [pre-merge/integration](pre-merge/integration) directory. By default, the tests are run
-in offline mode, meaning that no actual Intel® Geti™ server is needed and no real
+in offline mode, meaning that no actual Geti™ server is needed and no real
 http requests are being made during testing. All requests are intercepted, and a
 previously recorded response is returned. The recorded interactions can be found in
 [fixtures/cassettes](fixtures/cassettes).
@@ -31,9 +31,9 @@ integration testing.
 
 # Nightly test suite
 The nightly tests are defined in the [nightly](nightly) directory. They can only be run in
-`ONLINE` mode, meaning that a live Intel® Geti™ server is required to run against them. The
+`ONLINE` mode, meaning that a live Geti™ server is required to run against them. The
 nightly tests need to be run using a `online.ini` file that contains the host name and
-login details for the Intel® Geti™ server to run the tests against (see section
+login details for the Geti™ server to run the tests against (see section
 [Running the tests](#running-the-tests) below).
 
 # Running the tests
@@ -48,11 +48,11 @@ can be run in `ONLINE` or `RECORD` mode. The simplest way to change modes is to
 define a custom pytest configuration file for each mode, as explained below:
 
 ### Online mode
-If you want to run the test suite against a live Intel® Geti™ server (for example to make sure
-that the SDK data models are still up to date with the Intel® Geti™ REST contracts), the tests
+If you want to run the test suite against a live Geti™ server (for example to make sure
+that the SDK data models are still up to date with the Geti™ REST contracts), the tests
 can be executed in `ONLINE` mode. To do so, define a file `online.ini` in the `tests`
 directory. This file should have similar content to the existing `offline.ini`, but
-with the Intel® Geti™ server hostname and login details set appropriately:
+with the Geti™ server hostname and login details set appropriately:
 
 > ```shell
 > [pytest]
@@ -81,10 +81,10 @@ Once you created the custom `online.ini` or `record.ini` configurations, you can
 the tests using `pytest -c online.ini ./pre-merge`. This will execute the tests in
 online mode.
 
-### Tests Intel® Geti™ SDK against the previous version of Intel® Geti™ server.
-You can run the test suite against a legacy version of Intel® Geti™ server.
+### Tests Geti™ SDK against the previous version of Geti™ server.
+You can run the test suite against a legacy version of Geti™ server.
 - In `ONLINE` mode  Simply assign the `GETI_HOST` variable with the legacy server’s address.
 - In `OFFLINE` and `RECORD` modes one can set the `GETI_PLATFORM_VERSION` variable to `LEGACY`
 within `offline.ini` or `record.ini` correspondingly, thus utilizing the pre-recorded cassettes from the prior server release for testing.
 
-> **_NOTE:_**  Currently,  Intel® Geti™ 1.8 is considered as the legacy release.
+> **_NOTE:_**  Currently,  Geti™ 1.8 is considered as the legacy release.

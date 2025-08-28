@@ -32,7 +32,7 @@ class PredictionRESTConverter:
     def from_dict(prediction: dict[str, Any]) -> Prediction:
         """
         Create a Prediction object from a dictionary returned by the
-        /predictions REST endpoint in the Intel® Geti™ platform.
+        /predictions REST endpoint in the Geti™ platform.
 
         :param prediction: dictionary representing a Prediction, which
             contains all prediction annotations for a certain media entity

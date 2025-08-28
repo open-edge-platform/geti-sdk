@@ -20,7 +20,7 @@ from geti_sdk.utils import deserialize_dictionary
 
 class JobRESTConverter:
     """
-    Class that handles conversion of Intel® Geti™ REST output for jobs to objects,
+    Class that handles conversion of Geti™ REST output for jobs to objects,
     and vice-versa
     """
 
@@ -29,7 +29,7 @@ class JobRESTConverter:
         """
         Create a Job instance from the input dictionary passed in `job_dict`.
 
-        :param job_dict: Dictionary representing a job on the Intel® Geti™ server, as
+        :param job_dict: Dictionary representing a job on the Geti™ server, as
             returned by the /jobs endpoints
         :return: Job instance, holding the job data contained in job_dict
         """

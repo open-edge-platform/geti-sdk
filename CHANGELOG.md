@@ -1,4 +1,4 @@
-# v2.12.0 Intel® Geti™ SDK
+# v2.12.0 Geti™ SDK
 
 ## What's Changed
 
@@ -47,7 +47,7 @@
 **Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.11.0...v2.12.0
 
 
-# v2.11.0 Intel® Geti™ SDK (15-07-2025)
+# v2.11.0 Geti™ SDK (15-07-2025)
 
 ## What's Changed
 
@@ -76,7 +76,7 @@
 **Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.2...v2.11.0
 
 
-# v2.10.2 Intel® Geti™ SDK (04-07-2025)
+# v2.10.2 Geti™ SDK (04-07-2025)
 ## What's Changed
 
 Bugfixes:
@@ -85,7 +85,7 @@ Bugfixes:
 **Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.1...v2.10.2
 
 
-# v2.10.1 Intel® Geti™ SDK (30-06-2025)
+# v2.10.1 Geti™ SDK (30-06-2025)
 ## What's Changed
 
 Bugfixes:
@@ -94,7 +94,7 @@ Bugfixes:
 **Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.10.0...v2.10.1
 
 
-# v2.10.0 Intel® Geti™ SDK (30-05-2025)
+# v2.10.0 Geti™ SDK (30-05-2025)
 ## What's Changed
 
 Features:
@@ -125,10 +125,10 @@ Extra:
 **Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.8.0...v2.10.0
 
 
-# v2.9.0 Intel® Geti™ SDK (skipped)
+# v2.9.0 Geti™ SDK (skipped)
 
 
-# v2.8.0 Intel® Geti™ SDK (17-03-2025)
+# v2.8.0 Geti™ SDK (17-03-2025)
 ## What's Changed
 
 * Bugfix: inference would sometimes fail if labels have number-like names by @maxxgx in https://github.com/openvinotoolkit/geti-sdk/pull/567
@@ -139,7 +139,7 @@ Extra:
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v2.7.1...v2.8.0
 
 
-# v2.7.1 Intel® Geti™ SDK (26-02-2025)
+# v2.7.1 Geti™ SDK (26-02-2025)
 ## What's Changed
 
 * Bugfix: automatic workspace selection would sometimes not work by @leoll2 in https://github.com/openvinotoolkit/geti-sdk/pull/565
@@ -147,7 +147,7 @@ Extra:
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v2.7.0...v.2.7.1
 
 
-# v2.7.0 Intel® Geti™ SDK (17-02-2025)
+# v2.7.0 Geti™ SDK (17-02-2025)
 ## What's Changed
 
 * Added support for Python 3.12 by @gdlg in https://github.com/openvinotoolkit/geti-sdk/pull/549
@@ -163,14 +163,14 @@ Extra:
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v2.6.2...v.2.7.0
 
 
-# v2.6.2 Intel® Geti™ SDK (08-01-2025)
+# v2.6.2 Geti™ SDK (08-01-2025)
 ## What's Changed
 * Bugfix: inference not working for classification projects with label containing spaces in their name by @maxxgx in https://github.com/openvinotoolkit/geti-sdk/pull/539
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v2.6.1...v2.6.2
 
 
-# v2.6.1 Intel® Geti™ SDK (02-01-2025)
+# v2.6.1 Geti™ SDK (02-01-2025)
 ## What's Changed
 * Bugfix: empty label sometimes not recognized during inference by @maxxgx in https://github.com/openvinotoolkit/geti-sdk/pull/534
 
@@ -180,7 +180,7 @@ Extra:
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v2.6.0...v2.6.1
 
 
-# v2.6.0 Intel® Geti™ SDK (26-12-2024)
+# v2.6.0 Geti™ SDK (26-12-2024)
 ## What's Changed
 * Updated model representation to that of Geti V2.6 by @Daankrol in https://github.com/openvinotoolkit/geti-sdk/pull/523
 * Mark model response fields as deprecated in 2.6 instead of removed by @leoll2 in https://github.com/openvinotoolkit/geti-sdk/pull/528
@@ -191,7 +191,7 @@ Extra:
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v2.5.0...v2.6.0
 
 
-# v2.5.0 Intel® Geti™ SDK (22-10-2024)
+# v2.5.0 Geti™ SDK (22-10-2024)
 ## What's Changed
 * Introduce `delete_dataset` method  by @igor-davidyuk in https://github.com/openvinotoolkit/geti-sdk/pull/489
 * Update the download_all method for ImageClient to download specific dataset by @rajeshgangireddy in https://github.com/openvinotoolkit/geti-sdk/pull/484
@@ -220,7 +220,7 @@ Extra:
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v2.3.0...v2.5.0
 
 
-# v2.3.0 Intel® Geti™ SDK (03-09-2024)
+# v2.3.0 Geti™ SDK (03-09-2024)
 ## What's Changed
 * Add method to purge models by @igor-davidyuk in https://github.com/openvinotoolkit/geti-sdk/pull/468
 * Fix visualization in 008 example notebook by @igor-davidyuk in https://github.com/openvinotoolkit/geti-sdk/pull/472
@@ -234,7 +234,7 @@ Extra:
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v2.2.0...v2.3.0
 
 
-# v2.2.0 Intel® Geti™ SDK (18-07-2024)
+# v2.2.0 Geti™ SDK (18-07-2024)
 ## What's Changed
 * Add `description` attribute to the job class by @igor-davidyuk in https://github.com/openvinotoolkit/geti-sdk/pull/448
 * Project/Dataset export import API alignment by @igor-davidyuk in https://github.com/openvinotoolkit/geti-sdk/pull/446
@@ -259,7 +259,7 @@ Extra:
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/releases/v2.1.0...1234
 
-# v2.1.0 Intel® Geti™ SDK (19-06-2024)
+# v2.1.0 Geti™ SDK (19-06-2024)
 ## What's Changed
 * Saliency map visualization by @igor-davidyuk in https://github.com/openvinotoolkit/geti-sdk/pull/424
 * Add a model management notebook by @igor-davidyuk in https://github.com/openvinotoolkit/geti-sdk/pull/419
@@ -285,7 +285,7 @@ Extra:
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v2.0.1...v2.1.0
 
-# v2.0.1 Intel® Geti™ SDK (29-05-2024)
+# v2.0.1 Geti™ SDK (29-05-2024)
 ## What's Changed
 * Add retry mechanism to better handle `ConnectionError` by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/420
 * Undo changes to video tempfile handling, register atexit handler for tempfile deletion by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/423
@@ -293,16 +293,16 @@ Extra:
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v2.0.0...v2.0.1
 
-# v2.0.0 Intel® Geti™ SDK (16-05-2024)
+# v2.0.0 Geti™ SDK (16-05-2024)
 ## New features
 This release introduces a new feature related to model deployment: post-inference hooks! A post-inference hook can be added to any `Deployment`, and will be executed after every inference request (i.e. every call to `deployment.infer()`). The hooks allow you to define specific actions to take under certain conditions. For example, a hook could implement the following behaviour:
-**If** the confidence level of one of the predictions for the image is less than 20%, **then** upload the image to the Intel® Geti™ project in which the model was trained.
+**If** the confidence level of one of the predictions for the image is less than 20%, **then** upload the image to the Geti™ project in which the model was trained.
 
 This could be useful for improving your model with a next training round, because including such 'low confidence images' in the training dataset might help to improve model accuracy.
 Additional examples of post-inference hooks, and instructions for configuring them, can be found in the newly added [notebook 012](https://github.com/openvinotoolkit/geti-sdk/blob/main/notebooks/012_post_inference_hooks.ipynb) in this repository.
 
 ## Breaking changes
-This major release of the Intel® Geti™ SDK breaks backwards compatibility with Intel® Geti™ servers of version v1.14 and below. Please make sure that your Intel® Geti™ server is updated to the latest version of the Intel® Geti™ platform, to prevent compatibility issues.
+This major release of the Geti™ SDK breaks backwards compatibility with Geti™ servers of version v1.14 and below. Please make sure that your Geti™ server is updated to the latest version of the Geti™ platform, to prevent compatibility issues.
 
 ## What's Changed
 * Update `Video` data model with annotation statistics by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/391
@@ -338,14 +338,14 @@ This major release of the Intel® Geti™ SDK breaks backwards compatibility wit
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.16.1...v2.0.0
 
 
-# v1.16.1 Intel® Geti™ SDK (22-04-2024)
+# v1.16.1 Geti™ SDK (22-04-2024)
 ## What's Changed
 * Add `default_workspace` to possible default workspace names by @igor-davidyuk in https://github.com/openvinotoolkit/geti-sdk/pull/394
 
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.16.0...v1.16.1
 
-# v1.16.0 Intel® Geti™ SDK (26-03-2024)
+# v1.16.0 Geti™ SDK (26-03-2024)
 ## What's Changed
 * Decouple visualizer for OTX by @igor-davidyuk in https://github.com/openvinotoolkit/geti-sdk/pull/356
 * Update data models to account for REST API changes in Geti v1.16 by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/357
@@ -357,11 +357,11 @@ This major release of the Intel® Geti™ SDK breaks backwards compatibility wit
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.15.0...v1.16.0
 
-# v1.15.0 Intel® Geti™ SDK (12-03-2024)
-This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of the changes is focused on that, but below is a list of other changes that are worth mentioning.
+# v1.15.0 Geti™ SDK (12-03-2024)
+This release makes the SDK compatible for Geti™ v1.15. The majority of the changes is focused on that, but below is a list of other changes that are worth mentioning.
 
 ## Release Highlights
-- Add compatibility for Intel® Geti™ v1.15. Note that we maintain backwards compatibility for models created in Intel® Geti™ v1.8: This means that the SDK can run inference on deployments from both both the latest Intel® Geti™ on-prem release and Intel® Geti™ SaaS.
+- Add compatibility for Geti™ v1.15. Note that we maintain backwards compatibility for models created in Geti™ v1.8: This means that the SDK can run inference on deployments from both both the latest Geti™ on-prem release and Geti™ SaaS.
 - Add benchmarking functionality for deployments through the `Benchmarker` class, as well as a new notebook to demonstrate this feature.
 - Improve the job monitoring feature, job progression is now displayed via progress bars.
 - Image and annotation upload and download now uses multithreading, greatly speeding up the process.
@@ -424,7 +424,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v.1.8.2...v1.15.0
 
-# v1.8.2 Intel® Geti™ SDK (22-02-2024)
+# v1.8.2 Geti™ SDK (22-02-2024)
 ## What's Changed
 * Update `opencv-python` requirement to `4.9.*`
 * Update `Pillow` requirement to `10.2.*`
@@ -434,7 +434,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v.1.8.1...v.1.8.2
 
-# v1.8.1 Intel® Geti™ SDK (20-11-2023)
+# v1.8.1 Geti™ SDK (20-11-2023)
 ## What's Changed
 * Update pytest requirement from ==7.3.* to ==7.4.* in /requirements by @dependabot in https://github.com/openvinotoolkit/geti-sdk/pull/261
 * Update pytest-env requirement from ==0.8.* to ==1.0.* in /requirements by @dependabot in https://github.com/openvinotoolkit/geti-sdk/pull/275
@@ -443,7 +443,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v.1.8.0...v.1.8.1
 
-# v1.8.0 Intel® Geti™ SDK (16-10-2023)
+# v1.8.0 Geti™ SDK (16-10-2023)
 ## What's Changed
 * Predict video on local by @jihyeonyi in https://github.com/openvinotoolkit/geti-sdk/pull/243
 * Update job datamodel for new job scheduler by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/251
@@ -474,7 +474,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.5.8...v.1.8.0
 
-# v1.5.8 Intel® Geti™ SDK (19-06-2023)
+# v1.5.8 Geti™ SDK (19-06-2023)
 ## What's Changed
 * Update vcrpy requirement from ==4.2.* to ==4.3.* in /requirements by @dependabot in https://github.com/openvinotoolkit/geti-sdk/pull/227
 * Specify correct project name in notebook 009 by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/229
@@ -490,7 +490,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.5.7...v1.5.8
 
-# v1.5.7 Intel® Geti™ SDK (30-05-2023)
+# v1.5.7 Geti™ SDK (30-05-2023)
 ## What's Changed
 * Allow more efficient image uploading for datumaro annotation readers by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/224
 * Fix deployment for `otx v1.2.2` by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/225
@@ -498,7 +498,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.5.6...v1.5.7
 
-# v1.5.6 Intel® Geti™ SDK (23-05-2023)
+# v1.5.6 Geti™ SDK (23-05-2023)
 ## What's Changed
 * Add `group` key to hierarchical label definition in notebook 001 by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/220
 * Add `TestingClient` to perform model tests by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/221
@@ -508,14 +508,14 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.5.5...v1.5.6
 
-# v1.5.5 Intel® Geti™ SDK (15-05-2023)
+# v1.5.5 Geti™ SDK (15-05-2023)
 ## What's Changed
 * Add param to disable certificate validation for data download helpers by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/218
 
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.5.4...v1.5.5
 
-# v1.5.4 Intel® Geti™ SDK (11-05-2023)
+# v1.5.4 Geti™ SDK (11-05-2023)
 ## What's Changed
 * Add active learning client for retrieving the active set by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/215
 * Allow passing label dictionaries to `Geti.create_single_task_project_from_dataset` by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/216
@@ -524,7 +524,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.5.3...v1.5.4
 
-# v1.5.3 Intel® Geti™ SDK (10-05-2023)
+# v1.5.3 Geti™ SDK (10-05-2023)
 ## What's Changed
 * Add `ONNX` as optimization type by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/212
 * Remove trailing slash from the base url in the media rest client by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/214
@@ -534,7 +534,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.5.2...v1.5.3
 
-# v1.5.2 Intel® Geti™ SDK (08-05-2023)
+# v1.5.2 Geti™ SDK (08-05-2023)
 ## What's Changed
 * Add score NoneType check in summary function of ProjectStatus by @harimkang in https://github.com/openvinotoolkit/geti-sdk/pull/208
 * Update `OptimizedModel` data model by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/209
@@ -545,7 +545,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.5.1...v1.5.2
 
-# v1.5.1 Intel® Geti™ SDK (26-04-2023)
+# v1.5.1 Geti™ SDK (26-04-2023)
 ## What's Changed
 * Update hashing algorithm to `sha3_512` by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/204
 * Bump otx from 1.1.2 to 1.2.0 in /requirements by @dependabot in https://github.com/openvinotoolkit/geti-sdk/pull/203
@@ -554,7 +554,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.5.0...v1.5.1
 
-# v1.5.0 Intel® Geti™ SDK (24-04-2023)
+# v1.5.0 Geti™ SDK (24-04-2023)
 ## What's Changed
 * Pin orjson version to 3.8.8 to avoid installation error by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/178
 * Fix nightly tests for classification project by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/179
@@ -585,7 +585,7 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.4.1...v1.5.0
 
-# [Pre-release] v1.4.1 Intel® Geti™ SDK (28-03-2023)
+# [Pre-release] v1.4.1 Geti™ SDK (28-03-2023)
 ## What's Changed
 * Update otx requirement to `otx==1.1.0` by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/176
 * Make model wrapper module namespace unique by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/177
@@ -593,16 +593,16 @@ This release makes the SDK compatible for Intel® Geti™ v1.15. The majority of
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.4.0...v1.4.1
 
-# [Pre-release] v1.4.0 Intel® Geti™ SDK (27-03-2023)
+# [Pre-release] v1.4.0 Geti™ SDK (27-03-2023)
 ## What's Changed
 * Migrate from `ote_sdk` to `otx.api` by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/166
 
 ## Caution: Backwards incompatibility for project `Deployments`
-This release breaks backwards compatibility with `deployments` created by earlier versions of the Intel® Geti™ platform. Please only update to this version of the Geti SDK if you are sure that your Intel® Geti™ server is also on version 1.4 or later.
+This release breaks backwards compatibility with `deployments` created by earlier versions of the Geti™ platform. Please only update to this version of the Geti SDK if you are sure that your Geti™ server is also on version 1.4 or later.
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.2.4...v1.4.0
 
-# v1.2.4 Intel® Geti™ SDK (27-03-2023)
+# v1.2.4 Geti™ SDK (27-03-2023)
 ## What's Changed
 * Update ipython requirement from ==8.10.* to ==8.11.* in /requirements by @dependabot in https://github.com/openvinotoolkit/geti-sdk/pull/172
 * Fix `upload_and_predict_from_numpy.py` example by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/173
@@ -611,7 +611,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.2.3...v1.2.4
 
-# v1.2.3 Intel® Geti™ SDK (13-03-2023)
+# v1.2.3 Geti™ SDK (13-03-2023)
 ## What's Changed
 * Fix saving images and annotations with non-ascii characters in their filename by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/160
 * Update tqdm requirement from ==4.64.* to ==4.65.* in /requirements by @dependabot in https://github.com/openvinotoolkit/geti-sdk/pull/161
@@ -631,7 +631,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.2.2...v1.2.3
 
-# v1.2.2 Intel® Geti™ SDK (28-02-2023)
+# v1.2.2 Geti™ SDK (28-02-2023)
 ## What's Changed
 * Enable OVMS deployment by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/148
 * Minor fixes for notebook 010 by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/149
@@ -645,7 +645,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.2.1...v1.2.2
 
-# v1.2.1 Intel® Geti™ SDK (02-02-2023)
+# v1.2.1 Geti™ SDK (02-02-2023)
 ## What's Changed
 * Fix issue with deployment for anomaly classification models by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/144
 * Require `mistune>=2.0.3` for notebooks by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/147
@@ -655,7 +655,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.2.0...v1.2.1
 
-# v1.2 Intel® Geti™ SDK (24-01-2023)
+# v1.2 Geti™ SDK (24-01-2023)
 ## What's Changed
 * Add `size` field to MediaInformation data model by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/133
 * Update available Geti versions by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/134
@@ -674,7 +674,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.1.1...v1.2.0
 
-# v1.1.1 Intel® Geti™ SDK (20-12-2022)
+# v1.1.1 Geti™ SDK (20-12-2022)
 ## What's Changed
 * Fix issue with model to dictionary conversion by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/128
 * Only submit train request once all running jobs for task have finished by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/129
@@ -682,7 +682,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.1.0...v1.1.1
 
-# v1.1.0 Intel® Geti™ SDK (15-12-2022)
+# v1.1.0 Geti™ SDK (15-12-2022)
 ## What's Changed
 * Minor fix in README.md by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/118
 * Fix and improve geti version comparison mechanism by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/117
@@ -695,7 +695,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.0.4...v1.1.0
 
-# v1.0.4 Intel® Geti™ SDK (08-12-2022)
+# v1.0.4 Geti™ SDK (08-12-2022)
 ## What's Changed
 * Update ipython requirement from ==8.6.* to ==8.7.* in /requirements by @dependabot in https://github.com/openvinotoolkit/geti-sdk/pull/112
 * Properly check for empty annotation before uploading by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/111
@@ -707,7 +707,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.0.3...v1.0.4
 
-# v1.0.3 Intel® Geti™ SDK (25-11-2022)
+# v1.0.3 Geti™ SDK (25-11-2022)
 ## What's Changed
 * Add `ScoreMetadata` to represent the new `scores` field by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/106
 * Add model and prediction client integration tests + update cassettes by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/107
@@ -717,7 +717,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.0.2...v1.0.3
 
-# v1.0.2 Intel® Geti™ SDK (17-11-2022)
+# v1.0.2 Geti™ SDK (17-11-2022)
 ## What's Changed
 * Update ote-sdk requirement to v0.3.1 by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/98
 * Add integration tests for `project_client`, fix `project_client.add_labels` by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/99
@@ -729,7 +729,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.0.1...v1.0.2
 
-# v1.0.1 Intel® Geti™ SDK (11-11-2022)
+# v1.0.1 Geti™ SDK (11-11-2022)
 ## What's Changed
 * Add path validation to project download target path by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/87
 * Update tqdm requirement from ==4.62.* to ==4.64.* in /requirements by @dependabot in https://github.com/openvinotoolkit/geti-sdk/pull/84
@@ -737,7 +737,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 * Add security note to README for project download by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/88
 * Update numpy requirement to 1.21.* by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/89
 * Reduce permissions upon directory creation by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/90
-* Update README to correctly reference Intel Geti brand everywhere by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/92
+* Update README to correctly reference Geti brand everywhere by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/92
 * Improve check for video processing in `Geti.upload_project_data()` to avoid potential infinite loop by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/93
 * Add unit tests to pre-merge test suite by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/91
 * Update ProjectStatus and TaskStatus to include new field `n_new_annotations` by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/94
@@ -747,7 +747,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v1.0.0...v1.0.1
 
-# v1.0.0 Intel® Geti™ SDK (04-11-2022)
+# v1.0.0 Geti™ SDK (04-11-2022)
 ## What's Changed
 * Add a re-authentication mechanism when using token authentication by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/72
 * Update pytest requirement from ==7.1.* to ==7.2.* in /requirements by @dependabot in https://github.com/openvinotoolkit/geti-sdk/pull/73
@@ -768,7 +768,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v0.2.4...v1.0.0rc1
 
-# v0.2.4 Intel® Geti™ SDK (25-10-2022)
+# v0.2.4 Geti™ SDK (25-10-2022)
 ## What's Changed
 * Auto detect normalized annotation files for GetiAnnotationReader by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/63
 * Fix version detection mechanism and add tests for GetiVersion by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/64
@@ -782,7 +782,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v0.2.3...v0.2.4
 
-# v0.2.3 Intel® Geti™ SDK (06-10-2022)
+# v0.2.3 Geti™ SDK (06-10-2022)
 ## What's Changed
 * Remove VCR from nightly test for demos by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/54
 * Improve nightly tests for `demos` module by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/55
@@ -795,7 +795,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v0.2.2...v0.2.3
 
-# v0.2.2 Intel® Geti™ SDK (04-10-2022)
+# v0.2.2 Geti™ SDK (04-10-2022)
 ## What's Changed
 * Add coverage report to pre-merge and nightly test artifacts by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/47
 * Correctly set permissions on extracted files for anomaly dataset by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/51
@@ -805,7 +805,7 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v0.2.1...v0.2.2
 
-# v0.2.1 Intel® Geti™ SDK (30-09-2022)
+# v0.2.1 Geti™ SDK (30-09-2022)
 ## What's Changed
 * Replace SC references in docstrings by Geti by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/33
 * Change package name from `geti_sdk` to `geti-sdk`. Import names are unchanged by @ljcornel in https://github.com/openvinotoolkit/geti-sdk/pull/34
@@ -825,20 +825,20 @@ This release breaks backwards compatibility with `deployments` created by earlie
 
 **Full Changelog**: https://github.com/openvinotoolkit/geti-sdk/compare/v0.2.0...v0.2.1
 
-# v0.2.0 Intel® Geti™ SDK (27-09-2022)
+# v0.2.0 Geti™ SDK (27-09-2022)
 
-This is the first official release of the Intel® Geti™ Software Development Kit (SDK).
+This is the first official release of the Geti™ Software Development Kit (SDK).
 
 The purpose of this SDK is twofold:
 
-1. Provide an easy-to-use interface to the [Intel® Geti™ platform](www.geti.intel.com), to manipulate
-Intel® Geti™ projects and other entities or automate tasks on the platform. All
+1. Provide an easy-to-use interface to the [Geti™ platform](www.geti.intel.com), to manipulate
+Geti™ projects and other entities or automate tasks on the platform. All
 of this from a Python script or Jupyter notebook.
 
 
-2. Provide an API to deploy and run models trained on the Intel® Geti™ server on your local
+2. Provide an API to deploy and run models trained on the Geti™ server on your local
 machine. The SDK Deployment module provides a straightforward
-route to create a deployment for your Intel® Geti™ project, save it to a local disk and run
+route to create a deployment for your Geti™ project, save it to a local disk and run
 it offline.
 
 This SDK includes various example scripts and Jupyter notebooks which illustrate a

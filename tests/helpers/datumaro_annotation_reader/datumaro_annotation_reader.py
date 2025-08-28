@@ -172,7 +172,7 @@ class DatumAnnotationReader(AnnotationReader):
             (e.g. width, height) about the media item to upload the annotation for
         :param preserve_shape_for_global_labels: False to convert shapes for global
             tasks to full rectangles (required for classification like tasks in
-            Intel® Geti™ projects), True to preserve such shapes. This parameter
+            Geti™ projects), True to preserve such shapes. This parameter
             should be:
 
              - False when uploading annotations to a single task project
@@ -194,7 +194,7 @@ class DatumAnnotationReader(AnnotationReader):
             try:
                 label_name = self.datum_label_map[annotation.label]
             except KeyError:
-                # Label is not in the Intel® Geti™ project labels, move on to next
+                # Label is not in the Geti™ project labels, move on to next
                 # annotation for this dataset item.
                 continue
 

@@ -33,7 +33,7 @@ then use it to draw the annotations on the input image.
       show_count=False,
    )
 
-   # Obtain a prediction from the Intel Geti platfor server or a local deployment.
+   # Obtain a prediction from the Geti platfor server or a local deployment.
    ...
 
    # Visualize the prediction on the input image.

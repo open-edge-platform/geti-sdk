@@ -5,7 +5,7 @@
   <img
     width="120%"
     src="docs/geti-logo.png?raw=true"
-    alt="Intel® Geti™ enables anyone from domain experts to data scientists to rapidly develop production-ready AI models."
+    alt="Geti™ enables anyone from domain experts to data scientists to rapidly develop production-ready AI models."
   >
 </a>
 </p>
@@ -13,7 +13,7 @@
 <br>
 
 [![python](https://img.shields.io/badge/python-3.10%2B-green)]()
-![Intel Geti](https://img.shields.io/badge/Intel%C2%AE%20Geti%E2%84%A2-2.12-blue?link=https%3A%2F%2Fgeti.intel.com%2F)
+![Geti](https://img.shields.io/badge/Intel%C2%AE%20Geti%E2%84%A2-2.12-blue?link=https%3A%2F%2Fgeti.intel.com%2F)
 [![openvino](https://img.shields.io/badge/openvino-2025.2-purple)](https://github.com/openvinotoolkit/openvino)
 
 ![Pre-merge Tests Status](https://img.shields.io/github/actions/workflow/status/open-edge-platform/geti-sdk/pre-merge-tests.yml?label=pre-merge%20tests&link=https%3A%2F%2Fgithub.com%2Fopen-edge-platform%2Fgeti-sdk%2Factions%2Fworkflows%2Fpre-merge-tests.yml)
@@ -26,12 +26,12 @@
 
 # Geti SDK
 
-Geti SDK is a Python client for programmatically interacting with an [Intel® Geti™](https://github.com/open-edge-platform/geti) server via its [REST API](https://docs.geti.intel.com/docs/rest-api/openapi-specification).
+Geti SDK is a Python client for programmatically interacting with an [Geti™](https://github.com/open-edge-platform/geti) server via its [REST API](https://docs.geti.intel.com/docs/rest-api/openapi-specification).
 With Geti SDK, you can automate and streamline computer vision workflows, making it easy to manage datasets, train models, and deploy solutions directly from your Python environment.
 
 <!-- toc -->
 
-- [About Intel® Geti™](#what-is-intel-geti)
+- [About Geti™](#what-is-intel-geti)
 - [Install the SDK](#install-the-sdk)
   * [From PyPI](#from-pypi)
   * [From source](#from-source)
@@ -48,9 +48,9 @@ With Geti SDK, you can automate and streamline computer vision workflows, making
 
 <!-- tocstop -->
 
-### What is Intel® Geti™?
+### What is Geti™?
 
-[Intel® Geti™](https://github.com/open-edge-platform/geti) is an AI platform designed to help anyone build state-of-the-art computer vision models quickly and efficiently, even with minimal data.
+[Geti™](https://github.com/open-edge-platform/geti) is an AI platform designed to help anyone build state-of-the-art computer vision models quickly and efficiently, even with minimal data.
 It provides an end-to-end workflow for preparing, training, deploying, and running computer vision models at the edge. Geti™ supports the full AI model lifecycle, including dataset preparation, model training, and deployment of [OpenVINO™](https://docs.openvino.ai/)-optimized models.
 
 ### What can you do with Geti SDK?
@@ -68,7 +68,7 @@ With Geti SDK, you can:
 ### Tutorials and Examples
 
 The ['Code examples'](#code-examples) sections below contains short snippets that demonstrate
-how to perform several common tasks. This also shows how to configure the SDK to connect to your Intel® Geti™ server.
+how to perform several common tasks. This also shows how to configure the SDK to connect to your Geti™ server.
 
 For more comprehensive examples, see the [Jupyter notebooks](https://github.com/open-edge-platform/geti-sdk/tree/main/notebooks).
 These tutorials demonstrate how to use the SDK for various computer vision tasks and workflows, from basic project creation 
@@ -137,15 +137,15 @@ Follow these steps to install the SDK from a specific branch or commit:
 
 The package provides a main class `Geti` that can be used for the following use cases:
 
-### Connect to the Intel® Geti™ platform
+### Connect to the Geti™ platform
 
-To establish a connection between the SDK and the Intel® Geti™ platform, the `Geti` class needs to know the hostname or IP address for the server and requires authentication.
+To establish a connection between the SDK and the Geti™ platform, the `Geti` class needs to know the hostname or IP address for the server and requires authentication.
 
 #### Personal Access Token (Recommended)
 
 The recommended authentication method is the 'Personal Access Token'. To obtain a token:
 
-1. Open the Intel® Geti™ user interface in your browser
+1. Open the Geti™ user interface in your browser
 2. Click on the `User` menu in the top right corner
 3. Select `Personal access token` from the dropdown menu
 4. Follow the steps to create a token and copy the token value
@@ -366,9 +366,9 @@ although some advanced features may not be available yet due to technical and se
 - [x] **Deploy and benchmark models locally** - Export OpenVINO inference models, run full pipeline inference on local machines, and measure inference throughput on your hardware configurations
 - [x] **Download and upload datasets** - Export datasets to archives and import them to create new projects
 - [x] **Download and upload full projects** - Create complete backups of projects, including datasets, models and configurations, and restore them
-- [ ] **Upload trained models** - Intel® Geti™ does not allow to import external models
-- [ ] **Import datasets to existing projects** - currently, this feature is only available through the Intel® Geti™ UI and API
-- [ ] **Manage users and roles** - currently, this feature is only available through the Intel® Geti™ UI and API
+- [ ] **Upload trained models** - Geti™ does not allow to import external models
+- [ ] **Import datasets to existing projects** - currently, this feature is only available through the Geti™ UI and API
+- [ ] **Manage users and roles** - currently, this feature is only available through the Geti™ UI and API
 
 Are you looking for a specific feature that is not listed here?
 Please check if it is implemented by one of the clients in the [rest_clients](geti_sdk/rest_clients) module,

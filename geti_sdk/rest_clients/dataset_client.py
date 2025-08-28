@@ -33,7 +33,7 @@ from geti_sdk.utils import deserialize_dictionary
 
 class DatasetClient:
     """
-    Class to manage datasets for a certain Intel® Geti™ project.
+    Class to manage datasets for a certain Geti™ project.
     """
 
     def __init__(self, workspace_id: str, project: Project, session: GetiSession):
@@ -85,7 +85,7 @@ class DatasetClient:
 
     def get_all_datasets(self) -> list[Dataset]:
         """
-        Query the Intel® Geti™ server to retrieve an up to date list of datasets in
+        Query the Geti™ server to retrieve an up to date list of datasets in
         the project.
 
         :return: List of current datasets in the project

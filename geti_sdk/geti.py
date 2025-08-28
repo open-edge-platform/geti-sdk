@@ -68,11 +68,11 @@ logging.captureWarnings(True)
 
 class Geti:
     """
-    Interact with an Intel® Geti™ server via the REST API.
+    Interact with an Geti™ server via the REST API.
 
     The `Geti` class provides methods for project creation, downloading and
     uploading, as well as project deployment. Initializing the class will establish a
-    HTTP session to the Intel® Geti™ server, and requires authentication.
+    HTTP session to the Geti™ server, and requires authentication.
 
     NOTE: The `Geti` instance can either be initialized in the following ways:
 
@@ -173,7 +173,7 @@ class Geti:
                     "please update the `server_config` accordingly."
                 )
 
-        # Set the Intel Geti SDK version
+        # Set the Geti SDK version
         self.sdk_version = Version(sdk_version_string)
         # Initialize session and get workspace id
         self.session = GetiSession(
@@ -198,36 +198,36 @@ class Geti:
 
     def _check_platform_version(self) -> None:
         """
-        Check the version of the Intel® Geti™ server that this `Geti` instance is
+        Check the version of the Geti™ server that this `Geti` instance is
         connected to. If the version is not supported by the SDK, a warning will be
         issued.
 
-        :raises: ValueError if the Intel® Geti™ server version is not supported by the
-            Intel® Geti™ SDK.
+        :raises: ValueError if the Geti™ server version is not supported by the
+            Geti™ SDK.
         """
         # Get the build version without a timestamp
         platform_version = self.session.version.version
         # Check if the platform version is newer than the SDK version
         if platform_version > self.sdk_version:
             warnings.warn(
-                f"The Intel® Geti™ server version {platform_version} is newer than "
+                f"The Geti™ server version {platform_version} is newer than "
                 f"the Geti SDK version {self.sdk_version}. Some features may not be "
                 "supported and you may encounter errors.\n"
-                "Please update the Intel Geti SDK to the latest version "
+                "Please update the Geti SDK to the latest version "
                 "with `pip install --upgrade geti-sdk`."
             )
         # Check if the platform version is older than the last supported version
         if self.session.version < GETI_116_VERSION:
             raise ValueError(
-                "The Intel® Geti™ server version is not supported by this Intel Geti SDK package. Please "
-                "update the Intel® Geti™ server to version 2.0 or later, or use a previous version of the SDK."
+                "The Geti™ server version is not supported by this Geti SDK package. Please "
+                "update the Geti™ server to version 2.0 or later, or use a previous version of the SDK."
             )
 
     @property
     def projects(self) -> list[Project]:
         """
         Return a list of projects that are currently available in the workspace on
-        the Intel® Geti™ server.
+        the Geti™ server.
 
         :return: List of projects in the workspace addressed by the current `Geti`
             instance
@@ -251,9 +251,9 @@ class Geti:
         project: Project | None = None,
     ) -> Project:
         """
-        Return the Intel® Geti™ project by name or ID, if any.
+        Return the Geti™ project by name or ID, if any.
         If a project object is passed, the method will return the updated object.
-        If no project by that name is found on the Intel® Geti™ server,
+        If no project by that name is found on the Geti™ server,
         this method will raise a KeyError.
 
         :param project_name: Name of the project to retrieve.
@@ -267,9 +267,7 @@ class Geti:
         """
         project = self.project_client.get_project(project_name=project_name, project_id=project_id, project=project)
         if project is None:
-            raise KeyError(
-                f"Project '{project_name}' was not found in the current workspace on the Intel® Geti™ server."
-            )
+            raise KeyError(f"Project '{project_name}' was not found in the current workspace on the Geti™ server.")
         return project
 
     def download_project_data(
@@ -370,7 +368,7 @@ class Geti:
         max_threads: int = 5,
     ) -> Project:
         """
-        Upload a previously downloaded Intel® Geti™ project to the server. This method
+        Upload a previously downloaded Geti™ project to the server. This method
         expects the `target_folder` to contain the following:
 
             images
@@ -413,7 +411,7 @@ class Geti:
 
     def download_all_projects(self, target_folder: str, include_predictions: bool = True) -> list[Project]:
         """
-        Download all projects in the workspace from the Intel® Geti™ server.
+        Download all projects in the workspace from the Geti™ server.
 
         :param target_folder: Directory on local disk to download the project data to.
             If not specified, this method will create a directory named 'projects' in
@@ -423,7 +421,7 @@ class Geti:
             If this is set to True but the project has no trained models, downloading
             predictions will be skipped.
         :return: List of Project objects, each entry corresponding to one of the
-            projects found on the Intel® Geti™ server
+            projects found on the Geti™ server
         """
         return self.import_export_module.download_all_projects(
             target_folder=target_folder, include_predictions=include_predictions
@@ -432,7 +430,7 @@ class Geti:
     def upload_all_projects(self, target_folder: str) -> list[Project]:
         """
         Upload all projects found in the directory `target_folder` on local disk to
-        the Intel® Geti™ server.
+        the Geti™ server.
 
         This method expects the directory `target_folder` to contain subfolders. Each
         subfolder should correspond to the (previously downloaded) data for one
@@ -442,7 +440,7 @@ class Geti:
 
         :param target_folder: Directory on local disk to retrieve the project data from
         :return: List of Project objects, each entry corresponding to one of the
-            projects uploaded to the Intel® Geti™ server.
+            projects uploaded to the Geti™ server.
         """
         return self.import_export_module.upload_all_projects(target_folder=target_folder)
 
@@ -457,7 +455,7 @@ class Geti:
         Export a project with name `project_name` to the file specified by `filepath`.
         The project will be saved in a .zip file format, containing all project data,
         with the option to include all, none or only the latest_active model, indicated by `include_models`.
-        and metadata required for project import to another instance of the Intel® Geti™ platform.
+        and metadata required for project import to another instance of the Geti™ platform.
 
         :param filepath: Path to the file to save the project to
         :param project_id: Id of the project to export
@@ -486,7 +484,7 @@ class Geti:
 
     def import_project(self, filepath: os.PathLike, project_name: str | None = None) -> Project:
         """
-        Import a project from the zip file specified by `filepath` to the Intel® Geti™ server.
+        Import a project from the zip file specified by `filepath` to the Geti™ server.
         The project will be created on the server with the name `project_name`, if
         specified, esle with the archive base name.
         > Note: The project zip archive should be exported from the Geti™ server of the same version.
@@ -532,7 +530,7 @@ class Geti:
 
     def import_dataset(self, filepath: os.PathLike, project_name: str, project_type: str) -> Project:
         """
-        Import a dataset from the zip archive specified by `filepath` to the Intel® Geti™ server.
+        Import a dataset from the zip archive specified by `filepath` to the Geti™ server.
         A new project will be created from the dataset on the server with the name `project_name`.
         Please set the `project_type` to determine the type of the project with one of possible values are:
 
@@ -577,7 +575,7 @@ class Geti:
         max_threads: int = 5,
     ) -> Project:
         """
-        Create a single task project named `project_name` on the Intel® Geti™ server,
+        Create a single task project named `project_name` on the Geti™ server,
         and upload data from a dataset on local disk.
 
         The type of task that will be in the project can be controlled by setting the
@@ -706,7 +704,7 @@ class Geti:
         max_threads: int = 5,
     ) -> Project:
         """
-        Create a single task project named `project_name` on the Intel® Geti™ cluster,
+        Create a single task project named `project_name` on the Geti™ cluster,
         and upload data from a dataset on local disk.
 
         The type of task that will be in the project can be controlled by setting the
@@ -822,14 +820,14 @@ class Geti:
     ) -> bool:
         """
         Upload a folder with media (images, videos or both) from local disk at path
-        `target_folder` to the project provided with the `project` argument on the Intel® Geti™
+        `target_folder` to the project provided with the `project` argument on the Geti™
         server.
         After the media upload is complete, predictions will be downloaded for all
         media in the folder. This method will create a 'predictions' directory in
         the `target_folder`, containing the prediction output in json format.
 
         If `delete_after_prediction` is set to True, all uploaded media will be
-        removed from the project on the Intel® Geti™ server after the predictions have
+        removed from the project on the Geti™ server after the predictions have
         been downloaded.
 
         :param project: Project object to upload the media to
@@ -909,7 +907,7 @@ class Geti:
         dataset_name: str | None = None,
     ) -> tuple[Image, Prediction]:
         """
-        Upload a single image to a project on the Intel® Geti™
+        Upload a single image to a project on the Geti™
         server, and return a prediction for it.
 
         :param project: Project object to upload the image to
@@ -978,7 +976,7 @@ class Geti:
         delete_after_prediction: bool = False,
     ) -> tuple[Video, MediaList[VideoFrame], list[Prediction]]:
         """
-        Upload a single video to a project on the Intel® Geti™
+        Upload a single video to a project on the Geti™
         server, and return a list of predictions for the frames in the video.
 
         The parameter 'frame_stride' is used to control the stride for frame
@@ -1103,7 +1101,7 @@ class Geti:
 
     def logout(self) -> None:
         """
-        Log out of the Intel® Geti™ platform and end the HTTP session.
+        Log out of the Geti™ platform and end the HTTP session.
         """
         self.session.logout()
 

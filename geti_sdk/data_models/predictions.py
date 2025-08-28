@@ -34,7 +34,7 @@ from geti_sdk.http_session import GetiSession
 @attr.define
 class ResultMedium:
     """
-    Representation of a single result medium in Intel® Geti™.
+    Representation of a single result medium in Geti™.
 
     :var name: Name of the result medium option
     :var type: Type of the result medium represented by this object
@@ -71,7 +71,7 @@ class ResultMedium:
         """
         Download the data belonging to this ResultMedium object.
 
-        :param session: REST session to the Intel® Geti™ server from which this ResultMedium
+        :param session: REST session to the Geti™ server from which this ResultMedium
             was generated
         :return: bytes object holding the data, if any is found
         """
@@ -81,8 +81,7 @@ class ResultMedium:
                 self.data = response.content
             else:
                 raise ValueError(
-                    f"Unable to retrieve data for result medium {self}, received "
-                    f"response {response} from Intel® Geti™ server."
+                    f"Unable to retrieve data for result medium {self}, received response {response} from Geti™ server."
                 )
         return self.data
 
@@ -99,10 +98,10 @@ class ResultMedium:
 @attr.define
 class Prediction(AnnotationScene):
     """
-    Representation of the model predictions for a certain media entity in Intel® Geti™.
+    Representation of the model predictions for a certain media entity in Geti™.
 
     :var annotations: List of predictions belonging to the media entity
-    :var id: unique database ID of the Prediction in Intel® Geti™
+    :var id: unique database ID of the Prediction in Geti™
     :var kind: Kind of prediction (Annotation or Prediction)
     :var media_identifier: Identifier of the media entity to which this Prediction
         applies
@@ -158,7 +157,7 @@ class Prediction(AnnotationScene):
         """
         Download the data for all result media belonging to this prediction.
 
-        :param session: REST session to the Intel® Geti™ server from which this Prediction
+        :param session: REST session to the Geti™ server from which this Prediction
             was generated
         :return: List of result media, that have their data downloaded from the cluster
         """

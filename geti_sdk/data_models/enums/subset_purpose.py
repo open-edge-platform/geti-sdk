@@ -17,7 +17,7 @@ from enum import Enum
 
 class SubsetPurpose(Enum):
     """
-    Enum representing the purpose of a subset of a dataset on the Intel® Geti™ platform.
+    Enum representing the purpose of a subset of a dataset on the Geti™ platform.
     """
 
     TRAINING = "training"

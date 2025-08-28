@@ -23,7 +23,7 @@ from geti_sdk.utils.serialization_helpers import deserialize_dictionary
 
 class LabelList(UserList):
     """
-    A list containing labels for an Intel® Geti™ inference model.
+    A list containing labels for an Geti™ inference model.
     """
 
     def __init__(self, data: Sequence[Label] | None = None):

@@ -17,7 +17,7 @@ from enum import Enum
 
 class TaskType(Enum):
     """
-    Enum representing the different task types in Intel® Geti™ projects.
+    Enum representing the different task types in Geti™ projects.
     """
 
     DETECTION = "detection"

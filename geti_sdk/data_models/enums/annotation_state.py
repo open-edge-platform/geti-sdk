@@ -18,7 +18,7 @@ from enum import Enum
 class AnnotationState(Enum):
     """
     Enum representing the different annotation statuses for media items within an
-    Intel® Geti™ project.
+    Geti™ project.
     """
 
     TO_REVISIT = "to_revisit"

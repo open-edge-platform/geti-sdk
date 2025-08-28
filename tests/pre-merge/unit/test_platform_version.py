@@ -32,7 +32,7 @@ class TestGetiVersion:
     def test_comparison(self) -> None:
         """
         Test parsing the version from a version string, for different release versions
-        of the Intel Geti platform. Also test comparisons between versions
+        of the Geti platform. Also test comparisons between versions
         """
         assert GETI_10_VERSION < GETI_11_VERSION
         assert GETI_11_VERSION >= GETI_10_VERSION

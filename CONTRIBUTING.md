@@ -1,4 +1,4 @@
-We appreciate any contribution to the Intel® Geti™ SDK, whether it's in the form of a
+We appreciate any contribution to the Geti™ SDK, whether it's in the form of a
 Pull Request, Feature Request or general comment/issue that you found. For feature
 requests and issues, please feel free to create a GitHub Issue in this repository.
 

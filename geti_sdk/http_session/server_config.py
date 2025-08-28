@@ -32,10 +32,10 @@ def trim_trailing_slash(input_string: str) -> str:
 @attrs.define(slots=False)
 class ServerConfig:
     """
-    Base configuration holding the connection details of the Intel® Geti™ server.
+    Base configuration holding the connection details of the Geti™ server.
     Contains the hostname, ssl certificate configuration and proxy configuration.
 
-    :var host: full hostname or ip address of the Intel® Geti™ server.
+    :var host: full hostname or ip address of the Geti™ server.
         Note: this should include the protocol (i.e. https://your_geti_hostname.com)
     :var has_valid_certificate: Set to True if the server has a valid SSL certificate
         that should be validated and used to establish an encrypted HTTPS connection
@@ -104,7 +104,7 @@ class ServerConfig:
 @attrs.define(slots=False)
 class ServerCredentialConfig(ServerConfig):
     """
-    Configuration for an Intel® Geti™ server that requires authentication via username
+    Configuration for an Geti™ server that requires authentication via username
     and password.
 
     NOTE: This is a legacy authentication method. Recent server versions should
@@ -121,7 +121,7 @@ class ServerCredentialConfig(ServerConfig):
 @attrs.define(slots=False)
 class ServerTokenConfig(ServerConfig):
     """
-    Configuration for an Intel® Geti™ server that uses a personal access token
+    Configuration for an Geti™ server that uses a personal access token
     (API key) for authentication.
 
     :var token: Personal access token that can be used to connect to the server.
@@ -133,7 +133,7 @@ class ServerTokenConfig(ServerConfig):
 @attrs.define(slots=False)
 class SaaSTokenConfig(ServerTokenConfig):
     """
-    Configuration for the Intel® Geti™ SaaS environment that uses a personal access token
+    Configuration for the Geti™ SaaS environment that uses a personal access token
     (API key) for authentication.
 
     :var token: Personal access token that can be used to connect to the server.

@@ -20,7 +20,7 @@ The `rest_clients` package contains clients for interacting with the various ent
 such as :py:class:`~geti_sdk.data_models.project.Project`,
 :py:class:`~geti_sdk.data_models.media.Image` and
 :py:class:`~geti_sdk.data_models.model.Model`)
-on the Intel® Geti™ server.
+on the Geti™ server.
 
 The rest clients are initialized with a
 :py:class:`~geti_sdk.http_session.geti_session.GetiSession` and a workspace id. The

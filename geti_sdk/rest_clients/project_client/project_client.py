@@ -62,7 +62,7 @@ TASK_TYPE_MAPPING = {
 
 class ProjectClient:
     """
-    Class to manipulate projects on the Intel® Geti™ server, within a certain workspace.
+    Class to manipulate projects on the Geti™ server, within a certain workspace.
     """
 
     def __init__(self, session: GetiSession, workspace_id: str):
@@ -72,16 +72,16 @@ class ProjectClient:
 
     def get_all_projects(self, request_page_size: int = 50, get_project_details: bool = True) -> list[Project]:
         """
-        Return a list of projects found on the Intel® Geti™ server
+        Return a list of projects found on the Geti™ server
 
         :param request_page_size: Max number of projects to fetch in a single HTTP
             request. Higher values may reduce the response time of this method when
             there are many projects, but increase the chance of timeout.
         :param get_project_details: True to get all details of the projects on the
-            Intel® Geti™, False to fetch only a summary of each project. Set this to
+            Geti™, False to fetch only a summary of each project. Set this to
             False if minimizing latency is a concern. Defaults to True
         :return: List of Project objects, containing the project information for each
-            project on the Intel® Geti™ server
+            project on the Geti™ server
         """
         # The 'projects' endpoint uses pagination: multiple HTTP may be necessary to
         # fetch the full list of projects
@@ -112,7 +112,7 @@ class ProjectClient:
         project_name: str,
     ) -> Project | None:
         """
-        Get a project from the Intel® Geti™ server by project_name.
+        Get a project from the Geti™ server by project_name.
 
         If multiple projects with the same name exist on the server, this method will
         raise a ValueError. In that case, please use the `ProjectClient.get_project()`
@@ -210,9 +210,9 @@ class ProjectClient:
     def download_project_info(self, project: Project, path_to_folder: str) -> None:
         """
         Get the project data that can be used for project creation on
-        the Intel® Geti™ server. From the returned data, the
+        the Geti™ server. From the returned data, the
         method `ProjectClient.get_or_create_project` can create a project on the
-        Intel® Geti™ server. The data is retrieved from the cluster and saved in the
+        Geti™ server. The data is retrieved from the cluster and saved in the
         target folder `path_to_folder`.
 
         :param project: Project to download the data for
@@ -346,8 +346,8 @@ class ProjectClient:
     def _is_project_dir(path_to_folder: str) -> bool:
         """
         Check if the folder specified in `path_to_folder` is a directory
-        containing valid Intel® Geti™ project data that can be used to upload to an
-        Intel® Geti™ server.
+        containing valid Geti™ project data that can be used to upload to an
+        Geti™ server.
 
         :param path_to_folder: Directory to check
         :return: True if the directory holds project data, False otherwise
@@ -411,8 +411,8 @@ class ProjectClient:
         task_names_in_template: list[str] = [previous_task_name]
         is_first_task = True
         for task_type, task_labels in zip(get_task_types_by_project_type(project_type), labels):
-            # Anomaly task reduction introduced in Intel Geti 2.5
-            # The last on-premises version of Intel Geti to support legacy anomaly projects is 2.0
+            # Anomaly task reduction introduced in Geti 2.5
+            # The last on-premises version of Geti to support legacy anomaly projects is 2.0
             if self.session.version >= GETI_25_VERSION and task_type.is_anomaly and task_type != TaskType.ANOMALY:
                 logging.info(f"The {task_type} task is mapped to {TaskType.ANOMALY}.")
                 task_type = TaskType.ANOMALY
@@ -660,7 +660,7 @@ class ProjectClient:
 
     def _await_project_ready(self, project: Project, timeout: int = 5, interval: int = 1) -> None:
         """
-        Await the completion of the project creation process on the Intel® Geti™ server
+        Await the completion of the project creation process on the Geti™ server
 
         :param project: Project object representing the project
         :param timeout: Time (in seconds) after which the method will time out and
@@ -682,7 +682,7 @@ class ProjectClient:
 
     def get_project_by_id(self, project_id: str) -> Project | None:
         """
-        Get a project from the Intel® Geti™ server by project_id.
+        Get a project from the Geti™ server by project_id.
 
         :param project_id: ID of the project to get
         :return: Project object containing the data of the project, if the project is
@@ -698,7 +698,7 @@ class ProjectClient:
         project: Project | None = None,
     ) -> Project | None:
         """
-        Get a project from the Intel® Geti™ server by project_name or project_id, or
+        Get a project from the Geti™ server by project_name or project_id, or
         update a provided Project object with the latest data from the server.
 
         :param project_name: Name of the project to get

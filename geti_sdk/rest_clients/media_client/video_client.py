@@ -121,7 +121,7 @@ class VideoClient(BaseMediaClient[Video]):
     ) -> MediaList[Video]:
         """
         Upload all videos in a folder to the project. Returns the mapping of video
-        filename to the unique ID assigned by Intel Geti.
+        filename to the unique ID assigned by Geti.
 
         :param path_to_folder: Folder with videos to upload
         :param n_videos: Number of videos to upload from folder

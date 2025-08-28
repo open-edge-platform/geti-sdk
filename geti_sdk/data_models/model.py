@@ -37,7 +37,7 @@ from .performance import Performance
 @attr.define
 class OptimizationCapabilities:
     """
-    Representation of the various model optimization capabilities in Intel Geti.
+    Representation of the various model optimization capabilities in Geti.
     """
 
     is_nncf_supported: bool
@@ -71,7 +71,7 @@ class TrainingFramework:
 @attr.define
 class OptimizationConfigurationParameter:
     """
-    Representation of a parameter for model optimization in Intel Geti.
+    Representation of a parameter for model optimization in Geti.
     """
 
     name: str
@@ -81,7 +81,7 @@ class OptimizationConfigurationParameter:
 @attr.define(slots=False)
 class BaseModel:
     """
-    Representation of the basic information for a Model or OptimizedModel in Intel Geti
+    Representation of the basic information for a Model or OptimizedModel in Geti
     """
 
     _identifier_fields: ClassVar[str] = [
@@ -103,10 +103,10 @@ class BaseModel:
     previous_trained_revision_id: str | None = None
     performance: Performance | None = None
     id: str | None = attr.field(default=None)
-    label_schema_in_sync: bool | None = attr.field(default=None)  # Added in Intel Geti 1.1
-    total_disk_size: int | None = None  # Added in Intel Geti 2.3
-    training_framework: TrainingFramework | None = None  # Added in Intel Geti 2.5
-    learning_approach: str | None = None  # Added in Intel Geti v2.6
+    label_schema_in_sync: bool | None = attr.field(default=None)  # Added in Geti 1.1
+    total_disk_size: int | None = None  # Added in Geti 2.3
+    training_framework: TrainingFramework | None = None  # Added in Geti 2.5
+    learning_approach: str | None = None  # Added in Geti v2.6
 
     def __attrs_post_init__(self):
         """
@@ -141,7 +141,7 @@ class BaseModel:
         model, etc., if available.
 
         :return: base url at which the model can be addressed. The url is defined
-            relative to the ip address or hostname of the Intel® Geti™ server
+            relative to the ip address or hostname of the Geti™ server
         """
         if self._base_url is not None:
             return self._base_url
@@ -207,7 +207,7 @@ class BaseModel:
 @attr.define(slots=False)
 class OptimizedModel(BaseModel):
     """
-    Representation of an OptimizedModel in Intel® Geti™. An optimized model is a trained model
+    Representation of an OptimizedModel in Geti™. An optimized model is a trained model
     that has been converted OpenVINO representation. This conversion may involve weight
     quantization, filter pruning, or other optimization techniques supported by
     OpenVINO.
@@ -220,15 +220,15 @@ class OptimizedModel(BaseModel):
     version: int | None = attr.field(kw_only=True, default=None)
     configurations: list[OptimizationConfigurationParameter] | None = attr.field(
         kw_only=True, default=None
-    )  # Added in Intel Geti v1.4
-    model_format: str | None = None  # Added in Intel Geti v1.5
-    has_xai_head: bool = False  # Added in Intel Geti v1.5
+    )  # Added in Geti v1.4
+    model_format: str | None = None  # Added in Geti v1.5
+    has_xai_head: bool = False  # Added in Geti v1.5
 
 
 @attr.define(slots=False)
 class Model(BaseModel):
     """
-    Representation of a trained Model in Intel® Geti™.
+    Representation of a trained Model in Geti™.
     """
 
     architecture: str = attr.field(kw_only=True)

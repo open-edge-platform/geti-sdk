@@ -31,7 +31,7 @@ This directory contains Jupyter notebooks that demonstrate how to use the Geti S
 ## Try the Notebooks
 
 > [!IMPORTANT]
-> All notebooks require access to a running Intel® Geti™ server.
+> All notebooks require access to a running Geti™ server.
 > Make sure your server is accessible and your authentication is properly configured before running the notebooks.
 
 ### Setup the Repository
@@ -53,7 +53,7 @@ This directory contains Jupyter notebooks that demonstrate how to use the Geti S
 
 ### Authentication Setup
 
-Create a `.env` file in the `notebooks` directory with your Intel® Geti™ server details:
+Create a `.env` file in the `notebooks` directory with your Geti™ server details:
 
 #### Option 1: Personal Access Token (Recommended)
 ```shell
@@ -63,7 +63,7 @@ TOKEN=your_personal_access_token
 ```
 
 To obtain a Personal Access Token:
-1. Open Intel® Geti™ in your browser
+1. Open Geti™ in your browser
 2. Click the **User** menu (top right corner)
 3. Select **Personal access token**
 4. Follow the steps to create and copy your token

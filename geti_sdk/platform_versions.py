@@ -18,7 +18,7 @@ from semver import Version as SemVersion
 
 class GetiVersion:
     """
-    Version identifier of the Intel Geti platform
+    Version identifier of the Geti platform
     """
 
     _GETI10_TIMETAG = "20220910154208"
@@ -78,7 +78,7 @@ class GetiVersion:
         :param other: GetiVersion object to compare with
         :raises: TypeError if `other` is not a GetiVersion instance
         :return: True if this instance corresponds to a later or equivalent version of
-            the Intel Geti platform than `other`
+            the Geti platform than `other`
         """
         return (self > other) or (self == other)
 
@@ -90,7 +90,7 @@ class GetiVersion:
         :param other: GetiVersion object to compare with
         :raises: TypeError if `other` is not a GetiVersion instance
         :return: True if this instance corresponds to an earlier or equivalent version
-            of the Intel Geti platform than `other`
+            of the Geti platform than `other`
         """
         return (self < other) or (self == other)
 
@@ -108,7 +108,7 @@ class GetiVersion:
 
     def __str__(self) -> str:
         """
-        Return the Intel Geti version as a string
+        Return the Geti version as a string
 
         :return: String containing the version
         """
@@ -116,7 +116,7 @@ class GetiVersion:
 
     def __repr__(self) -> str:
         """
-        Return the string representation of the Intel Geti version
+        Return the string representation of the Geti version
 
         :return: String representing the version
         """

@@ -54,7 +54,7 @@ class DeploymentModelIdentifier:
 @attr.define()
 class CodeDeploymentInformation:
     """
-    Class containing information pertaining to the deployment of an Intel® Geti™
+    Class containing information pertaining to the deployment of an Geti™
     project.
 
     :var id: Unique ID of the code deployment

@@ -167,7 +167,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
         :param buffer: BinaryIO object representing a media file
         :param dataset: Dataset to upload the media to. If no dataset is passed, the
             media will be uploaded into the default (training) dataset
-        :return: Dictionary containing the response of the Intel® Geti™ server, which
+        :return: Dictionary containing the response of the Geti™ server, which
             holds the details of the uploaded entity
         """
         if dataset is None:
@@ -186,7 +186,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
         :param filepath: full path to the media file on disk
         :param dataset: Dataset to upload the media to. If no dataset is passed, the
             media will be uploaded into the default (training) dataset
-        :return: Dictionary containing the response of the Intel® Geti™ server, which
+        :return: Dictionary containing the response of the Geti™ server, which
             holds the details of the uploaded entity
         """
         with open(filepath, "rb") as f:
@@ -284,7 +284,7 @@ class BaseMediaClient(Generic[MediaTypeVar]):
     ) -> MediaList[MediaTypeVar]:
         """
         Upload all media in a folder to the project. Returns the mapping of filenames
-        to the unique IDs assigned by Intel Geti.
+        to the unique IDs assigned by Geti.
 
         :param path_to_folder: Folder with media items to upload
         :param n_media: Number of media to upload from folder

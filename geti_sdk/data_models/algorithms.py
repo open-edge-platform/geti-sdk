@@ -28,7 +28,7 @@ from .utils import attr_value_serializer, remove_null_fields
 @attr.define
 class LegacyAlgorithm:
     """
-    Representation of a supported algorithm on the Intel® Geti™ platform.
+    Representation of a supported algorithm on the Geti™ platform.
     """
 
     model_size: str

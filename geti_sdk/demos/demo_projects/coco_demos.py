@@ -58,7 +58,7 @@ def create_segmentation_demo_project(
         download it from the internet.
     :param project_name: Name of the project to create
     :return: Project object, holding detailed information about the project that was
-        created on the Intel® Geti™ server.
+        created on the Geti™ server.
     """
     coco_path = get_coco_dataset(dataset_path)
     logging.info(" ------- Creating segmentation project --------------- ")
@@ -111,7 +111,7 @@ def create_detection_demo_project(
         download it from the internet.
     :param project_name: Name of the project to create
     :return: Project object, holding detailed information about the project that was
-        created on the Intel® Geti™ server.
+        created on the Geti™ server.
     """
     coco_path = get_coco_dataset(dataset_path)
     logging.info(" ------- Creating detection project --------------- ")
@@ -165,7 +165,7 @@ def create_classification_demo_project(
         download it from the internet.
     :param project_name: Name of the project to create
     :return: Project object, holding detailed information about the project that was
-        created on the Intel® Geti™ server.
+        created on the Geti™ server.
     """
     coco_path = get_coco_dataset(dataset_path)
     logging.info(" ------- Creating classification project --------------- ")
@@ -222,7 +222,7 @@ def create_detection_to_segmentation_demo_project(
         download it from the internet.
     :param project_name: Name of the project to create
     :return: Project object, holding detailed information about the project that was
-        created on the Intel® Geti™ server.
+        created on the Geti™ server.
     """
     coco_path = get_coco_dataset(dataset_path)
     logging.info(" ------- Creating detection -> segmentation project --------------- ")
@@ -284,7 +284,7 @@ def create_detection_to_classification_demo_project(
         download it from the internet.
     :param project_name: Name of the project to create
     :return: Project object, holding detailed information about the project that was
-        created on the Intel® Geti™ server.
+        created on the Geti™ server.
     """
     coco_path = get_coco_dataset(dataset_path)
     logging.info(" ------- Creating detection -> classification project --------------- ")

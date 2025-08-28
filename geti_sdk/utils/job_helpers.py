@@ -43,10 +43,10 @@ def restrict(value: float, min: float = 0, max: float = 1) -> float:  # noqa: A0
 
 def get_job_by_id(job_id: str, session: GetiSession, workspace_id: str) -> Job | None:
     """
-    Retrieve Job information from the Intel® Geti™ server.
+    Retrieve Job information from the Geti™ server.
 
     :param job_id: Unique ID of the job to retrieve
-    :param session: GetiSession instance addressing the Intel® Geti™ platform
+    :param session: GetiSession instance addressing the Geti™ platform
     :param workspace_id: ID of the workspace in which the job was created
     :return: Job instance holding the details of the job
     """
@@ -70,11 +70,11 @@ def get_job_with_timeout(
     timeout: int = 15,
 ) -> Job:
     """
-    Retrieve a Job from the Intel® Geti™ server, by it's unique ID. If the job is not
+    Retrieve a Job from the Geti™ server, by it's unique ID. If the job is not
     found within the specified `timeout`, a RuntimeError is raised.
 
     :param job_id: Unique ID of the job to retrieve
-    :param session: GetiSession instance addressing the Intel® Geti™ platform
+    :param session: GetiSession instance addressing the Geti™ platform
     :param workspace_id: ID of the workspace in which the job was created
     :param job_type: String representing the type of job, for instance "training" or
         "testing"
@@ -108,7 +108,7 @@ def get_job_with_timeout(
                 else:
                     raise job_error
         if job is None:
-            raise RuntimeError(f"Unable to find the resulting {job_type} job on the Intel® Geti™ server.")
+            raise RuntimeError(f"Unable to find the resulting {job_type} job on the Geti™ server.")
     return job
 
 
@@ -119,7 +119,7 @@ def monitor_jobs(session: GetiSession, jobs: list[Job], timeout: int = 10000, in
 
     Progress will be reported in 15s intervals
 
-    :param session: GetiSession instance addressing the Intel® Geti™ platform
+    :param session: GetiSession instance addressing the Geti™ platform
     :param jobs: List of jobs to monitor
     :param timeout: Timeout (in seconds) after which to stop the monitoring
     :param interval: Time interval (in seconds) at which the TrainingClient polls
@@ -195,7 +195,7 @@ def monitor_jobs(session: GetiSession, jobs: list[Job], timeout: int = 10000, in
                         if error.status_code == 404:
                             logging.warning(
                                 f"Job with name `{job.name}` and id `{job.id}` was not "
-                                f"found on the Intel Geti instance. Monitoring is skipped "
+                                f"found on the Geti instance. Monitoring is skipped "
                                 f"for this job."
                             )
                         jobs_with_error.append(job)
@@ -256,7 +256,7 @@ def monitor_job(session: GetiSession, job: Job, timeout: int = 10000, interval: 
 
     Progress will be reported in 15s intervals
 
-    :param session: GetiSession instance addressing the Intel® Geti™ platform
+    :param session: GetiSession instance addressing the Geti™ platform
     :param job: Job to monitor
     :param timeout: Timeout (in seconds) after which to stop the monitoring
     :param interval: Time interval (in seconds) at which the TrainingClient polls
@@ -280,7 +280,7 @@ def monitor_job(session: GetiSession, job: Job, timeout: int = 10000, interval: 
         if error.status_code == 404:
             logging.warning(
                 f"Job with name `{job.name}` and id `{job.id}` was not "
-                f"found on the Intel Geti instance. Monitoring is skipped "
+                f"found on the Geti instance. Monitoring is skipped "
                 f"for this job."
             )
     if job.state in completed_states:

@@ -40,7 +40,7 @@ class DatumaroDataset:
     """
     Wrapper for interacting with the datumaro dataset, contains some example
     functions for dataset operations that can be carried out prior to importing the
-    dataset into an Intel® Geti™ project.
+    dataset into an Geti™ project.
     """
 
     def __init__(self, dataset_format: str, dataset_path: str):
@@ -61,7 +61,7 @@ class DatumaroDataset:
 
     def prepare_dataset(self, task_type: TaskType, previous_task_type: TaskType | None = None) -> Dataset:
         """
-        Prepare the dataset for uploading to Intel Geti.
+        Prepare the dataset for uploading to Geti.
 
         :param task_type: TaskType to prepare the dataset for
         :param previous_task_type: Optional type of the (trainable) task preceding

@@ -25,7 +25,7 @@ from geti_sdk.rest_clients import ImageClient
 
 class Uploader:
     """
-    Upload images to Intel Geti Platform using threading.
+    Upload images to Geti Platform using threading.
 
     :param num_worker_threads: Number of workers to use for the uploading
     :param image_client: ImageClient instance that will be used to upload the images
@@ -45,7 +45,7 @@ class Uploader:
 
     def upload_image(self, image: np.ndarray | str | os.PathLike):
         """
-        Upload image to the Intel Geti project
+        Upload image to the Geti project
 
         :param image: Image to upload
         """

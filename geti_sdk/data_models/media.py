@@ -44,7 +44,7 @@ from .utils import (
 @attr.define
 class MediaInformation:
     """
-    Basic information about a media item in Intel® Geti™.
+    Basic information about a media item in Geti™.
 
     :var display_url: URL that can be used to download the full size media entity
     :var height: Height of the media entity, in pixels
@@ -62,7 +62,7 @@ class MediaInformation:
 @attr.define
 class VideoInformation(MediaInformation):
     """
-    Basic information about a video entity in Intel® Geti™.
+    Basic information about a video entity in Geti™.
 
     :var duration: Duration of the video
     :var frame_count: Total number of frames in the video
@@ -79,7 +79,7 @@ class VideoInformation(MediaInformation):
 @attr.define
 class ImageInformation(MediaInformation):
     """
-    Basic information about an image entity in Intel® Geti™
+    Basic information about an image entity in Geti™
     """
 
     pass
@@ -88,7 +88,7 @@ class ImageInformation(MediaInformation):
 @attr.define
 class VideoFrameInformation(MediaInformation):
     """
-    Basic information about a video frame in Intel® Geti™.
+    Basic information about a video frame in Geti™.
     """
 
     frame_index: int = attr.ib(kw_only=True)
@@ -98,7 +98,7 @@ class VideoFrameInformation(MediaInformation):
 @attr.define
 class MediaPreprocessing:
     """
-    Basic information about a media preprocessing in Intel® Geti™.
+    Basic information about a media preprocessing in Geti™.
     """
 
     status: str = attr.ib(kw_only=True)
@@ -108,7 +108,7 @@ class MediaPreprocessing:
 @attr.define
 class MediaItem:
     """
-    Representation of a media entity in Intel® Geti™.
+    Representation of a media entity in Geti™.
 
     :var id: Unique database ID of the media entity
     :var name: Filename of the media entity
@@ -138,7 +138,7 @@ class MediaItem:
     def download_url(self) -> str:
         """
         Return the URL that can be used to download the full size media entity from the
-        Intel® Geti™ server.
+        Geti™ server.
 
         :return: URL at which the media entity can be downloaded
         """
@@ -185,7 +185,7 @@ class MediaItem:
         objects, this method will return a path-like string, pointing to the video
         on the local disk.
 
-        :param session: REST session to the Intel® Geti™ server on which the MediaItem
+        :param session: REST session to the Geti™ server on which the MediaItem
             lives
         :raises ValueError: If the cache is empty and no data can be downloaded
             from the cluster
@@ -215,7 +215,7 @@ class MediaItem:
 @attr.define(slots=False)
 class Image(MediaItem):
     """
-    Representation of an image in Intel® Geti™.
+    Representation of an image in Geti™.
 
     :var media_information: Container holding basic information such as width and
             height about the image entity
@@ -248,7 +248,7 @@ class Image(MediaItem):
 
         NOTE: The pixel data will be returned in BGR channel order
 
-        :param session: REST session to the Intel® Geti™ server on which the Image lives
+        :param session: REST session to the Geti™ server on which the Image lives
         :raises ValueError: If the cache is empty and no data can be downloaded
             from the cluster
         :return: Numpy.ndarray holding the pixel data for this Image.
@@ -259,7 +259,7 @@ class Image(MediaItem):
                 self._data = numpy_from_buffer(response.content)
             else:
                 raise ValueError(
-                    f"Unable to retrieve data for image {self}, received response {response} from Intel® Geti™ server."
+                    f"Unable to retrieve data for image {self}, received response {response} from Geti™ server."
                 )
         return self._data
 
@@ -278,7 +278,7 @@ class Image(MediaItem):
 @attr.define(slots=False)
 class VideoAnnotationStatistics:
     """
-    Annotation statistics for a video in Intel® Geti™.
+    Annotation statistics for a video in Geti™.
 
     :var annotated: Number of frames in the video that have been fully annotated
     :var partially_annotated: Number of frames in the video that have been partially
@@ -294,7 +294,7 @@ class VideoAnnotationStatistics:
 @attr.define(slots=False)
 class Video(MediaItem):
     """
-    Representation of a video in Intel® Geti™.
+    Representation of a video in Geti™.
 
     :var media_information: Container holding basic information such as width,
             height and duration about the video entity
@@ -323,7 +323,7 @@ class Video(MediaItem):
 
     def get_data(self, session: GetiSession) -> str:
         """
-        Get the video data from the Intel® Geti™ server. Calling this method will
+        Get the video data from the Geti™ server. Calling this method will
         download the video data to a temporary file, and returns the path to file.
 
         :param session: GetiSession object pointing to the instance from which the video
@@ -340,7 +340,7 @@ class Video(MediaItem):
                 self._needs_tempfile_deletion = True
             else:
                 raise ValueError(
-                    f"Unable to retrieve data for image {self}, received response {response} from Intel® Geti™ server."
+                    f"Unable to retrieve data for image {self}, received response {response} from Geti™ server."
                 )
         return self._data
 
@@ -397,7 +397,7 @@ class Video(MediaItem):
 @attr.define(slots=False)
 class VideoFrame(MediaItem):
     """
-    Representation of a video frame in Intel® Geti™.
+    Representation of a video frame in Geti™.
 
     :var media_information: Container holding basic information such as width and
             height about the VideoFrame entity
@@ -474,7 +474,7 @@ class VideoFrame(MediaItem):
         is empty, it will download the data using the provided session. Otherwise it
         will return the cached data directly
 
-        :param session: REST session to the Intel® Geti™ server on which the
+        :param session: REST session to the Geti™ server on which the
             VideoFrame lives
         :raises ValueError: If the cache is empty and no data can be downloaded
             from the cluster
@@ -486,6 +486,6 @@ class VideoFrame(MediaItem):
                 self._data = numpy_from_buffer(response.content)
             else:
                 raise ValueError(
-                    f"Unable to retrieve data for image {self}, received response {response} from Intel® Geti™ server."
+                    f"Unable to retrieve data for image {self}, received response {response} from Geti™ server."
                 )
         return self._data

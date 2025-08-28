@@ -17,7 +17,7 @@ from enum import Enum
 
 class ShapeType(Enum):
     """
-    Enum representing the types of shapes available for annotations on the Intel® Geti™
+    Enum representing the types of shapes available for annotations on the Geti™
     platform.
     """
 

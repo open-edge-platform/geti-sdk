@@ -30,7 +30,7 @@ from geti_sdk.utils.project_helpers import get_project_folder_name
 
 class GetiIE:
     """
-    Class to handle importing and exporting projects and datasets to and from the Intel® Geti™ platform.
+    Class to handle importing and exporting projects and datasets to and from the Geti™ platform.
     """
 
     def __init__(self, workspace_id: str, session: GetiSession, project_client: ProjectClient) -> None:
@@ -248,7 +248,7 @@ class GetiIE:
         os.makedirs(target_folder, exist_ok=True, mode=0o770)
         logging.info(
             f"Found {len(projects)} projects in the designated workspace on the "
-            f"Intel® Geti™ server. Commencing project download..."
+            f"Geti™ server. Commencing project download..."
         )
 
         # Download all found projects

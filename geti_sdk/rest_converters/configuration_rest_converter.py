@@ -45,7 +45,7 @@ from geti_sdk.utils import deprecate
 )
 class ConfigurationRESTConverter:
     """
-    Class that handles conversion of Intel® Geti™ REST output for configurable parameter
+    Class that handles conversion of Geti™ REST output for configurable parameter
     entities to objects and vice versa.
     """
 
@@ -54,7 +54,7 @@ class ConfigurationRESTConverter:
         """
         Create an EntityIdentifier object from an input dictionary.
 
-        :param input_dict: Dictionary representing an EntityIdentifier in Intel® Geti™
+        :param input_dict: Dictionary representing an EntityIdentifier in Geti™
         :return: EntityIdentifier object corresponding to the data in `input_dict`
         """
         identifier_type = input_dict.get("type")
@@ -74,7 +74,7 @@ class ConfigurationRESTConverter:
     def from_dict(input_dict: dict[str, Any]) -> ConfigurableParameters:
         """
         Create a ConfigurableParameters object holding the configurable parameters
-        for an entity in the Intel® Geti™ platform, from a dictionary returned by the
+        for an entity in the Geti™ platform, from a dictionary returned by the
         /configuration REST endpoints.
 
         :param input_dict: Dictionary containing the configurable parameters
@@ -95,7 +95,7 @@ class ConfigurationRESTConverter:
     ) -> list[ConfigurableParameters]:
         """
         Create a list of configurable parameters from a list of dictionaries received
-        by the Intel® Geti™ /configuration endpoints.
+        by the Geti™ /configuration endpoints.
 
         :param input_list: List of dictionaries to convert
         :return: List of ConfigurableParameters instances
@@ -161,7 +161,7 @@ class ConfigurationRESTConverter:
         """
         Convert a TaskConfiguration, GlobalConfiguration or FullConfiguration into a
         dictionary, removing fields that are None or are only relevant to the
-        Intel® Geti™ UI.
+        Geti™ UI.
 
         :param configuration: TaskConfiguration or GlobalConfiguration to convert
         :param deidentify: True to remove all unique database identifiers, False to
@@ -190,7 +190,7 @@ class ConfigurationRESTConverter:
     ) -> GlobalConfiguration:
         """
         Create a GlobalConfiguration object holding the configurable parameters
-        for all project-wide components in the Intel® Geti™ project, from input from the
+        for all project-wide components in the Geti™ project, from input from the
         /configuration/global REST endpoint.
 
         :param input_: REST response holding the serialized configurable parameters
@@ -207,7 +207,7 @@ class ConfigurationRESTConverter:
     @staticmethod
     def full_configuration_from_rest(input_dict: dict[str, Any]) -> FullConfiguration:
         """
-        Convert a dictionary holding the full configuration for an Intel® Geti™
+        Convert a dictionary holding the full configuration for an Geti™
         project, as returned by the /configuration endpoint, to an object
         representation.
 

@@ -28,7 +28,7 @@ from geti_sdk.data_models.utils import (
 @attr.define
 class Dataset:
     """
-    Representation of a dataset for a project in Intel® Geti™.
+    Representation of a dataset for a project in Geti™.
 
     :var id: Unique database ID of the dataset
     :var name: name of the dataset

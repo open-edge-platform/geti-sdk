@@ -17,7 +17,7 @@ from enum import Enum
 
 class SubscriptionStatus(Enum):
     """
-    Enum representing the status of a subscription on the Intel® Geti™ platform.
+    Enum representing the status of a subscription on the Geti™ platform.
     """
 
     ACTIVE = "ACTIVE"

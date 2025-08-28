@@ -20,7 +20,7 @@ from geti_sdk.utils import deserialize_dictionary
 
 class TestResultRESTConverter:
     """
-    Class that handles conversion of Intel® Geti™ REST output for test results to
+    Class that handles conversion of Geti™ REST output for test results to
     objects, and vice-versa
     """
 
@@ -29,7 +29,7 @@ class TestResultRESTConverter:
         """
         Create a TestResult instance from the input dictionary passed in `result_dict`.
 
-        :param result_dict: Dictionary representing a test result on the Intel® Geti™
+        :param result_dict: Dictionary representing a test result on the Geti™
             server, as returned by the /tests endpoints
         :return: TestResult instance, holding the result data contained in result_dict
         """

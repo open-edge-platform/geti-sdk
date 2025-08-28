@@ -32,7 +32,7 @@ class Score:
 @attr.define()
 class TaskPerformance:
     """
-    Task Performance metrics in Intel® Geti™.
+    Task Performance metrics in Geti™.
 
     :var task_id: Unique ID of the task to which this Performance metric
         applies.
@@ -52,7 +52,7 @@ class TaskPerformance:
 @attr.define()
 class Performance:
     """
-    Performance metrics for a project or model in Intel® Geti™.
+    Performance metrics for a project or model in Geti™.
 
     :var score: Overall score of the project or model
     :var local_score: Accuracy of the model or project with respect to object

@@ -17,7 +17,7 @@ from typing import BinaryIO
 
 class GetiRequestException(Exception):
     """
-    Exception representing an unsuccessful http request to the Intel® Geti™ server.
+    Exception representing an unsuccessful http request to the Geti™ server.
     """
 
     def __init__(
@@ -29,7 +29,7 @@ class GetiRequestException(Exception):
         response_data: dict | str | list | None = None,
     ):
         """
-        Raise this exception upon unsuccessful requests to the Intel® Geti™ server.
+        Raise this exception upon unsuccessful requests to the Geti™ server.
 
         :param method: Method that was used for the request, e.g. 'POST' or 'GET', etc.
         :param url: URL to which the request was made
@@ -61,7 +61,7 @@ class GetiRequestException(Exception):
     def __str__(self) -> str:
         """
         Return string representation of the unsuccessful http request to the
-        Intel® Geti™ server.
+        Geti™ server.
         """
         error_str = f"{self.method} request to '{self.url}' failed with status code {self.status_code}."
         if self.response_error_code and self.response_message:

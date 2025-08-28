@@ -31,7 +31,7 @@ def allow_supported(func):
     def wrapper(instance, *args, **kwargs):
         if instance._is_supported:
             return func(instance, *args, **kwargs)
-        logging.warning("Credit System is not supported by the Intel Geti Platform.")
+        logging.warning("Credit System is not supported by the Geti Platform.")
         return None
 
     return wrapper
@@ -39,7 +39,7 @@ def allow_supported(func):
 
 class CreditSystemClient:
     """
-    Class to work with credits in Intel Geti.
+    Class to work with credits in Geti.
     """
 
     def __init__(self, session: GetiSession, workspace_id: str | None = None):
@@ -48,12 +48,12 @@ class CreditSystemClient:
             self.workspace_id = workspace_id
         else:
             self.workspace_id = get_workspace_id(self.session)
-        # Make sure the Intel Geti Platform supports Credit System.
+        # Make sure the Geti Platform supports Credit System.
         self._is_supported = self.is_supported()
 
     def is_supported(self) -> bool:
         """
-        Check if the Intel Geti Platform supports Credit system.
+        Check if the Geti Platform supports Credit system.
 
         :return: True if the Credit System is supported, False otherwise.
         """

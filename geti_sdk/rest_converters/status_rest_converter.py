@@ -20,7 +20,7 @@ from geti_sdk.utils import deserialize_dictionary
 
 class StatusRESTConverter:
     """
-    Class that handles conversion of Intel® Geti™ REST output for status entities to
+    Class that handles conversion of Geti™ REST output for status entities to
     objects
     """
 
@@ -31,7 +31,7 @@ class StatusRESTConverter:
         `project_status_dict`.
 
         :param project_status_dict: Dictionary representing the status of a project on
-            the Intel® Geti™ server
+            the Geti™ server
         :return: ProjectStatus instance, holding the status data contained in
             project_status_dict
         """
