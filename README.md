@@ -71,7 +71,7 @@ The ['Code examples'](#code-examples) sections below contains short snippets tha
 how to perform several common tasks. This also shows how to configure the SDK to connect to your Geti™ server.
 
 For more comprehensive examples, see the [Jupyter notebooks](https://github.com/open-edge-platform/geti-sdk/tree/main/notebooks).
-These tutorials demonstrate how to use the SDK for various computer vision tasks and workflows, from basic project creation 
+These tutorials demonstrate how to use the SDK for various computer vision tasks and workflows, from basic project creation
 to advanced inference scenarios.
 
 ## Install the SDK
@@ -381,3 +381,9 @@ To explore the SDK features through Jupyter notebooks, please see the detailed s
 ## For developers
 
 Developers who want to modify the SDK source code should follow the development setup instructions in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Disclaimers
+
+Depending on your deployment, Geti SDK may utilize FFmpeg.
+
+FFmpeg is an open source project licensed under LGPL and GPL. See [https://www.ffmpeg.org/legal.html](https://www.ffmpeg.org/legal.html). You are solely responsible for determining if your use of FFmpeg requires any additional licenses. Intel is not responsible for obtaining any such licenses, nor liable for any licensing fees due, in connection with your use of FFmpeg.
