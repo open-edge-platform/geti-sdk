@@ -59,7 +59,7 @@ dev = [
     "pytest-html~=4.1",
     "pytest-mock~=3.10",
     "pytest-recording~=0.13",  # pinned due to https://github.com/kiwicom/pytest-recording/issues/174
-    "ruff==0.12.10",  # pinned to match the rev in pre-commit
+    "ruff==0.12.11",  # pinned to match the rev in pre-commit
     "snowballstemmer~=2.2",  # pinned because pytest-recording subdeps are loose
     "vcrpy~=7.0",
     "datumaro~=1.11",
