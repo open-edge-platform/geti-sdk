@@ -103,4 +103,4 @@ def fxt_geti_no_vcr(
             **auth_params,
             verify_certificate=fxt_server_config.has_valid_certificate,
             workspace_id=workspace_id,
-)
+        )
