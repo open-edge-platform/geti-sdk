@@ -19,6 +19,7 @@ class MultipleWorkspacesException(Exception):
     """Exception raised when multiple workspaces are available thus it is not possible to automatically select one."""
 
     def __init__(self, workspaces_list: list) -> None:
+        self.available_workspaces = workspaces_list
         ws_ids_and_names = [(ws["id"], ws["name"]) for ws in workspaces_list]
         error_message = (
             f"Multiple workspaces are available; please select one and provide its id through the 'workspace_id' "
