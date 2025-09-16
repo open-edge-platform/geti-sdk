@@ -23,6 +23,7 @@ from _pytest.main import Session
 
 from geti_sdk import Geti
 from geti_sdk.http_session import ServerCredentialConfig, ServerTokenConfig
+from geti_sdk.utils.workspace_helpers import MultipleWorkspacesException
 from tests.helpers.project_helpers import remove_all_test_projects
 
 from .helpers import SdkTestMode, get_sdk_fixtures, replace_unique_entries_in_cassettes
@@ -174,7 +175,15 @@ def _get_geti_instance() -> Geti:
         proxies = {"http": GETI_HTTP_PROXY, "https": GETI_HTTPS_PROXY}
     else:
         proxies = None
-    return Geti(host=HOST, **auth_params, proxies=proxies, verify_certificate=False)
+
+    # handle multiple workspaces
+    try:
+        return Geti(host=HOST, **auth_params, proxies=proxies, verify_certificate=False)
+    except MultipleWorkspacesException as exe:
+        workspaces_list = exe.ws_ids_and_names
+        workspace_id = workspaces_list[0][0]
+        print(f"workspace id {workspace_id}")
+        return Geti(host=HOST, **auth_params, proxies=proxies, verify_certificate=False, workspace_id=workspace_id)
 
 
 def pytest_sessionstart(session: Session) -> None:
