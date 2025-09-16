@@ -180,9 +180,8 @@ def _get_geti_instance() -> Geti:
     try:
         return Geti(host=HOST, **auth_params, proxies=proxies, verify_certificate=False)
     except MultipleWorkspacesException as exe:
-        workspaces_list = exe.ws_ids_and_names
-        workspace_id = workspaces_list[0][0]
-        print(f"workspace id {workspace_id}")
+        workspaces_list = exe.available_workspaces
+        workspace_id = workspaces_list[0]["id"]
         return Geti(host=HOST, **auth_params, proxies=proxies, verify_certificate=False, workspace_id=workspace_id)
 
 
