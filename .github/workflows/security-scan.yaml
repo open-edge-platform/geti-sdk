@@ -20,11 +20,11 @@ jobs:
       security-events: write # Needed to upload the results to code-scanning dashboard
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
         with:
           egress-policy: audit
       - name: Run Zizmor scan
-        uses: open-edge-platform/geti-ci/actions/zizmor@6373d2faae95889fa396f85ebcbafa79ad912a0b
+        uses: open-edge-platform/geti-ci/actions/zizmor@c2bb2697178bb2e50014420aef2351a45749b925
         with:
           scan-scope: "all"
           severity-level: "LOW"
@@ -38,11 +38,11 @@ jobs:
       security-events: write # Needed to upload the results to code-scanning dashboard
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
         with:
           egress-policy: audit
       - name: Run Bandit scan
-        uses: open-edge-platform/geti-ci/actions/bandit@6373d2faae95889fa396f85ebcbafa79ad912a0b
+        uses: open-edge-platform/geti-ci/actions/bandit@c2bb2697178bb2e50014420aef2351a45749b925
         with:
           scan-scope: "all"
           severity-level: "LOW"
@@ -57,12 +57,12 @@ jobs:
       security-events: write # Needed to upload the results to code-scanning dashboard
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
         with:
           egress-policy: audit
       - name: Run Trivy scan
         id: trivy
-        uses: open-edge-platform/geti-ci/actions/trivy@6373d2faae95889fa396f85ebcbafa79ad912a0b
+        uses: open-edge-platform/geti-ci/actions/trivy@c2bb2697178bb2e50014420aef2351a45749b925
         with:
           scan_type: "fs"
           scan-scope: all
