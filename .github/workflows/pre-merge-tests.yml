@@ -107,8 +107,8 @@ jobs:
         uses: open-edge-platform/geti-ci/actions/zizmor@c2bb2697178bb2e50014420aef2351a45749b925
         with:
           scan-scope: "changed"
-          severity-level: "MEDIUM"
-          confidence-level: "HIGH"
+          severity-level: "LOW"
+          confidence-level: "LOW"
           fail-on-findings: true
 
   bandit-scan-pr:
