@@ -3,6 +3,7 @@ Pull Request, Feature Request or general comment/issue that you found. For featu
 requests and issues, please feel free to create a GitHub Issue in this repository.
 
 # Development and pull requests
+
 To set up your development environment, please follow the steps below:
 
 1. Clone the repository or a fork (for external contributors):
@@ -14,6 +15,7 @@ To set up your development environment, please follow the steps below:
 3. Install uv following the official [uv documentation](https://docs.astral.sh/uv/getting-started/installation/).
 
 4. Set up the development environment with all dependencies:
+
    ```bash
    uv sync --all-extras
    ```
@@ -32,5 +34,63 @@ To set up your development environment, please follow the steps below:
 You should now be ready to make changes, run the SDK integration tests and create a Pull Request!
 
 ## Testing your code
+
 More details about the tests can be found in the [readme](tests/README.md) for the test suite.
 If your changes require updating the tests or the test data, please refer to that document.
+
+## Security
+
+To ensure our codebase remains secure, we leverage GitHub Actions for continuous security scanning (on PR and periodically) with the following tools:
+
+- [CodeQL](https://docs.github.com/en/code-security/code-scanning/introduction-to-code-scanning/about-code-scanning-with-codeql): static analysis tool to check Python code and GitHub Actions workflows
+- [Semgrep](https://github.com/semgrep/semgrep): static analysis tool to check Python code; ML-specific Semgrep rules developed by [Trail of Bits](https://github.com/trailofbits/semgrep-rules?tab=readme-ov-file#python) are used
+- [Bandit](https://github.com/PyCQA/bandit): Static analysis tool to check Python code
+- [Zizmor](https://github.com/woodruffw/zizmor): Static analysis tool to check GitHub Actions workflows
+- [Trivy](https://github.com/aquasecurity/trivy): Check misconfigurations and detect security issues in dependencies
+
+| Tool    | Pre-commit | PR-checks | Periodic |
+| ------- | ---------- | --------- | -------- |
+| CodeQL  |            | ✅        | ✅       |
+| Semgrep |            |           | ✅       |
+| Bandit  |            | ✅        | ✅       |
+| Zizmor  |            | ✅        | ✅       |
+| Trivy   |            |           | ✅       |
+
+<details>
+<summary>Suppressing False Positives</summary>
+
+If necessary, to suppress _false_ positives, add inline comment with specific syntax.
+Please also add a comment explaining _why_ you decided to disable a rule or provide a risk-acceptance reason.
+
+### Bandit
+
+Findings can be ignored inline with `# nosec BXXX` comments.
+
+```python
+import subprocess # nosec B404 # this is actually fine
+```
+
+[Details](https://bandit.readthedocs.io/en/latest/config.html#exclusions) in Bandit docs.
+
+### Zizmor
+
+Findings can be ignored inline with `# zizmor: ignore[rulename]` comments.
+
+```yaml
+uses: actions/checkout@v3 # zizmor: ignore[artipacked] this is actually fine
+```
+
+[Details](https://woodruffw.github.io/zizmor/usage/#with-comments) in Zizmor docs.
+
+### Semgrep
+
+Findings can be ignored inline with `# nosemgrep: rule-id` comments.
+
+```python
+    # nosemgrep: python.lang.security.audit.dangerous-system-call.dangerous-system-call # this is actually fine
+    r = os.system(' '.join(command))
+```
+
+[Details](https://semgrep.dev/docs/ignoring-files-folders-code) in Semgrep docs.
+
+</details>
