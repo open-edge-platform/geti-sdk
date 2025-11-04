@@ -128,6 +128,22 @@
       matchDepNames: ["python"],
       matchDepTypes: ["uses-with"],
     },
+
+    // Do not upgrade uv version used in workflows,
+    // it will be updated manually
+    {
+      enabled: false,
+      matchDatasources: ["github-releases"],
+      matchPackageNames: ["astral-sh/uv"],
+    },
+
+    // Do not upgrade ruff to match with pre-commit,
+    // it will be updated manually
+    {
+      enabled: false,
+      matchDatasources: ["pypi"],
+      matchPackageNames: ["ruff"],
+    },
   ],
 
   // Enable security upgrades

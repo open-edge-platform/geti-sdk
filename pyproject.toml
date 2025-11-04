@@ -27,8 +27,8 @@ classifiers = [
 
 dependencies = [
     "attrs~=25.3",
-    "certifi~=2025.8.3",
-    "cryptography~=45.0",
+    "certifi~=2025.10.5",
+    "cryptography~=46.0",
     "defusedxml~=0.7",
     "imageio-ffmpeg~=0.6",
     "joblib~=1.5",
@@ -47,7 +47,7 @@ dependencies = [
     "simplejson~=3.20",
     "tqdm~=4.67",
     "urllib3~=2.5",
-    "pydantic==2.11.7",
+    "pydantic==2.12.3",
 ]
 
 [dependency-groups]
