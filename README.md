@@ -4,7 +4,7 @@
 <a align="center" href="https://docs.geti.intel.com/">
   <img
     width="120%"
-    src="docs/geti-logo.png?raw=true"
+    src="https://github.com/user-attachments/assets/9faee9f9-8c04-4287-8302-6b9d8c8675fe"
     alt="Geti™ enables anyone from domain experts to data scientists to rapidly develop production-ready AI models."
   >
 </a>
