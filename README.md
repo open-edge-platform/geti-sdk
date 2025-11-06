@@ -13,7 +13,7 @@
 <br>
 
 [![python](https://img.shields.io/badge/python-3.10%2B-green)]()
-![Geti](https://img.shields.io/badge/Intel%C2%AE%20Geti%E2%84%A2-2.12-blue?link=https%3A%2F%2Fgeti.intel.com%2F)
+![Geti](https://img.shields.io/badge/Intel%C2%AE%20Geti%E2%84%A2-2.13-blue?link=https%3A%2F%2Fgeti.intel.com%2F)
 [![openvino](https://img.shields.io/badge/openvino-2025.2-purple)](https://github.com/openvinotoolkit/openvino)
 
 ![Pre-merge Tests Status](https://img.shields.io/github/actions/workflow/status/open-edge-platform/geti-sdk/pre-merge-tests.yml?label=pre-merge%20tests&link=https%3A%2F%2Fgithub.com%2Fopen-edge-platform%2Fgeti-sdk%2Factions%2Fworkflows%2Fpre-merge-tests.yml)
