@@ -17,6 +17,7 @@
 from .annotation_kind import AnnotationKind
 from .annotation_state import AnnotationState
 from .configuration_enums import ConfigurationEntityType
+from .dataset_format import DatasetFormat
 from .deployment_state import DeploymentState
 from .domain import Domain
 from .job_state import JobState
@@ -46,4 +47,5 @@ __all__ = [
     "JobState",
     "DeploymentState",
     "SubsetPurpose",
+    "DatasetFormat",
 ]

@@ -16,6 +16,7 @@ import pytest
 
 from geti_sdk import Geti
 from geti_sdk.http_session import GetiSession, ServerCredentialConfig, ServerTokenConfig
+from geti_sdk.utils.workspace_helpers import MultipleWorkspacesException
 from tests.helpers.constants import CASSETTE_EXTENSION, DUMMY_PASSWORD, DUMMY_USER
 
 
@@ -56,12 +57,23 @@ def fxt_geti(fxt_vcr, fxt_server_config: ServerTokenConfig | ServerCredentialCon
             }
         else:
             auth_params = {"token": fxt_server_config.token}
-        yield Geti(
-            host=fxt_server_config.host,
-            verify_certificate=fxt_server_config.has_valid_certificate,
-            proxies=fxt_server_config.proxies,
-            **auth_params,
-        )
+        try:
+            yield Geti(
+                host=fxt_server_config.host,
+                verify_certificate=fxt_server_config.has_valid_certificate,
+                proxies=fxt_server_config.proxies,
+                **auth_params,
+            )
+        except MultipleWorkspacesException as exe:
+            workspaces_list = exe.available_workspaces
+            workspace_id = workspaces_list[0]["id"]
+            yield Geti(
+                host=fxt_server_config.host,
+                verify_certificate=fxt_server_config.has_valid_certificate,
+                proxies=fxt_server_config.proxies,
+                **auth_params,
+                workspace_id=workspace_id,
+            )
 
 
 @pytest.fixture(scope="module")
@@ -75,9 +87,20 @@ def fxt_geti_no_vcr(
         }
     else:
         auth_params = {"token": fxt_server_config.token}
-    yield Geti(
-        host=fxt_server_config.host,
-        proxies=fxt_server_config.proxies,
-        **auth_params,
-        verify_certificate=fxt_server_config.has_valid_certificate,
-    )
+    try:
+        yield Geti(
+            host=fxt_server_config.host,
+            proxies=fxt_server_config.proxies,
+            **auth_params,
+            verify_certificate=fxt_server_config.has_valid_certificate,
+        )
+    except MultipleWorkspacesException as exe:
+        workspaces_list = exe.available_workspaces
+        workspace_id = workspaces_list[0]["id"]
+        yield Geti(
+            host=fxt_server_config.host,
+            proxies=fxt_server_config.proxies,
+            **auth_params,
+            verify_certificate=fxt_server_config.has_valid_certificate,
+            workspace_id=workspace_id,
+        )
