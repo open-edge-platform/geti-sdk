@@ -205,13 +205,13 @@ class Geti:
         :raises: ValueError if the Geti™ server version is not supported by the
             Geti™ SDK.
         """
-        # Get the build version without a timestamp
-        platform_version = self.session.version.version
         # Check if the platform version is newer than the SDK version
-        if platform_version > self.sdk_version:
+        major_platform_version = '.'.join(self.session.version.version.split('.')[:2])
+        major_sdk_version = '.'.join(self.sdk_version.split('.')[:2])
+        if major_platform_version > major_sdk_version:
             warnings.warn(
-                f"The Geti™ server version {platform_version} is newer than "
-                f"the Geti SDK version {self.sdk_version}. Some features may not be "
+                f"The Geti™ server version {self.session.version.version} is newer than "
+                f"the Geti SDK version {major_sdk_version}. Some features may not be "
                 "supported and you may encounter errors.\n"
                 "Please update the Geti SDK to the latest version "
                 "with `pip install --upgrade geti-sdk`."
