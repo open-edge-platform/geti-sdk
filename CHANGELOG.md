@@ -1,3 +1,30 @@
+# v2.13.0 Geti™ SDK
+
+## What's Changed
+
+### ✨ Features
+
+* Enable support for Python 3.13 by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/664
+* Rebranding of Geti name and support for multiworkspace by @jcchr in https://github.com/open-edge-platform/geti-sdk/pull/666
+  * handling of multiworkspace environments has been simplified
+* Relaxing control of compatibility with Geti, improving export of shapes components by @jcchr in https://github.com/open-edge-platform/geti-sdk/pull/699
+
+### 🐞 Bugfixes
+* Fixed issue with export DatasetFormat symbol from data_models.enums by @leoll2 in https://github.com/open-edge-platform/geti-sdk/pull/696
+
+### 🔒 Security
+* Adding Semgrep in the CI by @AlexanderBarabanov in https://github.com/open-edge-platform/geti-sdk/pull/680
+* Updated several dependencies
+  * pydantic by @oep-renovate[bot] in https://github.com/open-edge-platform/geti-sdk/pull/695
+  * certifi by @oep-renovate[bot] in https://github.com/open-edge-platform/geti-sdk/pull/698
+  * pillow by @oep-renovate[bot] in https://github.com/open-edge-platform/geti-sdk/pull/691
+  * cryptography by @oep-renovate[bot] in https://github.com/open-edge-platform/geti-sdk/pull/676
+
+## New Contributors
+* @jcchr made their first contribution in https://github.com/open-edge-platform/geti-sdk/pull/666
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.12.0...v2.13.0
+
 # v2.12.0 Geti™ SDK
 
 ## What's Changed
