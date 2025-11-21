@@ -88,9 +88,9 @@ pip install geti-sdk
 ```
 
 > [!IMPORTANT]
-> Make sure to install a version of the SDK that matches your Geti server version. For example, if you're using Geti server version 2.12, install SDK version 2.12:
+> Make sure to install a version of the SDK that is compatible with your Geti server version. The major and minor versions should match (e.g., SDK 2.13.x is compatible with server 2.13.x), but patch version mismatches are allowed. For example, if you're using Geti server version 2.13, install SDK version 2.13:
 > ```bash
-> pip install geti-sdk==2.12
+> pip install geti-sdk==2.13
 > ```
 
 #### Python and OS compatibility
@@ -119,9 +119,9 @@ Follow these steps to install the SDK from a specific branch or commit:
    cd geti-sdk
    ```
 
-2. Checkout the desired branch or commit (e.g., for the 2.12 release):
+2. Checkout the desired branch or commit (e.g., for the 2.13 release):
    ```bash
-   git checkout release-2.12
+   git checkout release-2.13
    ```
    Or use the develop branch for the latest changes:
    ```bash
@@ -232,7 +232,8 @@ uploaded_image = image_client.upload_image(image)
 #### Annotate an image
 
 ```python
-from geti_sdk.data_models import Rectangle, Annotation
+from geti_sdk.data_models import Annotation, Rectangle
+
 
 # Create a bounding box annotation
 bbox = Rectangle(x=100, y=100, width=200, height=150)

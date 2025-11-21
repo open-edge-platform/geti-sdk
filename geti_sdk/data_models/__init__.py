@@ -187,6 +187,7 @@ from .model_group import ModelGroup, ModelSummary
 from .performance import Performance
 from .predictions import Prediction
 from .project import Pipeline, Project
+from .shapes import Ellipse, Keypoint, Point, Polygon, Rectangle, RotatedRectangle
 from .status import ProjectStatus
 from .task import Task
 from .test_result import Score, TestResult
@@ -230,4 +231,10 @@ __all__ = [
     "Subscription",
     "Subset",
     "TrainingDatasetStatistics",
+    "Rectangle",
+    "RotatedRectangle",
+    "Ellipse",
+    "Polygon",
+    "Point",
+    "Keypoint",
 ]
