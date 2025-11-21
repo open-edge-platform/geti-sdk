@@ -88,7 +88,7 @@ pip install geti-sdk
 ```
 
 > [!IMPORTANT]
-> Make sure to install a version of the SDK that matches your Geti server version. For example, if you're using Geti server version 2.13, install SDK version 2.13:
+> Make sure to install a version of the SDK that is compatible with your Geti server version. The major and minor versions should match (e.g., SDK 2.13.x is compatible with server 2.13.x), but patch version mismatches are allowed. For example, if you're using Geti server version 2.13, install SDK version 2.13:
 > ```bash
 > pip install geti-sdk==2.13
 > ```
@@ -232,8 +232,7 @@ uploaded_image = image_client.upload_image(image)
 #### Annotate an image
 
 ```python
-from geti_sdk.data_models import Annotation
-from geti_sdk.data_models.shapes import Rectangle
+from geti_sdk.data_models import Annotation, Rectangle
 
 
 # Create a bounding box annotation

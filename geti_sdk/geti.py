@@ -206,12 +206,13 @@ class Geti:
             Geti™ SDK.
         """
         # Check if the platform version is newer than the SDK version
-        major_platform_version = '.'.join(self.session.version.version.split('.')[:2])
-        major_sdk_version = '.'.join(self.sdk_version.split('.')[:2])
+        major_platform_version = f"{self.session.version.version.major}.{self.session.version.version.minor}"
+        major_sdk_version = f"{self.sdk_version.major}.{self.sdk_version.minor}"
+
         if major_platform_version > major_sdk_version:
             warnings.warn(
                 f"The Geti™ server version {self.session.version.version} is newer than "
-                f"the Geti SDK version {major_sdk_version}. Some features may not be "
+                f"the Geti SDK version {self.sdk_version}. Some features may not be "
                 "supported and you may encounter errors.\n"
                 "Please update the Geti SDK to the latest version "
                 "with `pip install --upgrade geti-sdk`."
