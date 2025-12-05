@@ -91,9 +91,11 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
             )
             for i in range(n_missing_ids):
                 label_ids.append(f"generated_label_{i}")
-
         # Assumes configuration['label_ids'] and configuration['labels'] have the same ordering
-        for i, (label_id_str, label_str) in enumerate(zip(label_ids, model_api_labels)):
+        # sort by labels to ensure ordering consistent with ModelAPI output
+        sorted_output = sorted(zip(label_ids, model_api_labels), key=lambda x: x[1])
+
+        for i, (label_id_str, label_str) in enumerate(sorted_output):
             try:
                 label = self.__get_label(label_str, pos_idx=self.model_api_label_map_counts[label_str])
             except ValueError:
