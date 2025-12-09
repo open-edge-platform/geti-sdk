@@ -13,6 +13,7 @@
 # and limitations under the License.
 
 import os
+
 # nosemgrep: python.lang.compatibility.python37.python37-compatibility-importlib2
 from importlib import resources
 
