@@ -20,15 +20,15 @@ jobs:
       security-events: write # Needed to upload the results to code-scanning dashboard
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
         with:
           egress-policy: audit
       - name: Checkout code
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Run Zizmor scan
-        uses: open-edge-platform/geti-ci/actions/zizmor@6e7e8393869d05112f727d235acb644ed362c58f
+        uses: open-edge-platform/geti-ci/actions/zizmor@66652424b4ec87ff529dce5ae4a03f339e58a84b
         with:
           scan-scope: "all"
           severity-level: "LOW"
@@ -42,15 +42,15 @@ jobs:
       security-events: write # Needed to upload the results to code-scanning dashboard
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
         with:
           egress-policy: audit
       - name: Checkout code
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Run Bandit scan
-        uses: open-edge-platform/geti-ci/actions/bandit@6e7e8393869d05112f727d235acb644ed362c58f
+        uses: open-edge-platform/geti-ci/actions/bandit@66652424b4ec87ff529dce5ae4a03f339e58a84b
         with:
           scan-scope: "all"
           severity-level: "LOW"
@@ -65,16 +65,16 @@ jobs:
       security-events: write # Needed to upload the results to code-scanning dashboard
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
         with:
           egress-policy: audit
       - name: Checkout code
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Run Trivy scan
         id: trivy
-        uses: open-edge-platform/geti-ci/actions/trivy@6e7e8393869d05112f727d235acb644ed362c58f
+        uses: open-edge-platform/geti-ci/actions/trivy@66652424b4ec87ff529dce5ae4a03f339e58a84b
         with:
           scan_type: "fs"
           scan-scope: all
@@ -91,16 +91,16 @@ jobs:
       security-events: write # Needed to upload the results to code-scanning dashboard
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
         with:
           egress-policy: audit
       - name: Checkout code
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Run Semgrep scan
         id: semgrep
-        uses: open-edge-platform/geti-ci/actions/semgrep@6e7e8393869d05112f727d235acb644ed362c58f
+        uses: open-edge-platform/geti-ci/actions/semgrep@66652424b4ec87ff529dce5ae4a03f339e58a84b
         with:
           scan-scope: "all"
           severity: "LOW"
