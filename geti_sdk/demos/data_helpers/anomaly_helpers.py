@@ -102,9 +102,10 @@ def get_mvtec_dataset_from_path(dataset_path: str = "data") -> str:
     )
 
     logging.info(f"Extracting the '{dataset_name}' dataset at path {archive_path}...")
+    # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
     with tarfile.open(archive_path) as tar_file:
         # B202 - hash is validated before processing, file can be considered as trusted
-        tar_file.extractall(dataset_path)  # nosec B202
+        tar_file.extractall(dataset_path)  # nosec: B202
 
     if not is_ad_dataset(transistor_dataset_path):
         raise ValueError(
