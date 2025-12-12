@@ -93,7 +93,7 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
                 label_ids.append(f"generated_label_{i}")
         # Assumes configuration['label_ids'] and configuration['labels'] have the same ordering
         # sort by labels to ensure ordering consistent with ModelAPI output
-        sorted_output = sorted(zip(label_ids, model_api_labels), key=lambda x: x[1])
+        sorted_output = zip(label_ids, model_api_labels)
 
         for i, (label_id_str, label_str) in enumerate(sorted_output):
             try:
@@ -186,7 +186,7 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
         labels = []
         for label in inference_results.top_labels:
             label_idx, label_name, label_prob = label
-            scored_label = ScoredLabel.from_label(label=self.get_label_by_idx(label_idx), probability=label_prob)
+            scored_label = ScoredLabel.from_label(label=self.get_label_by_str(label_name), probability=label_prob)
             labels.append(scored_label)
 
         if not labels and self.empty_label:
@@ -311,7 +311,6 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
             # Some OpenVINO models use an output shape of [7,]
             # If this is the case, skip the first value as it is not used
             _detection = detection[1:] if detection.shape == (7,) else detection
-
             label_index = int(_detection[0])
             confidence = _detection[1]
             scored_label = ScoredLabel.from_label(self.get_label_by_idx(label_index), confidence)

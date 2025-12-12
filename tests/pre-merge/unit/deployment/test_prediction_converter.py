@@ -72,10 +72,11 @@ class TestInferenceResultsToPredictionConverter:
         prediction = converter.convert_to_prediction(raw_prediction, image_shape=(10, 10))
 
         # Assert
+        assert [converter.get_label_by_idx(i) for i in range(len(labels))] == labels
         assert [converter.get_label_by_str(label.name) for label in labels] == labels
         assert len(prediction.annotations) == 1
         predicted_label = prediction.annotations[0].labels[0]
-        assert predicted_label.name == labels[0].name
+        assert predicted_label.name == labels[1].name
         assert predicted_label.probability == 0.81
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
@@ -85,10 +86,11 @@ class TestInferenceResultsToPredictionConverter:
         coords = [12.0, 41.0, 12.5, 45.5]
         raw_prediction = DetectionResult(
             bboxes=np.array([coords]),
-            labels=np.array([2]),
+            labels=np.array([0]),
             scores=np.array([0.51]),
         )
         model_api_labels = [label.name for label in labels]
+
         # Act
         converter = DetectionToPredictionConverter(
             labels=labels,
@@ -98,7 +100,9 @@ class TestInferenceResultsToPredictionConverter:
             },
         )
         prediction = converter.convert_to_prediction(raw_prediction)
+
         # Assert
+        assert [converter.get_label_by_idx(i) for i in range(len(labels))] == labels
         assert [converter.get_label_by_str(label.name) for label in labels] == labels
         assert len(prediction.annotations) == 1
         if use_ellipse_shapes:
@@ -106,7 +110,7 @@ class TestInferenceResultsToPredictionConverter:
         else:
             assert prediction.annotations[0].shape == Rectangle(*coords_to_xmin_xmax_width_height(coords))
         assert prediction.annotations[0].labels[0].probability == pytest.approx(0.51)
-        assert prediction.annotations[0].labels[0].name == labels[1].name
+        assert prediction.annotations[0].labels[0].name == labels[0].name
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
     def test_rotated_rect_to_prediction_converter(self, use_ellipse_shapes, fxt_label_list_factory):
@@ -147,6 +151,7 @@ class TestInferenceResultsToPredictionConverter:
         prediction = converter.convert_to_prediction(raw_prediction, metadata=metadata)
 
         # Assert
+        assert [converter.get_label_by_idx(i) for i in range(len(labels))] == labels
         assert [converter.get_label_by_str(label.name) for label in labels] == labels
         assert len(prediction.annotations) == 1
         if use_ellipse_shapes:
@@ -211,6 +216,7 @@ class TestInferenceResultsToPredictionConverter:
         prediction = converter.convert_to_prediction(raw_prediction)
 
         # Assert
+        assert [converter.get_label_by_idx(i + 1) for i in range(len(labels))] == labels
         assert [converter.get_label_by_str(label.name) for label in labels] == labels
         assert len(prediction.annotations) == 1
         assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(labels[0], probability=0.8)
@@ -291,24 +297,21 @@ class TestInferenceResultsToPredictionConverter:
         # Assert
         assert converter.labels == labels
         assert len(prediction.annotations) == len(predicted_keypoints)
-
-        sorted_labels = sorted(labels, key=lambda label: label.name)
-
         for idx, annotation in enumerate(prediction.annotations):
             assert isinstance(annotation.shape, Keypoint)
             assert annotation.shape.is_visible
             assert annotation.shape.x == predicted_keypoints[idx][0]
             assert annotation.shape.y == predicted_keypoints[idx][1]
-            assert annotation.labels[0] == ScoredLabel.from_label(sorted_labels[idx], probability=scores[idx])
+            assert annotation.labels[0] == ScoredLabel.from_label(labels[idx], probability=scores[idx])
 
     @pytest.mark.parametrize(
         "label_ids, label_names, predicted_labels, configuration",
         [
             (
                 ["1", "2"],
-                ["foo bar", "foo_bar"],
-                ["foo_bar", "foo_bar"],
-                {"label_ids": ["1", "2"], "labels": ["foo_bar", "foo_bar"]},
+                ["foo bar1", "foo_bar2"],
+                ["foo_bar1", "foo_bar2"],
+                {"label_ids": ["1", "2"], "labels": ["foo_bar1", "foo_bar2"]},
             ),
             (
                 ["1", "2"],
