@@ -27,7 +27,7 @@ classifiers = [
 
 dependencies = [
     "attrs~=25.3",
-    "certifi~=2025.11.12",
+    "certifi~=2026.1.4",
     "cryptography~=46.0",
     "defusedxml~=0.7",
     "imageio-ffmpeg~=0.6",
