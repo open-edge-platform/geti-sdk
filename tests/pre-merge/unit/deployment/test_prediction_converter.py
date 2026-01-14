@@ -1,6 +1,7 @@
+
 # INTEL CONFIDENTIAL
 #
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2024 Intel
 #
 # This software and the related documents are Intel copyrighted materials, and
 # your use of them is governed by the express license under which they were provided to
@@ -11,6 +12,7 @@
 # This software and the related documents are provided as is,
 # with no express or implied warranties, other than those that are expressly stated
 # in the License.
+
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -25,7 +27,6 @@ from model_api.models import (
     ImageResultWithSoftPrediction,
     InstanceSegmentationResult,
 )
-
 from geti_sdk.data_models.containers import LabelList
 from geti_sdk.data_models.enums.domain import Domain
 from geti_sdk.data_models.label import Label, ScoredLabel
@@ -51,7 +52,7 @@ from geti_sdk.deployment.predictions_postprocessing.results_converter.results_to
 def coords_to_xmin_xmax_width_height(
     coords: tuple[int, int, int, int],
 ) -> tuple[int, int, int, int]:
-    "Convert bbox to xmin, ymin, width, height format"
+    """Convert bbox to xmin, ymin, width, height format."""
     x1, y1, x2, y2 = coords
     return x1, y1, x2 - x1, y2 - y1
 
@@ -71,7 +72,7 @@ class TestInferenceResultsToPredictionConverter:
 
         # Act
         converter = ClassificationToPredictionConverter(labels, configuration={"labels": model_api_labels})
-        prediction = converter.convert_to_prediction(raw_prediction, image_shape=(10, 10))
+        prediction = converter.convert_to_prediction(raw_prediction, image_shape=(10, 10, 3))
 
         # Assert
         assert [converter.get_label_by_idx(i) for i in range(len(labels))] == labels
@@ -255,7 +256,7 @@ class TestInferenceResultsToPredictionConverter:
         converter = AnomalyToPredictionConverter(
             labels, configuration={"domain": domain, "labels": ["Anomalous", "Normal"]}
         )
-        prediction = converter.convert_to_prediction(raw_prediction, image_shape=anomaly_map.shape)
+        prediction = converter.convert_to_prediction(raw_prediction, image_shape=(2, 2, 3))
 
         # Assert
         assert converter.normal_label == normal_label
@@ -308,6 +309,7 @@ class TestInferenceResultsToPredictionConverter:
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
     def test_mask_to_annotation_converter_instance_results(self, use_ellipse_shapes, fxt_label_list_factory):
+        """Covers legacy(schema=segmentedObjects) and object-list(schema=instances)."""
         # Arrange
         labels = fxt_label_list_factory(Domain.INSTANCE_SEGMENTATION)
         model_api_labels = [label.name for label in labels]
@@ -331,6 +333,7 @@ class TestInferenceResultsToPredictionConverter:
             mask=mask,
         )
         legacy_results = SimpleNamespace(segmentedObjects=[legacy_obj])
+
         new_instance = SimpleNamespace(
             score=0.9,
             bbox=np.array([1, 1, 4, 4]),
@@ -363,6 +366,97 @@ class TestInferenceResultsToPredictionConverter:
             legacy_points = {(point.x, point.y) for point in legacy_annotation.shape.points}
             new_points = {(point.x, point.y) for point in new_annotation.shape.points}
             assert legacy_points == new_points
+
+    @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
+    def test_mask_to_annotation_converter_vectorized_arrays(self, use_ellipse_shapes, fxt_label_list_factory):
+        """Covers vectorized schema: masks/labels/scores (+ bboxes as ndarray)."""
+        # Arrange
+        labels = fxt_label_list_factory(Domain.INSTANCE_SEGMENTATION)
+        model_api_labels = [label.name for label in labels]
+        mask = np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
+        # Vectorized inputs
+        vec = SimpleNamespace(
+            masks=np.stack([mask], axis=0),                 # (N, H, W)
+            labels=np.array([0]),
+            scores=np.array([0.9]),
+            bboxes=np.array([[1.0, 1.0, 4.0, 4.0]]),       # (N, 4)
+        )
+
+        converter = MaskToAnnotationConverter(
+            labels=labels,
+            configuration={
+                "use_ellipse_shapes": use_ellipse_shapes,
+                "labels": model_api_labels,
+            },
+        )
+
+        # Act
+        pred = converter.convert_to_prediction(vec)
+
+        # Assert
+        assert len(pred.annotations) == 1
+        ann = pred.annotations[0]
+        assert ann.labels[0] == ScoredLabel.from_label(labels[0], probability=0.9)
+        if use_ellipse_shapes:
+            assert ann.shape == Ellipse(1, 1, 3, 3)
+        else:
+            # Polygon must be non-empty and reasonable (top-level contour)
+            assert isinstance(ann.shape, Polygon)
+            assert len(ann.shape.points) >= 4
+
+    def test_mask_converter_mismatch_labels_scores(self, fxt_label_list_factory):
+        """labels and scores length mismatch should raise ValueError."""
+        labels = fxt_label_list_factory(Domain.INSTANCE_SEGMENTATION)
+        converter = MaskToAnnotationConverter(labels=labels, configuration={"labels": [l.name for l in labels]})
+        vec_bad = SimpleNamespace(
+            masks=np.zeros((1, 3, 3), dtype=np.uint8),
+            labels=np.array([0, 1]),
+            scores=np.array([0.9]),
+            bboxes=np.array([[0, 0, 1, 1]]),
+        )
+        with pytest.raises(ValueError, match="labels/scores length mismatch"):
+            _ = converter.convert_to_prediction(vec_bad)
+
+    def test_mask_converter_bboxes_len_mismatch(self, fxt_label_list_factory):
+        """bboxes length must be 0 or match labels/scores length."""
+        labels = fxt_label_list_factory(Domain.INSTANCE_SEGMENTATION)
+        converter = MaskToAnnotationConverter(labels=labels, configuration={"labels": [l.name for l in labels]})
+        vec_bad = SimpleNamespace(
+            masks=np.zeros((2, 3, 3), dtype=np.uint8),
+            labels=np.array([0, 1]),
+            scores=np.array([0.9, 0.8]),
+            bboxes=np.array([[0, 0, 1, 1]]),  # len=1, should be 0 or 2
+        )
+        with pytest.raises(ValueError, match="bboxes length must be 0 or match"):
+            _ = converter.convert_to_prediction(vec_bad)
+
+    def test_mask_converter_unsupported_schema_strict(self, fxt_label_list_factory):
+        """Unsupported schema should raise TypeError when strict_schema=True (default)."""
+        labels = fxt_label_list_factory(Domain.INSTANCE_SEGMENTATION)
+        converter = MaskToAnnotationConverter(labels=labels, configuration={"labels": [l.name for l in labels]})
+        unsupported = SimpleNamespace(foo="bar")  # no known fields
+        with pytest.raises(TypeError, match="Unsupported InstanceSegmentationResult schema"):
+            _ = converter.convert_to_prediction(unsupported)
+
+    def test_mask_converter_unsupported_schema_non_strict(self, fxt_label_list_factory):
+        """Unsupported schema should return empty Prediction when strict_schema=False."""
+        labels = fxt_label_list_factory(Domain.INSTANCE_SEGMENTATION)
+        converter = MaskToAnnotationConverter(
+            labels=labels,
+            configuration={"labels": [l.name for l in labels], "strict_schema": False},
+        )
+        unsupported = SimpleNamespace(foo="bar")
+        pred = converter.convert_to_prediction(unsupported)
+        assert pred.annotations == []
 
     @pytest.mark.parametrize(
         "label_ids, label_names, predicted_labels, configuration",
@@ -415,7 +509,7 @@ class TestInferenceResultsToPredictionConverter:
         converter = ClassificationToPredictionConverter(labels=labels, configuration=configuration)
         pred = converter.convert_to_prediction(
             inference_results=raw_prediction,
-            image_shape=(10, 10, 10),
+            image_shape=(10, 10, 3),
         )
 
         # Assert
