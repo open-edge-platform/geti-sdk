@@ -1,24 +1,22 @@
 # INTEL CONFIDENTIAL
-#
+# 
 # Copyright (C) 2024 Intel Corporation
-#
+# 
 # This software and the related documents are Intel copyrighted materials, and
 # your use of them is governed by the express license under which they were provided to
 # you ("License"). Unless the License provides otherwise, you may not use, modify, copy,
 # publish, distribute, disclose or transmit this software or the related documents
 # without Intel's prior written permission.
-#
+# 
 # This software and the related documents are provided as is,
 # with no express or implied warranties, other than those that are expressly stated
 # in the License.
-
 """Module implements the InferenceResultsToPredictionConverter class."""
-
 import abc
 import logging
 from collections import defaultdict
-from typing import Any, NamedTuple
-
+from dataclasses import dataclass
+from typing import Any, NamedTuple, Iterable, Tuple
 import cv2
 import numpy as np
 from model_api.models import (
@@ -31,7 +29,6 @@ from model_api.models import (
     InstanceSegmentationResult,
     SegmentationModel,
 )
-
 from geti_sdk.data_models.annotations import Annotation
 from geti_sdk.data_models.containers import LabelList
 from geti_sdk.data_models.enums.domain import Domain
@@ -67,10 +64,8 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
         self.label_map_ids = {}
         # Legacy OTX (<2.0) model configuration contains label names (without spaces) instead of IDs
         self.legacy_label_map_names = defaultdict(list)
-
         # get the first empty label
         self.empty_label = labels.get_empty_label()
-
         for i, label in enumerate(labels):
             self.label_map_ids[str(label.id)] = label
             # Using a dict of list to handle duplicates label names (e.g. "foo bar", "foo_bar")
@@ -119,7 +114,6 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
     def get_label_by_idx(self, label_idx: int) -> Label:
         """
         Get a Label object by its index. It is useful for converting ModelAPI results to Prediction.
-
         :param label_idx: index of the label from prediction results
         :return: Label corresponding to the index
         """
@@ -128,7 +122,6 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
     def get_label_by_str(self, label_str: int) -> Label:
         """
         Get a Label object by its string representation. It is useful for converting ModelAPI results to Prediction.
-
         :param label_str: string representation of the label from prediction results
         :return: Label corresponding to the string
         """
@@ -138,7 +131,6 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
     def convert_to_prediction(self, inference_results: NamedTuple, **kwargs) -> Prediction:
         """
         Convert raw inference results to the Prediction format.
-
         :param inference_results: raw predictions from inference
         :return: Prediction object containing the shapes obtained from the raw predictions.
         """
@@ -148,7 +140,6 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
     def convert_saliency_map(self, inference_results: NamedTuple, **kwargs) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
-
         :param inference_results: raw predictions from inference
         :return: Prediction object containing the shapes obtained from the raw predictions.
         """
@@ -158,10 +149,9 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
 class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter):
     """
     Converts ModelAPI Classification predictions to Prediction object.
-
     :param labels: LabelList containing the label info of the task
     :param configuration: configuration dictionary containing additional
-        parameters
+    parameters
     """
 
     def __init__(self, labels: LabelList, configuration: dict[str, Any]):
@@ -175,9 +165,8 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
     ) -> Prediction:  # noqa: ARG003
         """
         Convert ModelAPI ClassificationResult inference results to Prediction object.
-
         :param inference_results: classification labels represented in ModelAPI format
-            (label_index, label_name, confidence)
+        (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -186,10 +175,8 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
             label_idx, label_name, label_prob = label
             scored_label = ScoredLabel.from_label(label=self.get_label_by_idx(label_idx), probability=label_prob)
             labels.append(scored_label)
-
         if not labels and self.empty_label:
             labels = [ScoredLabel.from_label(self.empty_label, probability=0)]
-
         annotations = Annotation(
             shape=Rectangle.generate_full_box(image_shape[1], image_shape[0]),
             labels=labels,
@@ -203,9 +190,8 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
     ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
-
         :param inference_results: classification labels represented in ModelAPI format
-            (label_index, label_name, confidence)
+        (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -225,7 +211,6 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
     def _get_label_by_prediction_name(self, name: str) -> Label:
         """
         Get a Label object by its predicted name.
-
         :param name: predicted name of the label
         :return: Label corresponding to the name
         :raises KeyError: if the label is not found in the LabelList
@@ -239,13 +224,12 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
                 if legacy_name == name:
                     logging.warning(f"Found label `{label.name}` using its legacy name `{legacy_name}`.")
                     return label
-        raise KeyError(f"Label named `{name}` was not found in the LabelList")
+            raise KeyError(f"Label named `{name}` was not found in the LabelList")
 
 
 class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
     """
     Converts ModelAPI Detection objects to Prediction object.
-
     :param labels: LabelList containing the label info of the task
     :param configuration: optional model configuration setting
     """
@@ -262,7 +246,6 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
     def _detection2array(self, detection: DetectionResult) -> np.ndarray:
         """
         Convert DetectionResult to a numpy array.
-
         :param detection: list of OpenVINO Detection containing [score, id, xmin, ymin, xmax, ymax]
         :return: numpy array with [label, confidence, x1, y1, x2, y2]
         """
@@ -272,60 +255,49 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
             for score, label, bbox in zip(detection.scores, detection.labels, detection.bboxes)
             if (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) >= 1.0
         ]
-
         if not valid_detections:
             return np.empty((0, 6), dtype=np.float32)
 
         # Pre-allocate arrays with known size
         n_detections = len(valid_detections)
         result = np.empty((n_detections, 6), dtype=np.float32)
-
         for i, (score, label, bbox) in enumerate(valid_detections):
             result[i] = [label, score, bbox[0], bbox[1], bbox[2], bbox[3]]
-
         return result
 
     def convert_to_prediction(self, inference_results: DetectionResult, **kwargs) -> Prediction:
         """
         Convert ModelAPI DetectionResult inference results to Prediction object.
-
         :param inference_results: detection represented in ModelAPI format (label, confidence, x1, y1, x2, y2).
-
         _Note:
-            - `label` can be any integer that can be mapped to `self.labels`
-            - `confidence` should be a value between 0 and 1
-            - `x1`, `x2`, `y1` and `y2` are expected to be in pixel
+        - `label` can be any integer that can be mapped to `self.labels`
+        - `confidence` should be a value between 0 and 1
+        - `x1`, `x2`, `y1` and `y2` are expected to be in pixel
         :return: Prediction object containing the boxes obtained from the prediction
         """
         detections = self._detection2array(inference_results)
-
         annotations = []
         if len(detections) and detections.shape[1:] < (6,) or detections.shape[1:] > (7,):
             raise ValueError(
                 f"Shape of prediction is not expected, expected (n, 7) or (n, 6) but got {detections.shape}"
             )
-
         for detection in detections:
             # Some OpenVINO models use an output shape of [7,]
             # If this is the case, skip the first value as it is not used
             _detection = detection[1:] if detection.shape == (7,) else detection
-
             label_index = int(_detection[0])
             confidence = _detection[1]
             scored_label = ScoredLabel.from_label(self.get_label_by_idx(label_index), confidence)
             coords = _detection[2:]
             shape: Ellipse | Rectangle
-
             if confidence < self.confidence_threshold:
                 continue
-
             bbox_width = coords[2] - coords[0]
             bbox_height = coords[3] - coords[1]
             if self.use_ellipse_shapes:
                 shape = Ellipse(coords[0], coords[1], bbox_width, bbox_height)
             else:
                 shape = Rectangle(coords[0], coords[1], bbox_width, bbox_height)
-
             annotation = Annotation(shape=shape, labels=[scored_label])
             annotations.append(annotation)
         return Prediction(annotations)
@@ -337,9 +309,8 @@ class DetectionToPredictionConverter(InferenceResultsToPredictionConverter):
     ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
-
         :param inference_results: classification labels represented in ModelAPI format
-            (label_index, label_name, confidence)
+        (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -373,7 +344,6 @@ class RotatedRectToPredictionConverter(DetectionToPredictionConverter):
     def convert_to_prediction(self, inference_results: InstanceSegmentationResult, **kwargs) -> Prediction:
         """
         Convert ModelAPI instance segmentation inference results to a rotated bounding box annotation format.
-
         :param inference_results: segmentation represented in ModelAPI format
         :return: Prediction object containing the rotated boxes obtained from the segmentation contours
         :raises ValueError: if metadata is missing from the preprocess step
@@ -432,97 +402,223 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
     def convert_to_prediction(self, inference_results: Any, **kwargs: dict[str, Any]) -> Prediction:
         """
         Convert inference results to Prediction object.
-
         :param inference_results: Raw inference results from the model.
         :return: Prediction object.
         """
+        logger = logging.getLogger(__name__)
         annotations = []
         shape: Polygon | Ellipse
-        if hasattr(inference_results, "segmentedObjects"):
-            instances = inference_results.segmentedObjects
-        else:
-            instances = getattr(inference_results, "instances", None)
-            if instances is None:
-                instances = getattr(inference_results, "objects", [])
-        for instance in instances:
-            score = getattr(instance, "score", getattr(instance, "confidence", getattr(instance, "probability", 0.0)))
-            if score < self.confidence_threshold:
-                continue
-            label_value = None
-            for attr in ("id", "label_id", "label", "label_index", "class_id", "category_id"):
-                if hasattr(instance, attr):
-                    label_value = getattr(instance, attr)
-                    break
+
+        print("[DBG] type:", type(inference_results))
+        print("[DBG] attrs:", [a for a in dir(inference_results) if not a.startswith("_")])
+
+        @dataclass(frozen=True)
+        class _InstanceData:
+            label_value: int | str | None
+            score: float
+            mask: np.ndarray | None
+            contours: Any | None
+            bbox: tuple[float, float, float, float] | None
+
+        def _first_attr(obj: Any, names: tuple[str, ...]) -> Any | None:
+            for name in names:
+                if hasattr(obj, name):
+                    return getattr(obj, name)
+            return None
+
+        def _legacy_instance_data(instance: Any) -> _InstanceData:
+            return _InstanceData(
+                label_value=instance.id,
+                score=instance.score,
+                mask=instance.mask,
+                contours=None,
+                bbox=(instance.xmin, instance.ymin, instance.xmax, instance.ymax),
+            )
+
+        def _new_instance_data(instance: Any) -> _InstanceData | None:
+            label_value = _first_attr(instance, ("label_id", "label", "label_index", "class_id", "category_id", "id"))
             if label_value is None:
-                continue
-            if isinstance(label_value, str):
-                label = self.get_label_by_str(label_value)
+                return None
+            score = _first_attr(instance, ("score", "confidence", "probability"))
+            if score is None:
+                score = 0.0
+            mask = _first_attr(instance, ("mask", "segmentation"))
+            contours = _first_attr(instance, ("contours", "contour"))
+            bbox = _first_attr(instance, ("bbox", "box"))
+            if bbox is not None and len(bbox) == 4:
+                bbox = tuple(float(value) for value in bbox)
             else:
-                label = self.get_label_by_idx(int(label_value))
-            mask = getattr(instance, "mask", None)
-            if mask is None:
-                mask = getattr(instance, "segmentation", None)
-            contours = getattr(instance, "contours", None)
-            if contours is None:
-                contours = getattr(instance, "contour", None)
+                bbox = None
+            return _InstanceData(
+                label_value=label_value,
+                score=float(score),
+                mask=np.array(mask) if mask is not None else None,
+                contours=contours,
+                bbox=bbox,
+            )
+
+        def _resolve_label(self_ref, label_value: int | str | None) -> Label | None:
+            """
+            Resolve label by id or string; supports legacy string names (spaces vs underscores).
+            Returns None if the label can't be mapped to the current label schema.
+            """
+            if label_value is None:
+                return None
+            if isinstance(label_value, str):
+                try:
+                    return self_ref.get_label_by_str(label_value)
+                except KeyError:
+                    legacy = label_value.replace(" ", "_")
+                    try:
+                        return self_ref.get_label_by_str(legacy)
+                    except KeyError:
+                        return None
+            try:
+                return self_ref.get_label_by_idx(int(label_value))
+            except Exception:
+                return None
+
+        def _ensure_bbox_from_instance(instance: _InstanceData) -> tuple[float, float, float, float] | None:
+            if instance.bbox is not None:
+                return instance.bbox
+            if instance.mask is None:
+                return None
+            mask_coords = np.column_stack(np.where(instance.mask > 0))
+            if mask_coords.size == 0:
+                return None
+            ymin, xmin = mask_coords.min(axis=0)
+            ymax, xmax = mask_coords.max(axis=0)
+            return float(xmin), float(ymin), float(xmax), float(ymax)
+
+        def _contour_pairs_from_instance(instance: _InstanceData) -> Iterable[Tuple[np.ndarray, list[int]]] | None:
+            if instance.mask is not None:
+                mask = instance.mask.astype(np.uint8)
+                contours, hierarchies = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+                if hierarchies is None:
+                    # Fallback: treat all contours as top-level (no parent)
+                    return ((c, [0, 0, 0, -1]) for c in contours)
+                return zip(contours, hierarchies[0])
+            if instance.contours is not None:
+                contours = instance.contours
+                if isinstance(contours, np.ndarray):
+                    contours = [contours]
+                return ((contour, [0, 0, 0, -1]) for contour in contours)
+            return None
+
+        # --- DEBUG counters (temporary; remove after validation) ---
+        total_candidates = 0
+        after_score = 0
+        after_label = 0
+        after_geometry = 0
+
+        if hasattr(inference_results, "segmentedObjects"):
+            # legacy Model API <= 0.2.5.x
+            logger.debug("MaskToAnnotationConverter: using legacy segmentedObjects results.")
+            instances = (_legacy_instance_data(instance) for instance in inference_results.segmentedObjects)
+
+        elif all(hasattr(inference_results, a) for a in ("masks", "labels", "scores")):
+            # vectorized Model API result (arrays) – common for Mask R-CNN
+            logger.debug("MaskToAnnotationConverter: using vectorized arrays (masks/labels/scores).")
+
+            vec_masks = getattr(inference_results, "masks", None)
+            vec_labels = getattr(inference_results, "labels", None)
+            vec_scores = getattr(inference_results, "scores", None)
+            vec_bboxes = getattr(inference_results, "bboxes", None)
+
+            # Avoid ambiguous truthiness for NumPy arrays
+            if vec_masks is None:
+                vec_masks = []
+            if vec_labels is None:
+                vec_labels = []
+            if vec_scores is None:
+                vec_scores = []
+
+            # Treat NumPy arrays as sequences too
+            is_seq_bboxes = isinstance(vec_bboxes, (list, tuple, np.ndarray))
+
+            def _yield_vector_instances():
+                for i, (lbl, scr) in enumerate(zip(vec_labels, vec_scores)):
+                    mask = vec_masks[i] if i < len(vec_masks) else None
+                    bbox = None
+                    if isinstance(vec_bboxes, (list, tuple)) and i < len(vec_bboxes):
+                        bb = vec_bboxes[i]
+                        if bb is not None and len(bb) == 4:
+                            bbox = tuple(float(x) for x in bb)
+                    yield _InstanceData(
+                        label_value=int(lbl),                   # индексы меток в векторной схеме
+                        score=float(scr),
+                        mask=np.array(mask) if mask is not None else None,
+                        contours=None,
+                        bbox=bbox,
+                    )
+
+            instances = _yield_vector_instances()
+
+        else:
+            # new Model API >= 0.2.6 (object list)
+            logger.debug("MaskToAnnotationConverter: using new instances/objects results.")
+            candidates = _first_attr(inference_results, ("instances", "objects")) or []
+            instances = (data for instance in candidates if (data := _new_instance_data(instance)) is not None)
+
+        for instance in instances:
+            total_candidates += 1
+            if instance.score < self.confidence_threshold:
+                continue
+            after_score += 1
+
+            label = _resolve_label(self, instance.label_value)
+            if label is None or label.is_empty:
+                continue
+            after_label += 1
+
             if self.use_ellipse_shapes:
-                xmin = getattr(instance, "xmin", None)
-                ymin = getattr(instance, "ymin", None)
-                xmax = getattr(instance, "xmax", None)
-                ymax = getattr(instance, "ymax", None)
-                if None in (xmin, ymin, xmax, ymax):
-                    bbox = getattr(instance, "bbox", getattr(instance, "box", None))
-                    if bbox is not None and len(bbox) == 4:
-                        xmin, ymin, xmax, ymax = bbox
-                if None in (xmin, ymin, xmax, ymax) and mask is not None:
-                    mask_coords = np.column_stack(np.where(np.array(mask) > 0))
-                    if mask_coords.size > 0:
-                        ymin, xmin = mask_coords.min(axis=0)
-                        ymax, xmax = mask_coords.max(axis=0)
-                if None in (xmin, ymin, xmax, ymax):
+                bbox = _ensure_bbox_from_instance(instance)
+                if bbox is None:
                     continue
+                xmin, ymin, xmax, ymax = bbox
                 shape = Ellipse(float(xmin), float(ymin), float(xmax) - float(xmin), float(ymax) - float(ymin))
                 annotations.append(
                     Annotation(
                         shape=shape,
-                        labels=[ScoredLabel.from_label(label, float(score))],
+                        labels=[ScoredLabel.from_label(label, float(instance.score))],
                     )
                 )
-            else:
-                if mask is not None:
-                    mask = np.array(mask).astype(np.uint8)
-                    contours, hierarchies = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-                    if hierarchies is None:
-                        continue
-                    contour_pairs = zip(contours, hierarchies[0])
-                elif contours is not None:
-                    if isinstance(contours, np.ndarray):
-                        contours = [contours]
-                    contour_pairs = ((contour, [0, 0, 0, -1]) for contour in contours)
-                else:
+                after_geometry += 1
+                continue
+
+            contour_pairs = _contour_pairs_from_instance(instance)
+            if contour_pairs is None:
+                continue
+            for contour, hierarchy in contour_pairs:
+                if hierarchy[3] != -1:
                     continue
-                for contour, hierarchy in contour_pairs:
-                    if hierarchy[3] != -1:
-                        continue
-                    if len(contour) <= 2 or cv2.contourArea(contour) < 1.0:
-                        continue
-                    contour = np.array(contour)
-                    if contour.ndim == 3 and contour.shape[1] == 1:
-                        contour = contour[:, 0, :]
-                    points = [
-                        Point(
-                            x=point[0],
-                            y=point[1],
-                        )
-                        for point in contour
-                    ]
-                    shape = Polygon(points=points)
-                    annotations.append(
-                        Annotation(
-                            shape=shape,
-                            labels=[ScoredLabel.from_label(label, float(score))],
-                        )
+                if len(contour) <= 2 or cv2.contourArea(contour) < 1.0:
+                    continue
+                contour = np.array(contour)
+                if contour.ndim == 3 and contour.shape[1] == 1:
+                    contour = contour[:, 0, :]
+                points = [
+                    Point(
+                        x=point[0],
+                        y=point[1],
                     )
+                    for point in contour
+                ]
+                shape = Polygon(points=points)
+                annotations.append(
+                    Annotation(
+                        shape=shape,
+                        labels=[ScoredLabel.from_label(label, float(instance.score))],
+                    )
+                )
+                after_geometry += 1
+
+        # --- DEBUG: show filtering stages ---
+        print(
+            f"[DBG] candidates={total_candidates}, after_score={after_score}, "
+            f"after_label={after_label}, after_geometry={after_geometry}, final_shapes={len(annotations)}"
+        )
+
         return Prediction(annotations)
 
     def convert_saliency_map(
@@ -532,9 +628,8 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
     ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
-
         :param inference_results: classification labels represented in ModelAPI format
-            (label_index, label_name, confidence)
+        (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -554,7 +649,6 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
 class SegmentationToPredictionConverter(InferenceResultsToPredictionConverter):
     """
     Converts ModelAPI Segmentation objects to Prediction object.
-
     :param labels: LabelList containing the label info of the task
     :param configuration: model configuration setting
     :param model: SegmentationModel instance, needed for getting contours
@@ -567,9 +661,7 @@ class SegmentationToPredictionConverter(InferenceResultsToPredictionConverter):
     def get_label_by_idx(self, label_idx: int) -> Label:
         """
         Get a Label object by its index. It is useful for converting ModelAPI results to Prediction.
-
         # NB: For segmentation results, index=0 is reserved for the background label
-
         :param label_idx: index of the label from prediction results
         :return: Label corresponding to the index
         """
@@ -583,12 +675,10 @@ class SegmentationToPredictionConverter(InferenceResultsToPredictionConverter):
     ) -> Prediction:
         """
         Convert ModelAPI instance segmentation inference results to Prediction object.
-
         :param inference_results: segmentation represented in ModelAPI format
         :return: Prediction object containing the contour polygon obtained from the segmentation
         """
         contours = self.model.get_contours(inference_results)
-
         annotations: list[Annotation] = []
         for contour in contours:
             label = self.get_label_by_str(contour.label)
@@ -611,9 +701,8 @@ class SegmentationToPredictionConverter(InferenceResultsToPredictionConverter):
     ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
-
         :param inference_results: classification labels represented in ModelAPI format
-            (label_index, label_name, confidence)
+        (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -627,7 +716,6 @@ class SegmentationToPredictionConverter(InferenceResultsToPredictionConverter):
 class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
     """
     Convert ModelAPI AnomalyResult predictions to Prediction object.
-
     :param labels: LabelList containing the label info of the task
     :param configuration: model configuration setting
     """
@@ -641,12 +729,11 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
     def convert_to_prediction(self, inference_results: AnomalyResult, image_shape: tuple[int], **kwargs) -> Prediction:  # noqa: ARG002
         """
         Convert ModelAPI AnomalyResult inferenceresults to sc_sdk annotations.
-
         :param inference_results: anomaly result represented in ModelAPI format (same for all anomaly tasks)
         :return: Prediction object based on the specific anomaly task:
-            - Classification: single label (normal or anomalous).
-            - Segmentation: contour polygon representing the segmentation.
-            - Detection: predicted bounding boxes.
+        - Classification: single label (normal or anomalous).
+        - Segmentation: contour polygon representing the segmentation.
+        - Detection: predicted bounding boxes.
         """
         pred_label = inference_results.pred_label
         label = self.anomalous_label if pred_label.lower() in ("anomaly", "anomalous") else self.normal_label
@@ -682,6 +769,7 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
             raise ValueError(
                 f"Cannot convert inference results for task '{self.domain.name}'. Only Anomaly tasks are supported."
             )
+
         if not annotations:
             scored_label = ScoredLabel.from_label(label=self.normal_label, probability=0)
             annotations = [
@@ -699,9 +787,8 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
     ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
-
         :param inference_results: classification labels represented in ModelAPI format
-            (label_index, label_name, confidence)
+        (label_index, label_name, confidence)
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
         """
@@ -716,7 +803,6 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
 class KeypointDetectionToPredictionConverter(InferenceResultsToPredictionConverter):
     """
     Converts ModelAPI Keypoint Detection objects to Prediction object.
-
     :param labels: LabelList containing the label info of the task
     :param configuration: optional model configuration setting
     """
@@ -727,12 +813,10 @@ class KeypointDetectionToPredictionConverter(InferenceResultsToPredictionConvert
     def convert_to_prediction(self, inference_results: DetectedKeypoints, **kwargs) -> Prediction:
         """
         Convert ModelAPI KeypointDetectionResult inference results to Prediction object.
-
         :param inference_results: keypoints represented in ModelAPI format (keypoints, scores).
-
         _Note:
-            - `keypoints` a list of keypoint pairs expected to be in pixel e.g. [[x1, y1], [x2, y2], ...]
-            - `scores` should be a value between 0 and 1
+        - `keypoints` a list of keypoint pairs expected to be in pixel e.g. [[x1, y1], [x2, y2], ...]
+        - `scores` should be a value between 0 and 1
         :return: Prediction object containing the keypoints obtained from the prediction
         """
         annotations = []
@@ -751,7 +835,6 @@ class KeypointDetectionToPredictionConverter(InferenceResultsToPredictionConvert
     ) -> dict[str, np.ndarray] | None:
         """
         Extract a saliency map from inference results and return in a unified format.
-
         :param inference_results: keypoints represented in ModelAPI format (keypoints, scores).
         :param image_shape: shape of the input image
         :return: Prediction object with corresponding label
@@ -773,7 +856,6 @@ class ConverterFactory:
     ) -> InferenceResultsToPredictionConverter:
         """
         Create the appropriate inference converter object according to the model's task.
-
         :param labels: The labels of the model
         :param domain: The domain to which the converter applies
         :param configuration: configuration for the converter
