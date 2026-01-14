@@ -438,32 +438,81 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
         """
         annotations = []
         shape: Polygon | Ellipse
-        for obj in inference_results.segmentedObjects:
-            if obj.score < self.confidence_threshold:
+        if hasattr(inference_results, "segmentedObjects"):
+            instances = inference_results.segmentedObjects
+        else:
+            instances = getattr(inference_results, "instances", None)
+            if instances is None:
+                instances = getattr(inference_results, "objects", [])
+        for instance in instances:
+            score = getattr(instance, "score", getattr(instance, "confidence", getattr(instance, "probability", 0.0)))
+            if score < self.confidence_threshold:
                 continue
+            label_value = None
+            for attr in ("id", "label_id", "label", "label_index", "class_id", "category_id"):
+                if hasattr(instance, attr):
+                    label_value = getattr(instance, attr)
+                    break
+            if label_value is None:
+                continue
+            if isinstance(label_value, str):
+                label = self.get_label_by_str(label_value)
+            else:
+                label = self.get_label_by_idx(int(label_value))
+            mask = getattr(instance, "mask", None)
+            if mask is None:
+                mask = getattr(instance, "segmentation", None)
+            contours = getattr(instance, "contours", None)
+            if contours is None:
+                contours = getattr(instance, "contour", None)
             if self.use_ellipse_shapes:
-                shape = Ellipse(obj.xmin, obj.ymin, obj.xmax - obj.xmin, obj.ymax - obj.ymin)
+                xmin = getattr(instance, "xmin", None)
+                ymin = getattr(instance, "ymin", None)
+                xmax = getattr(instance, "xmax", None)
+                ymax = getattr(instance, "ymax", None)
+                if None in (xmin, ymin, xmax, ymax):
+                    bbox = getattr(instance, "bbox", getattr(instance, "box", None))
+                    if bbox is not None and len(bbox) == 4:
+                        xmin, ymin, xmax, ymax = bbox
+                if None in (xmin, ymin, xmax, ymax) and mask is not None:
+                    mask_coords = np.column_stack(np.where(np.array(mask) > 0))
+                    if mask_coords.size > 0:
+                        ymin, xmin = mask_coords.min(axis=0)
+                        ymax, xmax = mask_coords.max(axis=0)
+                if None in (xmin, ymin, xmax, ymax):
+                    continue
+                shape = Ellipse(float(xmin), float(ymin), float(xmax) - float(xmin), float(ymax) - float(ymin))
                 annotations.append(
                     Annotation(
                         shape=shape,
-                        labels=[ScoredLabel.from_label(self.get_label_by_idx(obj.id), float(obj.score))],
+                        labels=[ScoredLabel.from_label(label, float(score))],
                     )
                 )
             else:
-                mask = obj.mask.astype(np.uint8)
-                contours, hierarchies = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-                if hierarchies is None:
+                if mask is not None:
+                    mask = np.array(mask).astype(np.uint8)
+                    contours, hierarchies = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+                    if hierarchies is None:
+                        continue
+                    contour_pairs = zip(contours, hierarchies[0])
+                elif contours is not None:
+                    if isinstance(contours, np.ndarray):
+                        contours = [contours]
+                    contour_pairs = ((contour, [0, 0, 0, -1]) for contour in contours)
+                else:
                     continue
-                for contour, hierarchy in zip(contours, hierarchies[0]):
+                for contour, hierarchy in contour_pairs:
                     if hierarchy[3] != -1:
                         continue
                     if len(contour) <= 2 or cv2.contourArea(contour) < 1.0:
                         continue
-                    contour = list(contour)
+                    contour = np.array(contour)
+                    if contour.ndim == 3 and contour.shape[1] == 1:
+                        contour = contour[:, 0, :]
                     points = [
                         Point(
-                            x=point[0][0],
-                            y=point[0][1],
+                            x=point[0],
+                            y=point[1],
                         )
                         for point in contour
                     ]
@@ -471,7 +520,7 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
                     annotations.append(
                         Annotation(
                             shape=shape,
-                            labels=[ScoredLabel.from_label(self.get_label_by_idx(obj.id), float(obj.score))],
+                            labels=[ScoredLabel.from_label(label, float(score))],
                         )
                     )
         return Prediction(annotations)
