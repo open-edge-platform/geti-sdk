@@ -11,6 +11,7 @@
 # This software and the related documents are provided as is,
 # with no express or implied warranties, other than those that are expressly stated
 # in the License.
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -41,6 +42,7 @@ from geti_sdk.deployment.predictions_postprocessing.results_converter.results_to
     ClassificationToPredictionConverter,
     DetectionToPredictionConverter,
     KeypointDetectionToPredictionConverter,
+    MaskToAnnotationConverter,
     RotatedRectToPredictionConverter,
     SegmentationToPredictionConverter,
 )
@@ -303,6 +305,64 @@ class TestInferenceResultsToPredictionConverter:
             assert annotation.shape.x == predicted_keypoints[idx][0]
             assert annotation.shape.y == predicted_keypoints[idx][1]
             assert annotation.labels[0] == ScoredLabel.from_label(labels[idx], probability=scores[idx])
+
+    @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
+    def test_mask_to_annotation_converter_instance_results(self, use_ellipse_shapes, fxt_label_list_factory):
+        # Arrange
+        labels = fxt_label_list_factory(Domain.INSTANCE_SEGMENTATION)
+        model_api_labels = [label.name for label in labels]
+        mask = np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
+        legacy_obj = SimpleNamespace(
+            score=0.9,
+            xmin=1,
+            ymin=1,
+            xmax=4,
+            ymax=4,
+            id=0,
+            mask=mask,
+        )
+        legacy_results = SimpleNamespace(segmentedObjects=[legacy_obj])
+        new_instance = SimpleNamespace(
+            score=0.9,
+            bbox=np.array([1, 1, 4, 4]),
+            label_id=0,
+            mask=mask,
+        )
+        new_results = SimpleNamespace(instances=[new_instance])
+
+        # Act
+        converter = MaskToAnnotationConverter(
+            labels=labels,
+            configuration={
+                "use_ellipse_shapes": use_ellipse_shapes,
+                "labels": model_api_labels,
+            },
+        )
+        legacy_prediction = converter.convert_to_prediction(legacy_results)
+        new_prediction = converter.convert_to_prediction(new_results)
+
+        # Assert
+        assert len(legacy_prediction.annotations) == len(new_prediction.annotations) == 1
+        legacy_annotation = legacy_prediction.annotations[0]
+        new_annotation = new_prediction.annotations[0]
+        assert legacy_annotation.labels[0] == new_annotation.labels[0]
+        assert legacy_annotation.labels[0] == ScoredLabel.from_label(labels[0], probability=0.9)
+        if use_ellipse_shapes:
+            assert legacy_annotation.shape == Ellipse(1, 1, 3, 3)
+            assert new_annotation.shape == Ellipse(1, 1, 3, 3)
+        else:
+            legacy_points = {(point.x, point.y) for point in legacy_annotation.shape.points}
+            new_points = {(point.x, point.y) for point in new_annotation.shape.points}
+            assert legacy_points == new_points
 
     @pytest.mark.parametrize(
         "label_ids, label_names, predicted_labels, configuration",
