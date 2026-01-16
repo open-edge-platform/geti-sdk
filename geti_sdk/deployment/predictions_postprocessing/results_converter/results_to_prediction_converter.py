@@ -568,10 +568,16 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
                     raise ValueError(f"Expected masks as (N,H,W), got {vec_masks.shape}")
                 n = vec_masks.shape[0]
                 masks_len = n
-                get_mask = lambda i: vec_masks[i]
+                # get_mask = lambda i: vec_masks[i]
+                def get_mask(i: int):
+                    # Return the i-th mask from the vectorized (N, H, W) array
+                    return vec_masks[i]
             else:
                 masks_len = len(vec_masks)
-                get_mask = lambda i: vec_masks[i] if i < masks_len else None
+                def get_mask(i: int):
+                    # Return i-th mask if present, otherwise None
+                    return vec_masks[i] if i < masks_len else None
+                # get_mask = lambda i: vec_masks[i] if i < masks_len else None
 
             labels_len = len(vec_labels)
             scores_len = len(vec_scores)
