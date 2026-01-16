@@ -26,6 +26,7 @@ from model_api.models import (
     ImageResultWithSoftPrediction,
     InstanceSegmentationResult,
 )
+
 from geti_sdk.data_models.enums.domain import Domain
 from geti_sdk.data_models.label import ScoredLabel
 from geti_sdk.data_models.shapes import (
@@ -424,4 +425,5 @@ class TestInferenceResultsToPredictionConverter:
         assert len(pred.annotations) == 1
         ann = pred.annotations[0]
         assert ann.labels[0] == ScoredLabel.from_label(labels[0], probability=0.9)
-        assert isinstance(ann.shape, Polygon) or isinstance(ann.shape, Ellipse)
+        # assert isinstance(ann.shape, Polygon) or isinstance(ann.shape, Ellipse)
+        assert isinstance(ann.shape, Polygon | Ellipse)
