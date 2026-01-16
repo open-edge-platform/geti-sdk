@@ -12,6 +12,7 @@
 # with no express or implied warranties, other than those that are expressly stated
 # in the License.
 """Module implements the InferenceResultsToPredictionConverter class."""
+
 import abc
 import logging
 from collections import defaultdict
@@ -568,15 +569,18 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
                     raise ValueError(f"Expected masks as (N,H,W), got {vec_masks.shape}")
                 n = vec_masks.shape[0]
                 masks_len = n
+
                 # get_mask = lambda i: vec_masks[i]
                 def get_mask(i: int):
                     # Return the i-th mask from the vectorized (N, H, W) array
                     return vec_masks[i]
             else:
                 masks_len = len(vec_masks)
+
                 def get_mask(i: int):
                     # Return i-th mask if present, otherwise None
                     return vec_masks[i] if i < masks_len else None
+
                 # get_mask = lambda i: vec_masks[i] if i < masks_len else None
 
             labels_len = len(vec_labels)
@@ -777,11 +781,11 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
             self.domain = configuration["domain"]
 
     def convert_to_prediction(
-            self,
-            inference_results: "AnomalyResult",
-            image_shape: tuple[int],
-            **kwargs # noqa: ARG002
-        ) -> Prediction:
+        self,
+        inference_results: "AnomalyResult",
+        image_shape: tuple[int],
+        **kwargs,  # noqa: ARG002
+    ) -> Prediction:
         """
         Convert ModelAPI AnomalyResult inferenceresults to sc_sdk annotations.
         :param inference_results: anomaly result represented in ModelAPI format (same for all anomaly tasks)
