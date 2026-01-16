@@ -15,7 +15,7 @@
 import abc
 import logging
 from collections import defaultdict
-from typing import Any, NamedTuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import cv2
 import numpy as np
@@ -532,7 +532,7 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
                 if bboxes.ndim != 2 or bboxes.shape[1] != 4:
                     raise ValueError(f"Expected bboxes with shape (N, 4), got {bboxes.shape}")
                 return [tuple(float(x) for x in row) for row in bboxes]
-            if isinstance(bboxes, (list, tuple)):
+            if isinstance(bboxes, list | tuple):
                 out: list[tuple[float, float, float, float]] = []
                 for bb in bboxes:
                     if bb is None:
@@ -776,7 +776,12 @@ class AnomalyToPredictionConverter(InferenceResultsToPredictionConverter):
         if configuration is not None and "domain" in configuration:
             self.domain = configuration["domain"]
 
-    def convert_to_prediction(self, inference_results: "AnomalyResult", image_shape: tuple[int], **kwargs) -> Prediction:  # noqa: ARG002
+    def convert_to_prediction(
+            self,
+            inference_results: "AnomalyResult",
+            image_shape: tuple[int],
+            **kwargs # noqa: ARG002
+        ) -> Prediction:
         """
         Convert ModelAPI AnomalyResult inferenceresults to sc_sdk annotations.
         :param inference_results: anomaly result represented in ModelAPI format (same for all anomaly tasks)
