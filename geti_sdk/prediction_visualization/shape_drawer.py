@@ -523,20 +523,13 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
             :return: Image with the ellipse drawn on it.
             """
             base_color = labels[0].color_tuple
-            if entity.width > entity.height:
-                axes = (
-                    int(entity.major_axis * image.shape[1]),
-                    int(entity.minor_axis * image.shape[0]),
-                )
-            else:
-                axes = (
-                    int(entity.major_axis * image.shape[0]),
-                    int(entity.minor_axis * image.shape[1]),
-                )
-            center = (
-                int(entity.x_center * image.shape[1]),
-                int(entity.y_center * image.shape[0]),
+            # Ellipse coordinates are already in pixels, use them directly
+            # cv2.ellipse axes are (half_width, half_height) for angle=0
+            axes = (
+                int(entity.width / 2),
+                int(entity.height / 2),
             )
+            center = entity.get_center_point()
             # Draw the shape on the image
             alpha = self.alpha_shape
             if fill_shapes:
@@ -572,16 +565,16 @@ class ShapeDrawer(DrawerEntity[AnnotationScene]):
                 content_height,
             ) = self.generate_draw_command_for_labels(labels, image, self.show_labels, self.show_confidence)
 
-            # get top left corner of imaginary bbox around circle
+            # get top left corner of imaginary bbox around ellipse
             offset = self.label_offset_box_shape
-            x_coord = entity.x1 * image.shape[1]
-            y_coord = entity.y1 * image.shape[0] - offset - content_height
+            x_coord = entity.x
+            y_coord = entity.y - offset - content_height
 
-            flagpole_end_point = Point(entity.get_center_point())
+            flagpole_end_point = Point(entity.x, entity.y)
 
             # put label at bottom if it is out of bounds at the top of the shape, and shift label to left if needed
             if y_coord < self.top_margin * image.shape[0]:
-                y_coord = (entity.y1 * image.shape[0]) + (entity.y2 * image.shape[0]) + offset
+                y_coord = entity.y_max + offset
                 flagpole_start_point = Point(x_coord + 1, y_coord)
             else:
                 flagpole_start_point = Point(x_coord + 1, y_coord + content_height)
