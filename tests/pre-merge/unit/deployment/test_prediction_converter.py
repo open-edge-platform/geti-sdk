@@ -1,4 +1,3 @@
-
 # INTEL CONFIDENTIAL
 #
 # Copyright (C) 2024 Intel
@@ -27,9 +26,8 @@ from model_api.models import (
     ImageResultWithSoftPrediction,
     InstanceSegmentationResult,
 )
-from geti_sdk.data_models.containers import LabelList
 from geti_sdk.data_models.enums.domain import Domain
-from geti_sdk.data_models.label import Label, ScoredLabel
+from geti_sdk.data_models.label import ScoredLabel
 from geti_sdk.data_models.shapes import (
     Ellipse,
     Keypoint,
@@ -71,8 +69,12 @@ class TestInferenceResultsToPredictionConverter:
         model_api_labels = [label.name for label in labels]
 
         # Act
-        converter = ClassificationToPredictionConverter(labels, configuration={"labels": model_api_labels})
-        prediction = converter.convert_to_prediction(raw_prediction, image_shape=(10, 10, 3))
+        converter = ClassificationToPredictionConverter(
+            labels, configuration={"labels": model_api_labels}
+        )
+        prediction = converter.convert_to_prediction(
+            raw_prediction, image_shape=(10, 10, 3)
+        )
 
         # Assert
         assert [converter.get_label_by_idx(i) for i in range(len(labels))] == labels
@@ -83,7 +85,9 @@ class TestInferenceResultsToPredictionConverter:
         assert predicted_label.probability == 0.81
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
-    def test_detection_to_prediction_converter(self, use_ellipse_shapes, fxt_label_list_factory):
+    def test_detection_to_prediction_converter(
+        self, use_ellipse_shapes, fxt_label_list_factory
+    ):
         # Arrange
         labels = fxt_label_list_factory(Domain.DETECTION)
         coords = [12.0, 41.0, 12.5, 45.5]
@@ -97,7 +101,10 @@ class TestInferenceResultsToPredictionConverter:
         # Act
         converter = DetectionToPredictionConverter(
             labels=labels,
-            configuration={"use_ellipse_shapes": use_ellipse_shapes, "labels": model_api_labels},
+            configuration={
+                "use_ellipse_shapes": use_ellipse_shapes,
+                "labels": model_api_labels,
+            },
         )
         prediction = converter.convert_to_prediction(raw_prediction)
 
@@ -106,14 +113,20 @@ class TestInferenceResultsToPredictionConverter:
         assert [converter.get_label_by_str(label.name) for label in labels] == labels
         assert len(prediction.annotations) == 1
         if use_ellipse_shapes:
-            assert prediction.annotations[0].shape == Ellipse(*coords_to_xmin_xmax_width_height(coords))
+            assert prediction.annotations[0].shape == Ellipse(
+                *coords_to_xmin_xmax_width_height(coords)
+            )
         else:
-            assert prediction.annotations[0].shape == Rectangle(*coords_to_xmin_xmax_width_height(coords))
+            assert prediction.annotations[0].shape == Rectangle(
+                *coords_to_xmin_xmax_width_height(coords)
+            )
         assert prediction.annotations[0].labels[0].probability == pytest.approx(0.51)
         assert prediction.annotations[0].labels[0].name == labels[0].name
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
-    def test_rotated_rect_to_prediction_converter(self, use_ellipse_shapes, fxt_label_list_factory):
+    def test_rotated_rect_to_prediction_converter(
+        self, use_ellipse_shapes, fxt_label_list_factory
+    ):
         # Arrange
         labels = fxt_label_list_factory(Domain.ROTATED_DETECTION)
         coords = [1, 1, 4, 4]
@@ -143,7 +156,10 @@ class TestInferenceResultsToPredictionConverter:
         # Act
         converter = RotatedRectToPredictionConverter(
             labels,
-            configuration={"use_ellipse_shapes": use_ellipse_shapes, "labels": model_api_labels},
+            configuration={
+                "use_ellipse_shapes": use_ellipse_shapes,
+                "labels": model_api_labels,
+            },
         )
         prediction = converter.convert_to_prediction(raw_prediction, metadata=metadata)
 
@@ -152,7 +168,9 @@ class TestInferenceResultsToPredictionConverter:
         assert [converter.get_label_by_str(label.name) for label in labels] == labels
         assert len(prediction.annotations) == 1
         if use_ellipse_shapes:
-            assert prediction.annotations[0].shape == Ellipse(*coords_to_xmin_xmax_width_height(coords))
+            assert prediction.annotations[0].shape == Ellipse(
+                *coords_to_xmin_xmax_width_height(coords)
+            )
         else:
             assert prediction.annotations[0].shape == RotatedRectangle.from_polygon(
                 Polygon(
@@ -164,7 +182,9 @@ class TestInferenceResultsToPredictionConverter:
                     ]
                 )
             )
-        assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(label=labels[1], probability=score)
+        assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(
+            label=labels[1], probability=score
+        )
 
     def test_segmentation_to_prediction_converter(self, fxt_label_list_factory):
         # Arrange
@@ -190,7 +210,9 @@ class TestInferenceResultsToPredictionConverter:
             saliency_map=np.zeros_like(result_image),
             feature_vector=np.zeros((result_image.shape[0], result_image.shape[1], 2)),
         )
-        expected_shape = Polygon(points=[Point(1, 1), Point(0, 3), Point(1, 3), Point(3, 3)])
+        expected_shape = Polygon(
+            points=[Point(1, 1), Point(0, 3), Point(1, 3), Point(3, 3)]
+        )
         seg_model = MagicMock()
         seg_model.labels = labels_str
         model_api_labels = [label.name for label in labels]
@@ -207,16 +229,22 @@ class TestInferenceResultsToPredictionConverter:
         seg_model.get_contours = get_contours
 
         # Act
-        converter = SegmentationToPredictionConverter(labels, configuration={"labels": model_api_labels}, model=seg_model)
+        converter = SegmentationToPredictionConverter(
+            labels, configuration={"labels": model_api_labels}, model=seg_model
+        )
         prediction = converter.convert_to_prediction(raw_prediction)
 
         # Assert
         assert [converter.get_label_by_idx(i + 1) for i in range(len(labels))] == labels
         assert [converter.get_label_by_str(label.name) for label in labels] == labels
         assert len(prediction.annotations) == 1
-        assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(labels[0], probability=0.8)
+        assert prediction.annotations[0].labels[0] == ScoredLabel.from_label(
+            labels[0], probability=0.8
+        )
         assert isinstance(prediction.annotations[0].shape, Polygon)
-        for p1, p2 in zip(prediction.annotations[0].shape.points, expected_shape.points):
+        for p1, p2 in zip(
+            prediction.annotations[0].shape.points, expected_shape.points
+        ):
             assert p1.x == pytest.approx(p2.x, 0.01)
             assert p1.y == pytest.approx(p2.y, 0.01)
 
@@ -245,8 +273,12 @@ class TestInferenceResultsToPredictionConverter:
         )
 
         # Act
-        converter = AnomalyToPredictionConverter(labels, configuration={"domain": domain, "labels": ["Anomalous", "Normal"]})
-        prediction = converter.convert_to_prediction(raw_prediction, image_shape=(2, 2, 3))
+        converter = AnomalyToPredictionConverter(
+            labels, configuration={"domain": domain, "labels": ["Anomalous", "Normal"]}
+        )
+        prediction = converter.convert_to_prediction(
+            raw_prediction, image_shape=(2, 2, 3)
+        )
 
         # Assert
         assert converter.normal_label == normal_label
@@ -265,7 +297,9 @@ class TestInferenceResultsToPredictionConverter:
                 ]
             )
         elif domain == Domain.ANOMALY_DETECTION:
-            assert prediction.annotations[0].shape == Rectangle(*coords_to_xmin_xmax_width_height(pred_boxes[0]))
+            assert prediction.annotations[0].shape == Rectangle(
+                *coords_to_xmin_xmax_width_height(pred_boxes[0])
+            )
 
     def test_keypoint_to_prediction_converter(self, fxt_label_list_factory):
         # Arrange
@@ -280,7 +314,10 @@ class TestInferenceResultsToPredictionConverter:
         # Act
         converter = KeypointDetectionToPredictionConverter(
             labels,
-            configuration={"domain": Domain.KEYPOINT_DETECTION, "labels": [label.name for label in labels]},
+            configuration={
+                "domain": Domain.KEYPOINT_DETECTION,
+                "labels": [label.name for label in labels],
+            },
         )
         prediction = converter.convert_to_prediction(raw_prediction)
 
@@ -292,10 +329,14 @@ class TestInferenceResultsToPredictionConverter:
             assert annotation.shape.is_visible
             assert annotation.shape.x == predicted_keypoints[idx][0]
             assert annotation.shape.y == predicted_keypoints[idx][1]
-            assert annotation.labels[0] == ScoredLabel.from_label(labels[idx], probability=scores[idx])
+            assert annotation.labels[0] == ScoredLabel.from_label(
+                labels[idx], probability=scores[idx]
+            )
 
     @pytest.mark.parametrize("use_ellipse_shapes", [True, False])
-    def test_mask_to_annotation_converter_instance_results(self, use_ellipse_shapes, fxt_label_list_factory):
+    def test_mask_to_annotation_converter_instance_results(
+        self, use_ellipse_shapes, fxt_label_list_factory
+    ):
         # Arrange: legacy segmentedObjects + object-list instances
         labels = fxt_label_list_factory(Domain.INSTANCE_SEGMENTATION)
         model_api_labels = [label.name for label in labels]
@@ -310,23 +351,37 @@ class TestInferenceResultsToPredictionConverter:
             dtype=np.uint8,
         )
 
-        legacy_obj = SimpleNamespace(score=0.9, xmin=1, ymin=1, xmax=4, ymax=4, id=0, mask=mask)
+        legacy_obj = SimpleNamespace(
+            score=0.9, xmin=1, ymin=1, xmax=4, ymax=4, id=0, mask=mask
+        )
         legacy_results = SimpleNamespace(segmentedObjects=[legacy_obj])
 
-        new_instance = SimpleNamespace(score=0.9, bbox=np.array([1, 1, 4, 4]), label_id=0, mask=mask)
+        new_instance = SimpleNamespace(
+            score=0.9, bbox=np.array([1, 1, 4, 4]), label_id=0, mask=mask
+        )
         new_results = SimpleNamespace(instances=[new_instance])
 
         # Act
-        converter = MaskToAnnotationConverter(labels=labels, configuration={"use_ellipse_shapes": use_ellipse_shapes, "labels": model_api_labels})
+        converter = MaskToAnnotationConverter(
+            labels=labels,
+            configuration={
+                "use_ellipse_shapes": use_ellipse_shapes,
+                "labels": model_api_labels,
+            },
+        )
         legacy_prediction = converter.convert_to_prediction(legacy_results)
         new_prediction = converter.convert_to_prediction(new_results)
 
         # Assert
-        assert len(legacy_prediction.annotations) == len(new_prediction.annotations) == 1
+        assert (
+            len(legacy_prediction.annotations) == len(new_prediction.annotations) == 1
+        )
         legacy_ann = legacy_prediction.annotations[0]
         new_ann = new_prediction.annotations[0]
         assert legacy_ann.labels[0] == new_ann.labels[0]
-        assert legacy_ann.labels[0] == ScoredLabel.from_label(labels[0], probability=0.9)
+        assert legacy_ann.labels[0] == ScoredLabel.from_label(
+            labels[0], probability=0.9
+        )
         if use_ellipse_shapes:
             assert legacy_ann.shape == Ellipse(1, 1, 3, 3)
             assert new_ann.shape == Ellipse(1, 1, 3, 3)
@@ -336,7 +391,9 @@ class TestInferenceResultsToPredictionConverter:
             new_points = {(p.x, p.y) for p in new_ann.shape.points}
             assert legacy_points == new_points
 
-    def test_mask_to_annotation_converter_vectorized_arrays(self, fxt_label_list_factory):
+    def test_mask_to_annotation_converter_vectorized_arrays(
+        self, fxt_label_list_factory
+    ):
         # Arrange: vectorized schema (masks/labels/scores + bboxes ndarray)
         labels = fxt_label_list_factory(Domain.INSTANCE_SEGMENTATION)
         model_api_labels = [label.name for label in labels]
@@ -351,14 +408,16 @@ class TestInferenceResultsToPredictionConverter:
             dtype=np.uint8,
         )
         vec = SimpleNamespace(
-            masks=np.stack([mask], axis=0),          # (N, H, W)
+            masks=np.stack([mask], axis=0),  # (N, H, W)
             labels=np.array([0]),
             scores=np.array([0.9]),
             bboxes=np.array([[1.0, 1.0, 4.0, 4.0]]),
         )
 
         # Act
-        converter = MaskToAnnotationConverter(labels=labels, configuration={"labels": model_api_labels})
+        converter = MaskToAnnotationConverter(
+            labels=labels, configuration={"labels": model_api_labels}
+        )
         pred = converter.convert_to_prediction(vec)
 
         # Assert
