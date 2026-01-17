@@ -91,7 +91,6 @@ class InferenceResultsToPredictionConverter(metaclass=abc.ABCMeta):
             )
             for i in range(n_missing_ids):
                 label_ids.append(f"generated_label_{i}")
-
         # Assumes configuration['label_ids'] and configuration['labels'] have the same ordering
         for i, (label_id_str, label_str) in enumerate(zip(label_ids, model_api_labels)):
             try:
@@ -184,7 +183,7 @@ class ClassificationToPredictionConverter(InferenceResultsToPredictionConverter)
         labels = []
         for label in inference_results.top_labels:
             label_idx, label_name, label_prob = label
-            scored_label = ScoredLabel.from_label(label=self.get_label_by_idx(label_idx), probability=label_prob)
+            scored_label = ScoredLabel.from_label(label=self.get_label_by_str(label_name), probability=label_prob)
             labels.append(scored_label)
 
         if not labels and self.empty_label:

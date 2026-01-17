@@ -309,9 +309,9 @@ class TestInferenceResultsToPredictionConverter:
         [
             (
                 ["1", "2"],
-                ["foo bar", "foo_bar"],
-                ["foo_bar", "foo_bar"],
-                {"label_ids": ["1", "2"], "labels": ["foo_bar", "foo_bar"]},
+                ["foo bar1", "foo_bar2"],
+                ["foo_bar1", "foo_bar2"],
+                {"label_ids": ["1", "2"], "labels": ["foo_bar1", "foo_bar2"]},
             ),
             (
                 ["1", "2"],
