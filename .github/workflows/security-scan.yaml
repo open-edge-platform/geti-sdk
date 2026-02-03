@@ -28,7 +28,7 @@ jobs:
       security-events: write # Needed to upload the results to code-scanning dashboard
     steps:
       - &harden_runner
-      - name: Harden Runner
+        name: Harden Runner
         uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
         with:
           egress-policy: audit
