@@ -133,11 +133,11 @@ def set_directory_permissions(target_directory: str, file_permissions=0o660, dir
     :param dir_permissions: Permissions to apply to all directories found in the
         directory tree
     """
-    os.chmod(target_directory, dir_permissions)
+    os.chmod(target_directory, dir_permissions)  # nosec: B103
     for root, dirs, files in os.walk(target_directory):
         for file_name in files:
             file_path = os.path.join(root, file_name)
             os.chmod(file_path, file_permissions)
         for dir_name in dirs:
             dir_path = os.path.join(root, dir_name)
-            os.chmod(dir_path, dir_permissions)
+            os.chmod(dir_path, dir_permissions)  # nosec: B103
