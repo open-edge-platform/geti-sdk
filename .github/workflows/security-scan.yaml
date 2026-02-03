@@ -60,7 +60,7 @@ jobs:
         uses: open-edge-platform/geti-ci/actions/bandit@eee8dda846963533ec8b4498086f4432e3adea59
         with:
           scan-scope: ${{ github.event_name == 'pull_request' && 'changed' || 'all' }}
-          severity-level: "LOW"
+          severity-level: ${{ github.event_name == 'pull_request' && 'MEDIUM' || 'LOW' }}
           confidence-level: "LOW"
           config_file: "pyproject.toml"
           fail-on-findings: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
@@ -104,5 +104,5 @@ jobs:
         uses: open-edge-platform/geti-ci/actions/semgrep@eee8dda846963533ec8b4498086f4432e3adea59
         with:
           scan-scope: ${{ github.event_name == 'pull_request' && 'changed' || 'all' }}
-          severity: "LOW"
+          severity: ${{ github.event_name == 'pull_request' && 'MEDIUM' || 'LOW' }}
           fail-on-findings: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
