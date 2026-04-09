@@ -18,6 +18,6 @@ jobs:
           persist-credentials: false
 
       - name: Collect library licenses
-        uses: open-edge-platform/geti-ci/actions/collect-sbom-library@cc6fbe840db6ebd16ebd18d409f475bff5a8c182
+        uses: open-edge-platform/geti-ci/actions/collect-sbom-library@90a5d42c3cab01a95ab8f6bf22fd483bcfc5678b
         with:
           path: .
