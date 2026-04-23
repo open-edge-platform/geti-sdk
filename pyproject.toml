@@ -44,7 +44,7 @@ dependencies = [
     "python-dotenv~=1.1",
     "requests~=2.32",
     "semver~=3.0",
-    "simplejson~=3.20",
+    "simplejson~=4.1",
     "tqdm~=4.67",
     "urllib3~=2.5",
     "pydantic==2.12.5",
