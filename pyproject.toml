@@ -26,7 +26,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "attrs~=25.3",
+    "attrs~=26.1",
     "certifi~=2026.2.25",
     "cryptography~=46.0",
     "defusedxml~=0.7",
