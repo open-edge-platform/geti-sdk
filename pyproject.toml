@@ -75,7 +75,7 @@ notebooks = [
     "ipywidgets~=8.1",
     "jupyter-core>=5.8.1",  # min version set by CVE-2025-30167
     "jupyterlab~=4.4",
-    "mistune~=2.0",
+    "mistune~=3.2",
     "pandas~=2.3",
 ]
 
