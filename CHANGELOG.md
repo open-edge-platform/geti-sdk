@@ -1,3 +1,14 @@
+# v2.13.1 Geti™ SDK
+
+## What's Changed
+
+### 🐞 Bugfixes
+
+* Fixed error on code deployment demo script by @maxxgx in https://github.com/open-edge-platform/geti-sdk/pull/718
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.13.0...v2.13.1
+
+
 # v2.13.0 Geti™ SDK
 
 ## What's Changed
@@ -24,6 +35,7 @@
 * @jcchr made their first contribution in https://github.com/open-edge-platform/geti-sdk/pull/666
 
 **Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.12.0...v2.13.0
+
 
 # v2.12.0 Geti™ SDK
 

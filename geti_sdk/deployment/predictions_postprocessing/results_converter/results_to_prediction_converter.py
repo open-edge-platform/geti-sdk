@@ -438,20 +438,22 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
         """
         annotations = []
         shape: Polygon | Ellipse
-        for obj in inference_results.segmentedObjects:
-            if obj.score < self.confidence_threshold:
+        for bbox, mask, label, score in zip(
+            inference_results.bboxes, inference_results.masks, inference_results.labels, inference_results.scores
+        ):
+            if score < self.confidence_threshold:
                 continue
             if self.use_ellipse_shapes:
-                shape = Ellipse(obj.xmin, obj.ymin, obj.xmax - obj.xmin, obj.ymax - obj.ymin)
+                xmin, ymin, xmax, ymax = bbox
+                shape = Ellipse(xmin, ymin, xmax - xmin, ymax - ymin)
                 annotations.append(
                     Annotation(
                         shape=shape,
-                        labels=[ScoredLabel.from_label(self.get_label_by_idx(obj.id), float(obj.score))],
+                        labels=[ScoredLabel.from_label(self.get_label_by_idx(label), float(score))],
                     )
                 )
             else:
-                mask = obj.mask.astype(np.uint8)
-                contours, hierarchies = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+                contours, hierarchies = cv2.findContours(mask.astype(np.uint8), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
                 if hierarchies is None:
                     continue
                 for contour, hierarchy in zip(contours, hierarchies[0]):
@@ -471,7 +473,7 @@ class MaskToAnnotationConverter(DetectionToPredictionConverter):
                     annotations.append(
                         Annotation(
                             shape=shape,
-                            labels=[ScoredLabel.from_label(self.get_label_by_idx(obj.id), float(obj.score))],
+                            labels=[ScoredLabel.from_label(self.get_label_by_idx(label), float(score))],
                         )
                     )
         return Prediction(annotations)
