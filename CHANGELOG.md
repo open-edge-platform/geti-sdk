@@ -1,3 +1,28 @@
+# v2.13.2 Geti™ SDK
+
+## What's Changed
+
+### 🔒 Security
+* Updated several dependencies
+  * attrs 
+  * certifi 
+  * cryptography
+  * openvino
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.13.1...v2.13.2
+
+
+# v2.13.1 Geti™ SDK
+
+## What's Changed
+
+### 🐞 Bugfixes
+
+* Fixed error on code deployment demo script by @maxxgx in https://github.com/open-edge-platform/geti-sdk/pull/718
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.13.0...v2.13.1
+
+
 # v2.13.0 Geti™ SDK
 
 ## What's Changed
