@@ -26,9 +26,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "attrs~=25.3",
-    "certifi~=2025.11.12",
-    "cryptography~=46.0",
+    "attrs~=26.1",
+    "certifi~=2026.5.20",
+    "cryptography~=48.0",
     "defusedxml~=0.7",
     "imageio-ffmpeg~=0.6",
     "joblib~=1.5",
@@ -36,7 +36,7 @@ dependencies = [
     "omegaconf~=2.3",
     "opencv-python~=4.11",
     "openvino-model-api~=0.3",
-    "openvino~=2025.2",
+    "openvino~=2026.1",
     "orjson~=3.10",
     "ovmsclient~=2023.1",
     "pathvalidate~=3.3",
