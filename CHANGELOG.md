@@ -1,3 +1,15 @@
+## What's Changed
+
+### 🔒 Security
+* Updated several dependencies
+  * attrs 
+  * certifi 
+  * cryptography
+  * openvino
+
+**Full Changelog**: https://github.com/open-edge-platform/geti-sdk/compare/v2.13.1...v2.13.2
+
+
 # v2.13.1 Geti™ SDK
 
 ## What's Changed
