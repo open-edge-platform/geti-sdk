@@ -1,3 +1,16 @@
+> [!IMPORTANT]
+> **This repository is deprecated.**
+>
+> The **Geti SDK** provided a Python client for **[Geti v2.x](https://github.com/open-edge-platform/geti_v2)**. It is no longer maintained and does not support **[Geti v3.0+](https://github.com/open-edge-platform/geti)**.
+>
+> Geti v3 exposes its API via an **[OpenAPI specification](https://docs.geti.intel.com/docs/rest-api/openapi-specification)**. We recommend using the specification directly or generating a client for your preferred language with tools such as **[openapi-generator](https://github.com/openapitools/openapi-generator)**.
+>
+> **For new features, issues, documentation, and releases, please refer to the Geti repository:**
+>
+> 👉 **[https://github.com/open-edge-platform/geti](https://github.com/open-edge-platform/geti)**
+
+---
+
 <div align="center">
 
 <p>
